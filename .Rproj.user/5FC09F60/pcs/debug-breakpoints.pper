@@ -1,0 +1,36 @@
+{
+    "debugBreakpointsState": {
+        "breakpoints": [
+            {
+                "id": 0,
+                "path": "C:/Users/rheirene/Dropbox (Personal)/Sci-Software/Blog posts/PubMed Article Scraping/Web scrape scholar/PubMed scrape.R",
+                "line_number": 118,
+                "function_steps": "",
+                "function_name": "toplevel",
+                "state": 1,
+                "editor_state": 1,
+                "editor_line_number": 118,
+                "is_pending_debug_completion": false,
+                "needs_updated_steps": true,
+                "type": 1,
+                "is_package_breakpoint": false,
+                "package_name": ""
+            },
+            {
+                "id": 6,
+                "path": "C:/Users/rheirene/Dropbox (Personal)/Sci-Software/Blog posts/PubMed Article Scraping/Web scrape scholar/PubMed scrape.R",
+                "line_number": 243,
+                "function_steps": "",
+                "function_name": "toplevel",
+                "state": 1,
+                "editor_state": 1,
+                "editor_line_number": 243,
+                "is_pending_debug_completion": false,
+                "needs_updated_steps": true,
+                "type": 1,
+                "is_package_breakpoint": false,
+                "package_name": ""
+            }
+        ]
+    }
+}
