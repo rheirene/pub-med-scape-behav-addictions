@@ -8,9 +8,33 @@ format:
 editor: visual
 ---
 
-## Load packages
+## Preamble
+
+List of journals indexed on PubMed: [Link](https://ftp.ncbi.nih.gov/pubmed/J_Medline.txt)
 
 https://www.youtube.com/watch?v=yzTuBuRdAyA
+
+::: {.callout-note appearance="minimal"}
+## Code blocks
+
+Please note that any code chunks presented in this document that, when executed, scrape or pull data from PubMed, are specifically set so that they do not execute when this document renders. Thus, these code chunks, as seen here, simply represent documentation rather than working code. This is because extracting this data (particularly for behavioural addictions where there are thousands of studies \[e.g., gambling\]) can take a substantial amount of time and therefore it would take 30-40 minutes every time this document renders if these code chunks executed.
+
+I only note this for anyone wanting to reproduce this analysis who tries to run the entire script by rendering the document. It's also important as the date at the top of this document may not be the latest date of data extraction (it is only the last date this was rendered).
+
+The latest dates of data extraction for each behavioural addiction are below:
+
+-   Gambling: 10/07/2023
+
+-   Gaming: 10/07/2023
+
+-   Work: 10/07/2023
+
+-   Exercise: 10/07/2023
+:::
+
+## Load packages
+
+Use the groundhog package to load in relevant packages in a (hopefully) stable form:
 
 ```{r results=FALSE, warning=FALSE, message=FALSE}
 #| code-fold: true
@@ -34,8 +58,6 @@ packages <- c('rentrez',
 groundhog.library(packages, "2023-06-07")
 ```
 
-List of journals indexed on PubMed: [Link](https://ftp.ncbi.nih.gov/pubmed/J_Medline.txt)
-
 ## Gambling addiction
 
 #### Extract studies and perform a basic clean of dataset
@@ -45,9 +67,9 @@ List of journals indexed on PubMed: [Link](https://ftp.ncbi.nih.gov/pubmed/J_Med
 -   One unavoidable issue with the gambling search is 2 of the 3 gambling-specific journals (International Gambling Studies & Journal of Gambling Issues) are not indexed by PubMed. That said, most behavioural addiction and addiction-focused journals are, fortunately.
 
 ::: {.callout-note appearance="minimal" icon="false"}
-## Add gambling journals?
+## Add gambling journals
 
-A simple reminder to look into this.
+A simple reminder to look into how feasible it would be to scrape data from the specific gambling journal websites.
 :::
 
 **Actual search used:** ("gambling disorder"\[Title/Abstract\]) OR ("disordered gambling"\[Title/Abstract\] OR "gambling addiction"\[Title/Abstract\]) OR ("addicted gambler\*"\[Title/Abstract\]) OR ("pathological gambl\*"\[Title/Abstract\]) OR ("compulsive gambl\*"\[Title/Abstract\]
@@ -56,93 +78,74 @@ A simple reminder to look into this.
 
 **Notes post-search:** I manually inspected a large proportion of the results directly in the PubMed site. Many duplicates that require removal.
 
-```{r}
-#  Clean environment:
-rm(list = ls())
+\`\`\`{r}} \# Clean environment: rm(list = ls())
 
-# Define the search term:
-search_term_gambling <- '("gambling disorder"[Title/Abstract]) OR ("disordered gambling"[Title/Abstract] OR "gambling addiction"[Title/Abstract]) OR ("addicted gambler*"[Title/Abstract]) OR ("pathological gambl*"[Title/Abstract]) OR ("compulsive gambl*"[Title/Abstract])'
+# Define the search terms/string::
+
+search_term_gambling \<- '("gambling disorder"\[Title/Abstract\]) OR ("disordered gambling"\[Title/Abstract\] OR "gambling addiction"\[Title/Abstract\]) OR ("addicted gambler*"\[Title/Abstract\]) OR ("pathological gambl*"\[Title/Abstract\]) OR ("compulsive gambl\*"\[Title/Abstract\])'
 
 # Use entrez_search to get the IDs of the articles:
-search_results_gambling <- entrez_search(db="pubmed", term=search_term_gambling, retmax=20000)
-id_list_gambling <- search_results_gambling$ids
+
+search_results_gambling \<- entrez_search(db="pubmed", term=search_term_gambling, retmax=20000) id_list_gambling \<- search_results_gambling\$ids
 
 # Split id list into chunks of 500:
-chunks <- split(id_list_gambling, ceiling(seq_along(id_list_gambling)/100))
+
+chunks \<- split(id_list_gambling, ceiling(seq_along(id_list_gambling)/100))
 
 # Fetch details for each chunk of articles:
-article_details_gambling <- map_dfr(chunks, function(ids) {
-  articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
-  
-  # Split the articles into individual articles:
-  articles <- strsplit(articles, "\n\n")[[1]]
-  
-  # Process each article:
-  map_dfr(articles, function(article) {
-    # Split the article into lines:
-    lines <- strsplit(article, "\n")[[1]]
-    
-    # Get the details we're interested in:
-    details_gambling <- list(
-      PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
-      DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
-      TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
-      LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
-      AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
-      FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
-      AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
-      LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
-      PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
-      TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
-      COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
-      JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
-    )
-    
-    # Convert the list of details into a one-row data frame:
-    details_df_gambling <- bind_rows(details_gambling)
-    
-    return(details_df_gambling)
-  })
-})
+
+article_details_gambling \<- map_dfr(chunks, function(ids) { articles \<- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
+
+\# Split the articles into individual articles: articles \<- strsplit(articles, "\n\n")\[\[1\]\]
+
+\# Process each article: map_dfr(articles, function(article) { \# Split the article into lines: lines \<- strsplit(article, "\n")\[\[1\]\]
+
+```         
+# Get the details we're interested in:
+details_gambling <- list(
+  PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
+  DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
+  TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
+  LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
+  AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
+  FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
+  AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
+  LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
+  PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
+  TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
+  COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
+  JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
+)
+
+# Convert the list of details into a one-row data frame:
+details_df_gambling <- bind_rows(details_gambling)
+
+return(details_df_gambling)
+```
+
+}) })
 
 # Check the results:
-article_details_gambling %>%
-  as_tibble() %>%
-  print()
+
+article_details_gambling %\>% as_tibble() %\>% print()
 
 # Let's remove the identifiers at the beginning of each data point:
-rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',
-             'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',
-             'COIS- ' = '', 'JT  - ' = '')
 
-results_gambling <- article_details_gambling %>%
-  mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers
-  # Now separate the date year and month/day info:
-  separate(DP, c("Year", "Month"), sep = "\\ ") %>%
-  mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric
-  rename( # Let's also provide more descriptive names for each of the columns
-         "Title" = "TI", 
-         "DOI" = "LID", 
-         "Abstract" = "AB", 
-         "Full_Author_Name" = "FAU", 
-         "Author_Address" = "AD", 
-         "Language" = "LA", 
-         "Publication_Type" = "PT", 
-         "Journal_name_short" = "TA",
-         "Conflict_of_Interest_Statement" = "COIS",
-         "Journal_Title" = "JT") %>%
-  print()
+rep_str \<- c('PMID-' = '', 'DP -' = '', 'TI -' = '', 'LID -' = '', 'AB -' = '', 'FAU -' = '', 'AD -' = '', 'LA -' = '', 'PT -' = '', 'TA -' = '', 'COIS-' = '', 'JT -' = '')
+
+results_gambling \<- article_details_gambling %\>% mutate(across(everything(), \~str_replace_all(., rep_str))) %\>% \# Remove identifiers \# Now separate the date year and month/day info: separate(DP, c("Year", "Month"), sep = "\\") %\>% mutate(Year = as.numeric(Year)) %\>% \# Convert Year to numeric rename( \# Let's also provide more descriptive names for each of the columns "Title" = "TI", "DOI" = "LID", "Abstract" = "AB", "Full_Author_Name" = "FAU", "Author_Address" = "AD", "Language" = "LA", "Publication_Type" = "PT", "Journal_name_short" = "TA", "Conflict_of_Interest_Statement" = "COIS", "Journal_Title" = "JT") %\>% print()
 
 # Now save the initial results before proceeding so we can't lose them!
+
 write.csv(results_gambling, "Data extraction/gambling_data.csv", row.names=FALSE)
 
-```
+```         
 
 #### Extract full title using rvest
 
 Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the `rvest` package to scrape the titles returned from a manual search in PubMed (it uses the URL from this search), then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r}
+```{r}}
 # Add search URL:
 url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200" # 3502 results on 10/07/2023
 
@@ -344,7 +347,7 @@ read.csv("Data extraction/gambling_data_cleaned.csv")
 #  Clean environment:
 # rm(list = ls())
 
-# Define the search term:
+# Define the search terms/string::
 search_term_gaming <- '((((("gaming disorder"[Title/Abstract]) OR ("internet gaming disorder"[Title/Abstract])) OR ("gaming addiction"[Title/Abstract])) OR ("video game addiction"[Title/Abstract])) OR ("video game disorder"[Title/Abstract])) OR ("gaming dependence")'
 
 # Use entrez_search to get the IDs of the articles:
@@ -420,7 +423,6 @@ results_gaming <- article_details_gaming %>%
 
 # Now save the initial results before proceeding so we can't lose them!
 write.csv(results_gaming, "Data extraction/gaming_data.csv", row.names=FALSE)
-
 ```
 
 #### Extract full title using rvest
@@ -429,7 +431,7 @@ As with the gambling study extraction, we're going to use the `rvest` package to
 
 ```{r}
 # Add search URL:
-url_gaming_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%28%22gaming+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22internet+gaming+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+dependence%22%29&size=200"
+url_gaming_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%28%22gaming+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22internet+gaming+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+dependence%22%29&size=200" # 1569 on 10/07/2023
 
 # Read and parse the webpage
 webpage_gaming_rvest <- read_html(url_gaming_rvest)
@@ -613,19 +615,18 @@ write.csv(results_gaming_final, "Data extraction/gaming_data_cleaned.csv", row.n
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%22work+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addiction+to+work%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22workaholism%22%5BTitle%2FAbstract%5D%29&size=200)
 
-**Notes post-search:** Again, I manually inspected all of the results directly in the PubMed site. All appeared relevant.
-
-**Date of analysis:** 16/05/2022
+**Notes post-search:** Again, I manually inspected all of the results directly in the PubMed site. All appeared relevant (July 2023).
 
 ```{r}
 #  Clean environment:
-rm(list = ls())
+# rm(list = ls())
 
-# Define the search term:
+# Define the search terms/string:
 search_term_work <- '("work addiction"[Title/Abstract]) OR ("addiction to work"[Title/Abstract]) OR ("workaholism"[Title/Abstract])'
 
 # Use entrez_search to get the IDs of the articles:
 search_results_work <- entrez_search(db="pubmed", term=search_term_work, retmax=20000)
+
 id_list_work <- search_results_work$ids
 
 # Split id list into chunks of 500:
@@ -766,6 +767,9 @@ for (page in 0:(total_pages_work - 1)) {
 
 # Print the extracted data
 print(as_tibble(results_work_rvest))
+
+# Now save the initial results before proceeding so we can't lose them!
+write.csv(results_work_rvest, "Data extraction/work_titles.csv", row.names=FALSE)
 ```
 
 #### Refine dataset
@@ -773,7 +777,15 @@ print(as_tibble(results_work_rvest))
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
 ```{r}
-# Merge our two datasets
+# Load in first dataset in case environment clean on knit (above sections not excuted for render):
+results_work<- read.csv("Data extraction/work_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not excuted for render):
+results_work_rvest<- read.csv("Data extraction/work_titles.csv") %>% 
+  as_tibble()
+
+# Merge our two datasets:
 results_work2 <- results_work %>%
   as_tibble() %>%
   rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
@@ -801,7 +813,6 @@ results_work2 %>%
            Journal_name_short, 
            Full_Author_Name) %>% 
   filter(n()>1)
-  print() # None
 
 # Have a look at duplicates were just the title, journal and year are the same:
 results_work2 %>% 
@@ -852,7 +863,7 @@ results_work_final <- results_work2 %>% bind_cols(Label_work) %>%
 
 # View(results_work_final)
 # Now save the cleaned results
-write.csv(results_work_final, "C:/Users/rheirene/Dropbox (Personal)/Sci-Software/Blog posts/PubMed Article Scraping/Web scrape scholar/Data extraction/work_data_cleaned.csv", row.names=FALSE)
+write.csv(results_work_final, "Data extraction/work_data_cleaned.csv", row.names=FALSE)
 ```
 
 ## Exercise addiction
@@ -873,7 +884,7 @@ write.csv(results_work_final, "C:/Users/rheirene/Dropbox (Personal)/Sci-Software
 #  Clean environment:
 rm(list = ls())
 
-# Define the search term:
+# Define the search terms/string::
 search_term_exercise <- '(((("Exercise addiction"[Title/Abstract]) OR ("exercise dependence"[Title/Abstract])) OR ("compulsory exercise"[Title/Abstract])) OR ("obligatory exercise"[Title/Abstract])) OR ("Addiction to exercise"[Title/Abstract])'
 
 # Use entrez_search to get the IDs of the articles:
