@@ -8,14 +8,26 @@ editor: visual
 
 https://www.youtube.com/watch?v=yzTuBuRdAyA
 
-```{r}
-# Load required libraries:
-library(rentrez)
-library(dplyr)
-library(tidyr)
-library(purrr)
-library(rvest)
-library(stringr)
+```{r results=FALSE, warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Set-up code"
+
+# Install and load the groundhog package to ensure consistency of the package versions used here:
+# install.packages("groundhog") # Install
+
+library(groundhog) # Load
+
+# List desired packages:
+packages <- c('rentrez',
+              'dplyr',
+              'tidyr',
+              'purrr',
+              'rvest',
+              'stringr')
+              
+
+# Load desired package with versions specific to project start date:
+groundhog.library(packages, "2023-06-07")
 ```
 
 List of journals indexed on PubMed: [Link](https://ftp.ncbi.nih.gov/pubmed/J_Medline.txt)
@@ -24,15 +36,19 @@ List of journals indexed on PubMed: [Link](https://ftp.ncbi.nih.gov/pubmed/J_Med
 
 #### Extract studies and perform a basic clean of dataset
 
-**Notes pre-search:** Mesh terms can be found here: https://www.ncbi.nlm.nih.gov/mesh/?term=gaming+disorder. Tried adding problem gambling and it adds around 1,200 more studies, but the overall distribution over time remains very similar. One unavoidable issue with the gambling search is 2 of the 3 gambling-specific journals (International Gambling Studies & Journal of Gambling Issues) are not indexed by PubMed. That said, most behavioural addiction and addiction-focused journals are, fortunately.
+**Notes pre-search:** Mesh terms can be found [here](https://www.ncbi.nlm.nih.gov/mesh/?term=gaming+disorder). Tried adding problem gambling and it adds around 1,200 more studies, but the overall distribution over time remains very similar. One unavoidable issue with the gambling search is 2 of the 3 gambling-specific journals (International Gambling Studies & Journal of Gambling Issues) are not indexed by PubMed. That said, most behavioural addiction and addiction-focused journals are, fortunately.
+
+::: {.callout-note appearance="minimal" icon="false"}
+## Add gambling journals?
+
+A simple reminder to look into this.
+:::
 
 **Actual search used:** ("gambling disorder"\[Title/Abstract\]) OR ("disordered gambling"\[Title/Abstract\] OR "gambling addiction"\[Title/Abstract\]) OR ("addicted gambler\*"\[Title/Abstract\]) OR ("pathological gambl\*"\[Title/Abstract\]) OR ("compulsive gambl\*"\[Title/Abstract\]
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200)
 
 **Notes post-search:** I manually inspected a large proportion of the results directly in the PubMed site. Many duplicates that require removal.
-
-**Date of analysis:** 16/05/2022
 
 ```{r}
 #  Clean environment:
@@ -50,7 +66,6 @@ chunks <- split(id_list_gambling, ceiling(seq_along(id_list_gambling)/100))
 
 # Fetch details for each chunk of articles:
 article_details_gambling <- map_dfr(chunks, function(ids) {
-  # Fetch details of the articles:
   articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
   
   # Split the articles into individual articles:
@@ -119,10 +134,10 @@ write.csv(results_gambling, "Data extraction/gambling_data.csv", row.names=FALSE
 
 #### Extract full title using rvest
 
-Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the rvest to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
 ```{r}
-# Define the URL
+# Add search URL
 url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200"
 
 # Read and parse the webpage
@@ -190,9 +205,9 @@ print(as_tibble(results_gambling_rvest))
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
 ```{r}
-# Merge our two datasets
+# Merge the two datasets
 results_gambling2 <- results_gambling %>%
-  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from the primary dataset
   merge(results_gambling_rvest, by = "PMID") %>%
   relocate(Title) %>% # Place full title first for ease
   as_tibble() %>%
@@ -212,7 +227,7 @@ results_gambling2 %>%
   filter(n()>1) %>% 
   print(n = 100)
 
-# Remove these asap as there's no debate about them being dupliactes or not:
+# Remove these asap as they're clear duplicates:
 results_gambling_sans_duplicates<- results_gambling2 %>%
   distinct(PMID, .keep_all = TRUE) %>% 
   print()
@@ -241,7 +256,7 @@ results_gambling_sans_duplicates %>%
 # There are a few more of these, suggesting there are some papers with the same title, journal and date but different authors. 
 # The only one of concern is this one (PMID: 31346181) which is  agraphical abstract for another paper by the looks. 
 
-# Remove duplicates based on only duplicated titles and authors:
+# Remove duplicates based on above observation:
 results_gambling_sans_duplicates2<- results_gambling_sans_duplicates %>%
 filter(PMID != "31346181") %>% 
   print()
@@ -291,7 +306,7 @@ results_gambling_final <- results_gambling_sans_duplicates2 %>% bind_cols(Label)
 # View(results_gambling_final)
 # Now save the cleaned results
 
-write.csv(results_gambling_final, "C:/Users/rheirene/Dropbox (Personal)/Sci-Software/Blog posts/PubMed Article Scraping/Web scrape scholar/Data extraction/gambling_data_cleaned.csv", row.names=FALSE)
+write.csv(results_gambling_final, "Data extraction/gambling_data_cleaned.csv", row.names=FALSE)
 
 read.csv("Data extraction/gambling_data_cleaned.csv")
 ```
