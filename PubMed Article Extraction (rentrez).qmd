@@ -73,7 +73,7 @@ A simple reminder to look into this.
 
 **Notes post-search:** I manually inspected a large proportion of the results directly in the PubMed site. Many duplicates that require removal.
 
-```{r}
+```{{r}}
 #  Clean environment:
 rm(list = ls())
 
@@ -159,7 +159,7 @@ write.csv(results_gambling, "Data extraction/gambling_data.csv", row.names=FALSE
 
 Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the `rvest` package to scrape the titles returned from a manual search in PubMed (it uses the URL from this search), then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r}
+```{{r}}
 # Add search URL:
 url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200" # 3502 results on 10/07/2023
 
@@ -357,7 +357,7 @@ read.csv("Data extraction/gambling_data_cleaned.csv")
 
 **Notes post-search:** "video game dependence" returned no results and so was removed. I manually inspected a large proportion of the results directly in the PubMed site.
 
-```{r}
+```{{r}}
 #  Clean environment:
 # rm(list = ls())
 
@@ -444,7 +444,7 @@ write.csv(results_gaming, "Data extraction/gaming_data.csv", row.names=FALSE)
 
 As with the gambling study extraction, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r}
+```{{r}}
 # Add search URL:
 url_gaming_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%28%22gaming+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22internet+gaming+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+dependence%22%29&size=200"
 
