@@ -17,13 +17,13 @@ The criteria for inclusion are:
 ```{=html}
 <!-- -->
 ```
--   The study must primarily focus on a behaviour which has been studied within the context of addiction (e.g., exercise)
+-   The study must primarily focus on a behaviour which has been studied within the context of addiction (e.g., gambling, exercise, video gaming)
 
 -   The study must use language in the title and/or abstract that indicate that the behaviour is discussed in the context of or as an addiction. This includes:
 
     -   the direct use of the terms "addiction" or "dependence"
 
-    -   the use of accepted (DSM/ICD) diagnostic terms
+    -   the use of accepted (DSM/ICD) or previosuly accepted (e.g., "pathological gambling") diagnostic terms (e.g., "gambling disorder")
 
     -   the use of a term or phrase which is not a clinically/medically accepted diagnostic term (i.e., it is not included in any nosological system), but is used in the research area as such (e.g., "compulsory exercise", "workaholism")
 
@@ -90,7 +90,7 @@ A simple reminder to look into this.
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200)
 
-**Notes post-search:** I manually inspected a large proportion of the results directly in the PubMed site. Many duplicates that require removal.
+**Notes post-search:** I manually inspected the results directly in the PubMed site. Many duplicates that require removal (performed below), but all studies appeared relevant (July 2023).
 
 ```{{r}}
 #  Clean environment:
@@ -250,11 +250,11 @@ write.csv(results_gambling_rvest, "Data extraction/gambling_titles.csv", row.nam
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
 ```{r}
-# Load in first dataset in case environment clean on knit (above sections not excuted for render):
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_gambling<- read.csv("Data extraction/gambling_data.csv") %>% 
   as_tibble()
 
-# Load in second dataset in case environment clean on knit (above sections not excuted for render):
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
 results_gambling_rvest<- read.csv("Data extraction/gambling_titles.csv") %>% 
   as_tibble()
 
@@ -374,7 +374,7 @@ read.csv("Data extraction/gambling_data_cleaned.csv")
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%28%22gaming+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22internet+gaming+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+dependence%22%29&size=200)
 
-**Notes post-search:** "video game dependence" returned no results and so was removed. I manually inspected a large proportion of the results directly in the PubMed site.
+**Notes post-search:** "video game dependence" returned no results and so was removed. I manually inspected the results directly in the PubMed site and all appeared relevant (July 2023).
 
 ```{{r}}
 #  Clean environment:
@@ -536,11 +536,11 @@ Now we need to identify and remove any duplicates, irrelevant studies, or entrie
 
 ```{r}
 
-# Load in first dataset in case environment clean on knit (above sections not excuted for render):
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_gaming<- read.csv("Data extraction/gaming_data.csv") %>% 
   as_tibble()
 
-# Load in second dataset in case environment clean on knit (above sections not excuted for render):
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
 results_gaming_rvest<- read.csv("Data extraction/gaming_titles.csv") %>% 
   as_tibble()
 
@@ -651,7 +651,7 @@ write.csv(results_gaming_final, "Data extraction/gaming_data_cleaned.csv", row.n
 
 **Notes post-search:** Again, I manually inspected all of the results directly in the PubMed site. All appeared relevant other than one study which is mentioned and removed in the code under the title "Refine dataset" within this section.
 
-```{r}
+```{{r})
 #  Clean environment:
 # rm(list = ls())
 
@@ -738,7 +738,7 @@ write.csv(results_work, "Data extraction/work_data.csv", row.names=FALSE)
 
 Again, we're going to use the rvest to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r}
+```{{r})
 # Add search URL:
 url_work_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%22work+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addiction+to+work%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22workaholism%22%5BTitle%2FAbstract%5D%29&size=200" # 275 results on 10/07/2023
 
@@ -810,11 +810,11 @@ write.csv(results_work_rvest, "Data extraction/work_titles.csv", row.names=FALSE
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
 ```{r}
-# Load in first dataset in case environment clean on knit (above sections not excuted for render):
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_work<- read.csv("Data extraction/work_data.csv") %>% 
   as_tibble()
 
-# Load in second dataset in case environment clean on knit (above sections not excuted for render):
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
 results_work_rvest<- read.csv("Data extraction/work_titles.csv") %>% 
   as_tibble()
 
@@ -919,7 +919,7 @@ write.csv(results_work_final, "C:/Users/rheirene/Dropbox (Personal)/Sci-Software
 
 **Notes post-search:**
 
-```{r}
+```{{r})
 #  Clean environment:
 # rm(list = ls())
 
@@ -1006,7 +1006,7 @@ write.csv(results_exercise, "Data extraction/exercise_data.csv", row.names=FALSE
 
 Again, we're going to use the rvest to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r}
+```{{r})
 # Add search URL:
 url_exercise_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22Exercise+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22exercise+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+exercise%22%5BTitle%2FAbstract%5D%29&size=200" # 386 results returned on 10/07/2023
 
@@ -1080,11 +1080,11 @@ Now we need to identify and remove any duplicates, irrelevant studies, or entrie
 
 ```{r}
 
-# Load in first dataset in case environment clean on knit (above sections not excuted for render):
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_exercise<- read.csv("Data extraction/exercise_data.csv") %>% 
   as_tibble()
 
-# Load in second dataset in case environment clean on knit (above sections not excuted for render):
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
 results_exercise_rvest<- read.csv("Data extraction/exercise_titles.csv") %>% 
   as_tibble()
 
