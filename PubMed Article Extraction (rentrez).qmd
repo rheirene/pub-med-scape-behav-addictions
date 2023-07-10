@@ -1,6 +1,10 @@
 ---
 title: "PubMed Article Extraction (rentrez)"
-format: html
+author: "Rob Heirene"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format: 
+  html:
+    toc: true
 editor: visual
 ---
 
@@ -36,7 +40,9 @@ List of journals indexed on PubMed: [Link](https://ftp.ncbi.nih.gov/pubmed/J_Med
 
 #### Extract studies and perform a basic clean of dataset
 
-**Notes pre-search:** Mesh terms can be found [here](https://www.ncbi.nlm.nih.gov/mesh/?term=gaming+disorder). Tried adding problem gambling and it adds around 1,200 more studies, but the overall distribution over time remains very similar. One unavoidable issue with the gambling search is 2 of the 3 gambling-specific journals (International Gambling Studies & Journal of Gambling Issues) are not indexed by PubMed. That said, most behavioural addiction and addiction-focused journals are, fortunately.
+**Notes pre-search:** Mesh terms can be found [here](https://www.ncbi.nlm.nih.gov/mesh/?term=gaming+disorder). I tried adding "problem gambling" and it adds around 1,200 more studies, but the overall distribution over time remains very similar.
+
+-   One unavoidable issue with the gambling search is 2 of the 3 gambling-specific journals (International Gambling Studies & Journal of Gambling Issues) are not indexed by PubMed. That said, most behavioural addiction and addiction-focused journals are, fortunately.
 
 ::: {.callout-note appearance="minimal" icon="false"}
 ## Add gambling journals?
@@ -134,70 +140,73 @@ write.csv(results_gambling, "Data extraction/gambling_data.csv", row.names=FALSE
 
 #### Extract full title using rvest
 
-Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the `rvest` package to scrape the titles returned from a manual search in PubMed (it uses the URL from this search), then join the two datasets using the PMID, retaining the title from this new dataset.
 
 ```{r}
-# Add search URL
-url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200"
+# Add search URL:
+url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200" # 3502 results on 10/07/2023
 
-# Read and parse the webpage
+# Read and parse the webpage:
 webpage_gambling_rvest <- read_html(url_gambling_rvest)
 
-# Get the total number of search results
+# Get the total number of search results:
 results_count_gambling <- webpage_gambling_rvest %>%
   html_node(".results-amount .value") %>%
   html_text() %>%
   str_replace(",", "") %>%
   as.numeric()
 
-# Calculate the number of pages
+# Calculate the number of pages:
 results_per_page_gambling <- 100
 total_pages_gambling <- ceiling(results_count_gambling[1] / results_per_page_gambling)
-# Print results_count_gambling and total_pages_gambling
+# Print results_count_gambling and total_pages_gambling:
 print(results_count_gambling)
 print(total_pages_gambling)
 
 
-# Initialize an empty data frame
+# Initialize an empty data frame:
 results_gambling_rvest <- data.frame()
 
-# Loop through each page and scrape the data
+# Loop through each page and scrape the data:
 for (page in 0:(total_pages_gambling - 1)) {
   # Update the page parameter in the URL for the current page
   current_url <- paste0(url_gambling_rvest, "&page=", page + 1)
   
-  # Read and parse the current webpage
+  # Read and parse the current webpage:
   current_page <- read_html(current_url)
   
-  # Extract title
+  # Extract title:
   Title <- tryCatch({
     current_page %>%
       html_nodes(".docsum-title") %>%
       html_text(trim = TRUE)
   }, error = function(e) {
-    print(paste("Error extracting title info on page", page + 1))
+    print(paste("Error extracting title", page + 1))
     rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
   })
   
-  # Extract the PMID
+  # Extract the PMID:
   pmid <- current_page %>%
     html_nodes(".docsum-pmid") %>%
     html_text(trim = TRUE)
   
-  # Create a data frame with the extracted data
+  # Create a data frame with the extracted data:
   current_results_gambling <- data.frame(Title = Title,
                                        PMID = pmid)
   
-  # Combine the current results with the previous results
+  # Combine the current results with the previous results:
   results_gambling_rvest <- rbind(results_gambling_rvest, current_results_gambling)
   
-  # Introduce a delay to avoid overloading the server
+  # Introduce a delay to avoid overloading the server:
   sleep_time <- runif(1, min = 5, max = 15)
   Sys.sleep(sleep_time)
 }
 
-# Print the extracted data
+# Print the extracted data:
 print(as_tibble(results_gambling_rvest))
+
+# Now save the titles results before proceeding so we can't lose them!
+write.csv(results_gambling_rvest, "Data extraction/gambling_titles.csv", row.names=FALSE)
 ```
 
 #### Refine dataset
@@ -205,7 +214,15 @@ print(as_tibble(results_gambling_rvest))
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
 ```{r}
-# Merge the two datasets
+# Load in first dataset in case environment clean on knit (above sections not excuted for render):
+results_gambling<- read.csv("Data extraction/gambling_titles.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not excuted for render):
+results_gambling_rvest<- read.csv("Data extraction/gambling_data.csv") %>% 
+  as_tibble()
+
+# Merge the two datasets:
 results_gambling2 <- results_gambling %>%
   rename("Title_trunc" = "Title") %>% # Designate the truncated title from the primary dataset
   merge(results_gambling_rvest, by = "PMID") %>%
@@ -315,7 +332,7 @@ read.csv("Data extraction/gambling_data_cleaned.csv")
 
 #### Extract studies and perform a basic clean of dataset
 
-**Notes pre-search:** Mesh terms can be found here: https://www.ncbi.nlm.nih.gov/mesh/?term=gaming+disorder \-- didn't use all of these as some relate to other behavioural addictions
+**Notes pre-search:** Mesh terms can be found [here](https://www.ncbi.nlm.nih.gov/mesh/?term=gaming+disorder). Didn't use all of these terms as some relate to other behavioural addictions
 
 **Actual search used:** ((((("gaming disorder"\[Title/Abstract\]) OR ("internet gaming disorder"\[Title/Abstract\])) OR ("gaming addiction"\[Title/Abstract\])) OR ("video game addiction"\[Title/Abstract\])) OR ("video game disorder"\[Title/Abstract\])) OR ("gaming dependence")
 
@@ -323,11 +340,9 @@ read.csv("Data extraction/gambling_data_cleaned.csv")
 
 **Notes post-search:** "video game dependence" returned no results and so was removed. I manually inspected a large proportion of the results directly in the PubMed site.
 
-**Date of analysis:** 16/05/2022
-
 ```{r}
 #  Clean environment:
-rm(list = ls())
+# rm(list = ls())
 
 # Define the search term:
 search_term_gaming <- '((((("gaming disorder"[Title/Abstract]) OR ("internet gaming disorder"[Title/Abstract])) OR ("gaming addiction"[Title/Abstract])) OR ("video game addiction"[Title/Abstract])) OR ("video game disorder"[Title/Abstract])) OR ("gaming dependence")'
@@ -410,10 +425,10 @@ write.csv(results_gaming, "Data extraction/gaming_data.csv", row.names=FALSE)
 
 #### Extract full title using rvest
 
-Again, we're going to use the rvest to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+As with the gambling study extraction, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
 ```{r}
-# Define the URL
+# Add search URL:
 url_gaming_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%28%22gaming+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22internet+gaming+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+dependence%22%29&size=200"
 
 # Read and parse the webpage
@@ -455,25 +470,28 @@ for (page in 0:(total_pages_gaming - 1)) {
     rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
   })
   
-  # Extract the PMID
+  # Extract the PMID:
   pmid <- current_page %>%
     html_nodes(".docsum-pmid") %>%
     html_text(trim = TRUE)
   
-  # Create a data frame with the extracted data
+  # Create a data frame with the extracted data:
   current_results_gaming <- data.frame(Title = Title,
                                        PMID = pmid)
   
-  # Combine the current results with the previous results
+  # Combine the current results with the previous results:
   results_gaming_rvest <- rbind(results_gaming_rvest, current_results_gaming)
   
-  # Introduce a delay to avoid overloading the server
+  # Introduce a delay to avoid overloading the server:
   sleep_time <- runif(1, min = 5, max = 15)
   Sys.sleep(sleep_time)
 }
 
-# Print the extracted data
+# Print the extracted data:
 print(as_tibble(results_gaming_rvest))
+
+# Now save the titles before proceeding so we can't lose them!
+write.csv(results_gaming_rvest, "Data extraction/gaming_titles.csv", row.names=FALSE)
 ```
 
 #### Refine dataset
@@ -481,7 +499,16 @@ print(as_tibble(results_gaming_rvest))
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
 ```{r}
-# Merge our two datasets
+
+# Load in first dataset in case environment clean on knit (above sections not excuted for render):
+results_gaming<- read.csv("Data extraction/gaming_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not excuted for render):
+results_gaming_rvest<- read.csv("Data extraction/gaming_titles.csv") %>% 
+  as_tibble()
+
+# Merge our two datasets:
 results_gaming2 <- results_gaming %>%
   as_tibble() %>%
   rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
@@ -503,7 +530,7 @@ Simple_duplicate_removal_n <- results_gaming2 %>%
 results_gaming2 %>% 
   group_by(Title) %>% 
   filter(n()>1) %>% 
-  print() # This is actually two seperatre studies
+  print() # **This is actually two seperate studies**
 
  
 # I know from manual searching that there is a genuine duplicate that is a corrigendum to one study. The PMID  for the corrigendum is 35543161 (Remove later)
@@ -572,8 +599,8 @@ results_gaming_final <- results_gaming_sans_duplicates %>% bind_cols(Label) %>%
   print()
 
 # View(results_gaming_final)
-# Now save the cleaned results
-write.csv(results_gaming_final, "C:/Users/rheirene/Dropbox (Personal)/Sci-Software/Blog posts/PubMed Article Scraping/Web scrape scholar/Data extraction/gaming_data_cleaned.csv", row.names=FALSE)
+# Now save the cleaned results:
+write.csv(results_gaming_final, "Data extraction/gaming_data_cleaned.csv", row.names=FALSE)
 ```
 
 ## Work addiction
