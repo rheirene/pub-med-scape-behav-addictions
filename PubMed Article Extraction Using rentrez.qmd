@@ -1,5 +1,5 @@
 ---
-title: "PubMed Article Extraction (rentrez)"
+title: "PubMed Article Extraction Using rentrez"
 author: "Rob Heirene"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 format: 
@@ -181,7 +181,7 @@ write.csv(results_gambling, "Data extraction/gambling_data.csv", row.names=FALSE
 
 Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the `rvest` package to scrape the titles returned from a manual search in PubMed (it uses the URL from this search), then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r}
+```{{r}}
 # Add search URL:
 url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200" # 3502 results on 10/07/2023
 
@@ -307,7 +307,8 @@ results_gambling_sans_duplicates %>%
 results_gambling_sans_duplicates %>% 
   group_by(Title, Journal_name_short, Year) %>% 
   filter(n()>1) %>% 
-  View()
+  # View()
+  print()
 
 # There are a few more of these, suggesting there are some papers with the same title, journal and date but different authors. 
 # The only one of concern is this one (PMID: 31346181) which is  agraphical abstract for another paper by the looks. 
@@ -360,11 +361,8 @@ results_gambling_final <- results_gambling_sans_duplicates2 %>% bind_cols(Label)
   print()
 
 # View(results_gambling_final)
-# Now save the cleaned results
-
+# Now save the cleaned results:
 write.csv(results_gambling_final, "Data extraction/gambling_data_cleaned.csv", row.names=FALSE)
-
-read.csv("Data extraction/gambling_data_cleaned.csv")
 ```
 
 ## Gaming addiction
@@ -568,8 +566,7 @@ Simple_duplicate_removal_n <- results_gaming2 %>%
 # Show duplicate:
 results_gaming2 %>% 
   group_by(Title) %>% 
-  filter(n()>1) %>% 
-  print() # **This is actually two seperate studies**
+  filter(n()>1) # **This is actually two seperate studies**
 
  
 # I know from manual searching that there is a genuine duplicate that is a corrigendum to one study. The PMID  for the corrigendum is 35543161 (Remove later)
@@ -580,15 +577,14 @@ results_gaming2 %>%
            Journal_name_short, 
            Full_Author_Name) %>% 
   filter(n()>1)
-  print()
+
 
 # Have a look at duplicates were just the title, journal and year are the same:
 results_gaming2 %>% 
   group_by(Title, 
            Journal_name_short, 
            Year) %>% 
-  filter(n()>1) %>% 
-  print()
+  filter(n()>1) 
 
 
 # Remove the duplicate study:
@@ -845,16 +841,14 @@ results_work2 %>%
   group_by(Title, 
            Journal_name_short, 
            Full_Author_Name) %>% 
-  filter(n()>1)
-  print() # None
+  filter(n()>1) # None
 
 # Have a look at duplicates were just the title, journal and year are the same:
 results_work2 %>% 
   group_by(Title, 
            Journal_name_short, 
            Year) %>% 
-  filter(n()>1) %>% 
-  print() # None
+  filter(n()>1)# None
 
 # Upon manual inspection of the dataset, there appears to be one study with the title "Overearning"  which doesn't seem to meet my criteria for inclusion.  Therefore, let's remove this here:
 
@@ -863,7 +857,7 @@ results_work2 %>%
 # View(results_work2)
 
 results_work2_relevent <- results_work2 %>% 
-   filter(Title != "Overearning.") # There is a. At the end of the total in the extracted data for some reason
+   filter(Title != "Overearning.") # There is a "." at the end of the total in the extracted data for some reason
 # Confirming that I have checked this reduces the number of studies by 1.
 
 #  Okay, now we are confident that we have a clean dataset, let's explore!
@@ -904,7 +898,7 @@ results_work_final <- results_work2_relevent %>%
 
 # View(results_work_final)
 # Now save the cleaned results
-write.csv(results_work_final, "C:/Users/rheirene/Dropbox (Personal)/Sci-Software/Blog posts/PubMed Article Scraping/Web scrape scholar/Data extraction/work_data_cleaned.csv", row.names=FALSE)
+write.csv(results_work_final, "Data extraction/work_data_cleaned.csv", row.names=FALSE)
 ```
 
 ## Exercise addiction
@@ -920,17 +914,30 @@ write.csv(results_work_final, "C:/Users/rheirene/Dropbox (Personal)/Sci-Software
 **Notes post-search:**I manually inspected all of the results returned on PubMed. The search term " compulsory exercise" is slightly problematic for this search as it sometimes used in the context of exercise rehabilitation/animal studies. The following studies were found to be not relevant:
 
 -   "\[Doping in sports\]."
+
 -   "Psychoeducation: a basic psychotherapeutic intervention for patients with schizophrenia and their families."
+
 -   "Metabolic response to fasting in experimental intrauterine growth retardation induced by surgical and nonsurgical maternal stress."
+
 -   "\[Arguments in favor of Integrated Health Care as regular health care provision in cardiology\]."
+
 -   "\[What can a chair on alternatives to animal experimentation effectuate?\]."
+
 -   "Mandatory Physical Education Classes of Two Hours per Week Can Be Comparable to Losing More than Five Kilograms for Chinese College Students."
+
 -   "Degeneration of dystrophic or injured skeletal muscles induces high expression of Galectin-1."
+
 -   "A Pilot Study of a 12-Week Leg Exercise and a 6- and 12-Month Follow-Up in Community-Dwelling Diabetic Elders: Effect on Dynamic Standing Balance."
+
 -   "Opposite effects of catalase and MnSOD ectopic expression on stress induced defects and mortality in the desmin deficient cardiomyopathy model."
+
 -   "Beef extract supplementation increases leg muscle mass and modifies skeletal muscle fiber types in rats."
+
 -   "Does exercise deprivation increase the tendency towards morphine dependence in rats?."
+
 -   "A Polymeric Bilayer Multi-Legged Soft Millirobot with Dual Actuation and Humidity Sensing."
+
+    # EXCLUDE THE ABOVE STUDIES FROM THE FINAL DATASET!
 
 ```{{r}}
 #  Clean environment:
