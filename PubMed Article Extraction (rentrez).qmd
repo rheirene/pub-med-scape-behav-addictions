@@ -12,14 +12,13 @@ editor: visual
 
 The criteria for inclusion are:
 
--   The study must be registered/stored on the PubMed database (a list of journals indexed on PubMed can be found [here](https://ftp.ncbi.nih.gov/pubmed/J_Medline.txt)).
+-   The article must be registered/stored on the PubMed database (a list of journals indexed on PubMed can be found [here](https://ftp.ncbi.nih.gov/pubmed/J_Medline.txt)).
 
-```{=html}
 <!-- -->
-```
--   The study must primarily focus on a behaviour which has been studied within the context of addiction (e.g., gambling, exercise, video gaming)
 
--   The study must use language in the title and/or abstract that indicate that the behaviour is discussed in the context of or as an addiction. This includes:
+-   The article must focus on a behaviour which has been studied within the context of addiction (e.g., gambling, exercise, video gaming); the behaviour can be the primary focus or a sub-component of a larger paper (e.g., a study on alcohol use which also measures symptoms of gambling disorder)
+
+-   The article must use language in the title and/or abstract that indicate that the behaviour is discussed in the context of or as an addiction. This could include, but is not restricted to:
 
     -   the direct use of the terms "addiction" or "dependence"
 
@@ -27,7 +26,11 @@ The criteria for inclusion are:
 
     -   the use of a term or phrase which is not a clinically/medically accepted diagnostic term (i.e., it is not included in any nosological system), but is used in the research area as such (e.g., "compulsory exercise", "workaholism")
 
+    -   the use of measures of "addiction" to the behaviour (e.g., "Exercise Addiction Inventory") or measures of the symptoms of addiction (e.g., craving, withdrawal) that are then discussed in the context of a disorder or addiction
+
 -   There are no restrictions on date of publication, study designs, article types (e.g., commentaries, empirical studies etc.)
+
+-   There are no restrictions on language publication, provided the title and abstract are presented in English as well as the primary language.
 
 The above criteria were used to design of the search terms/strings employed to extract data from the PubMed database (the search string for each behavioural addiction is included before the code used to extract the associated studies). A manual scan of all return studies for relevance according to the above criteria has been made.
 
@@ -651,11 +654,11 @@ write.csv(results_gaming_final, "Data extraction/gaming_data_cleaned.csv", row.n
 
 **Notes post-search:** Again, I manually inspected all of the results directly in the PubMed site. All appeared relevant other than one study which is mentioned and removed in the code under the title "Refine dataset" within this section.
 
-```{{r})
+```{{r}}
 #  Clean environment:
-# rm(list = ls())
+rm(list = ls())
 
-# Define the search terms/string:
+# Define the search term:
 search_term_work <- '("work addiction"[Title/Abstract]) OR ("addiction to work"[Title/Abstract]) OR ("workaholism"[Title/Abstract])'
 
 # Use entrez_search to get the IDs of the articles:
@@ -736,11 +739,11 @@ write.csv(results_work, "Data extraction/work_data.csv", row.names=FALSE)
 
 #### Extract full title using rvest
 
-Again, we're going to use the rvest to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r})
-# Add search URL:
-url_work_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%22work+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addiction+to+work%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22workaholism%22%5BTitle%2FAbstract%5D%29&size=200" # 275 results on 10/07/2023
+```{{r}}
+# Define the URL
+url_work_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%22work+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addiction+to+work%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22workaholism%22%5BTitle%2FAbstract%5D%29&size=200"
 
 # Read and parse the webpage
 webpage_work_rvest <- read_html(url_work_rvest)
@@ -800,9 +803,6 @@ for (page in 0:(total_pages_work - 1)) {
 
 # Print the extracted data
 print(as_tibble(results_work_rvest))
-
-# Now save the titles before proceeding so we can't lose them!
-write.csv(results_work_rvest, "Data extraction/work_titles.csv", row.names=FALSE)
 ```
 
 #### Refine dataset
@@ -911,19 +911,32 @@ write.csv(results_work_final, "C:/Users/rheirene/Dropbox (Personal)/Sci-Software
 
 #### Extract studies and perform a basic clean of dataset
 
-**Notes pre-search:** No MeSH terms for this, so I looked up the most recent [systematic review](https://doi.org/10.1007/s11469-021-00568-1) on the topic that I could find and then examined their search strategy. They use the following terms: exercise addiction, exercise dependence, compulsory exercise, obligatory exercis
+**Notes pre-search:** No MeSH terms for this, so I looked up the most recent systematic review on the topic that I could find (https://doi.org/10.1007/s11469-021-00568-1) and then examine their search strategy. They use the following terms: exercise addiction, exercise dependence, compulsory exercise, obligatory exercis
 
 **Actual search used:** (((("Exercise addiction"\[Title/Abstract\]) OR ("exercise dependence"\[Title/Abstract\])) OR ("compulsory exercise"\[Title/Abstract\])) OR ("obligatory exercise"\[Title/Abstract\])) OR ("Addiction to exercise"\[Title/Abstract\])
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22Exercise+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22exercise+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+exercise%22%5BTitle%2FAbstract%5D%29&size=200)
 
-**Notes post-search:**
+**Notes post-search:**I manually inspected all of the results returned on PubMed. The search term " compulsory exercise" is slightly problematic for this search as it sometimes used in the context of exercise rehabilitation/animal studies. The following studies were found to be not relevant:
 
-```{{r})
+-   "\[Doping in sports\]."
+-   "Psychoeducation: a basic psychotherapeutic intervention for patients with schizophrenia and their families."
+-   "Metabolic response to fasting in experimental intrauterine growth retardation induced by surgical and nonsurgical maternal stress."
+-   "\[Arguments in favor of Integrated Health Care as regular health care provision in cardiology\]."
+-   "\[What can a chair on alternatives to animal experimentation effectuate?\]."
+-   "Mandatory Physical Education Classes of Two Hours per Week Can Be Comparable to Losing More than Five Kilograms for Chinese College Students."
+-   "Degeneration of dystrophic or injured skeletal muscles induces high expression of Galectin-1."
+-   "A Pilot Study of a 12-Week Leg Exercise and a 6- and 12-Month Follow-Up in Community-Dwelling Diabetic Elders: Effect on Dynamic Standing Balance."
+-   "Opposite effects of catalase and MnSOD ectopic expression on stress induced defects and mortality in the desmin deficient cardiomyopathy model."
+-   "Beef extract supplementation increases leg muscle mass and modifies skeletal muscle fiber types in rats."
+-   "Does exercise deprivation increase the tendency towards morphine dependence in rats?."
+-   "A Polymeric Bilayer Multi-Legged Soft Millirobot with Dual Actuation and Humidity Sensing."
+
+```{{r}}
 #  Clean environment:
-# rm(list = ls())
+rm(list = ls())
 
-# Define the search terms/string:
+# Define the search term:
 search_term_exercise <- '(((("Exercise addiction"[Title/Abstract]) OR ("exercise dependence"[Title/Abstract])) OR ("compulsory exercise"[Title/Abstract])) OR ("obligatory exercise"[Title/Abstract])) OR ("Addiction to exercise"[Title/Abstract])'
 
 # Use entrez_search to get the IDs of the articles:
@@ -1004,9 +1017,9 @@ write.csv(results_exercise, "Data extraction/exercise_data.csv", row.names=FALSE
 
 #### Extract full title using rvest
 
-Again, we're going to use the rvest to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r})
+```{{r}}
 # Add search URL:
 url_exercise_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22Exercise+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22exercise+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+exercise%22%5BTitle%2FAbstract%5D%29&size=200" # 386 results returned on 10/07/2023
 
@@ -1079,7 +1092,6 @@ write.csv(results_exercise_rvest, "Data extraction/exercise_titles.csv", row.nam
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
 ```{r}
-
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_exercise<- read.csv("Data extraction/exercise_data.csv") %>% 
   as_tibble()
@@ -1170,5 +1182,3 @@ results_exercise_final <- results_exercise2 %>% bind_cols(Label) %>%
 # Now save the cleaned results
 write.csv(results_exercise_final, "Data extraction/exercise_data_cleaned.csv", row.names=FALSE)
 ```
-
-Done up to here, but need to manually check the results of the exercise search to check for relevance
