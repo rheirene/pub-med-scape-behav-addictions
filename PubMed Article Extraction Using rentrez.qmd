@@ -51,6 +51,8 @@ The latest dates of data extraction for each behavioural addiction are below:
 -   Exercise: 10/07/2023
 :::
 
+https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
+
 ## Load packages
 
 ```{r results=FALSE, warning=FALSE, message=FALSE}
@@ -73,6 +75,257 @@ packages <- c('rentrez',
 
 # Load desired package with versions specific to project start date:
 groundhog.library(packages, "2023-06-07")
+```
+
+## Behavioural addictions
+
+#### Extract studies and perform a basic clean of dataset
+
+**Notes pre-search:** MeSH terms were pretty useless here (unlike the more specific behavioural addiction searches used below) so I relied on my knowledge of the field for terms to use.
+
+**Actual search used:** (((("behavioural addiction"\[Title/Abstract\]) OR ("behavioral addiction"\[Title/Abstract\])) OR ("non-drug addiction"\[Title/Abstract\])) OR ("non-substance addiction"\[Title/Abstract\])) OR ("non-chemical addiction"\[Title/Abstract\])
+
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&size=200). PubMed format display can be found [here](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&format=pubmed&size=200)
+
+**Notes post-search:** I manually scanned the results returned on the PubMed site for relevance and all appeared to meet the inclusion criteria. There will certainly be one of overlap between the studies returned from this search and the search is specific to individual behavioural addictions.
+
+```{{r}}
+#  Clean environment:
+# rm(list = ls())
+
+# Define the search terms/string:
+search_term_behav_addictions <- '(((("behavioural addiction"[Title/Abstract]) OR ("behavioral addiction"[Title/Abstract])) OR ("non-drug addiction"[Title/Abstract])) OR ("non-substance addiction"[Title/Abstract])) OR ("non-chemical addiction"[Title/Abstract])'
+
+# Use entrez_search to get the IDs of the articles:
+search_results_behav_addictions <- entrez_search(db="pubmed", term=search_term_behav_addictions, retmax=20000)
+id_list_behav_addictions <- search_results_behav_addictions$ids
+
+# Split id list into chunks of 500:
+chunks <- split(id_list_behav_addictions, ceiling(seq_along(id_list_behav_addictions)/100))
+
+# Fetch details for each chunk of articles:
+article_details_behav_addictions <- map_dfr(chunks, function(ids) {
+  articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
+  
+  # Split the articles into individual articles:
+  articles <- strsplit(articles, "\n\n")[[1]]
+  
+  # Process each article:
+  map_dfr(articles, function(article) {
+    # Split the article into lines:
+    lines <- strsplit(article, "\n")[[1]]
+    
+    # Get the details we're interested in:
+    details_behav_addictions <- list(
+      PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
+      DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
+      TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
+      LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
+      AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
+      FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
+      AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
+      LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
+      PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
+      TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
+      COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
+      JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
+    )
+    
+    # Convert the list of details into a one-row data frame:
+    details_df_behav_addictions <- bind_rows(details_behav_addictions)
+    
+    return(details_df_behav_addictions)
+  })
+})
+
+# Check the results:
+article_details_behav_addictions %>%
+  as_tibble() %>%
+  print()
+
+# Let's remove the identifiers at the beginning of each data point:
+rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',
+             'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',
+             'COIS- ' = '', 'JT  - ' = '')
+
+results_behav_addictions <- article_details_behav_addictions %>%
+  mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers
+  # Now separate the date year and month/day info:
+  separate(DP, c("Year", "Month"), sep = "\\ ") %>%
+  mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric
+  rename( # Let's also provide more descriptive names for each of the columns
+         "Title" = "TI", 
+         "DOI" = "LID", 
+         "Abstract" = "AB", 
+         "Full_Author_Name" = "FAU", 
+         "Author_Address" = "AD", 
+         "Language" = "LA", 
+         "Publication_Type" = "PT", 
+         "Journal_name_short" = "TA",
+         "Conflict_of_Interest_Statement" = "COIS",
+         "Journal_Title" = "JT") %>%
+  print()
+
+# Now save the initial results before proceeding so we can't lose them!
+write.csv(results_behav_addictions, "Data extraction/behav_addictions_data.csv", row.names=FALSE)
+
+```
+
+#### Extract full title using `rvest`
+
+Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the `rvest` package to scrape the titles returned from a manual search in PubMed (it uses the URL from this search), then join the two datasets using the PMID, retaining the title from this new dataset.
+
+::: {.callout-note appearance="minimal"}
+## Using the `revest` package
+
+It's important to note that, unlike using the `rentrez` package X uses data via PubMed's API, using the `rvest` package involves scraping the PubMed website for information, and there are many important ethical and legal considerations surrounding web scraping (some of which vary from country to country) that you may need to consider before proceeding. See, for example, this useful [paper](https://www.researchgate.net/profile/Vlad-Krotov/publication/324907302_Legality_and_Ethics_of_Web_Scraping/links/5aea622345851588dd8287dc/Legality-and-Ethics-of-Web-Scraping.pdf).
+:::
+
+```{{r}}
+# Add search URL:
+url_behav_addictions_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&size=200" # 856 results on 11/07/2023. 
+
+# Read and parse the webpage:
+webpage_behav_addictions_rvest <- read_html(url_behav_addictions_rvest)
+
+# Get the total number of search results:
+results_count_behav_addictions <- webpage_behav_addictions_rvest %>%
+  html_node(".results-amount .value") %>%
+  html_text() %>%
+  str_replace(",", "") %>%
+  as.numeric()
+
+# Calculate the number of pages:
+results_per_page_behav_addictions <- 100
+total_pages_behav_addictions <- ceiling(results_count_behav_addictions[1] / results_per_page_behav_addictions)
+# Print results_count_behav_addictions and total_pages_behav_addictions:
+print(results_count_behav_addictions)
+print(total_pages_behav_addictions)
+
+
+# Initialize an empty data frame:
+results_behav_addictions_rvest <- data.frame()
+
+# Loop through each page and scrape the data:
+for (page in 0:(total_pages_behav_addictions - 1)) {
+  # Update the page parameter in the URL for the current page
+  current_url <- paste0(url_behav_addictions_rvest, "&page=", page + 1)
+  
+  # Read and parse the current webpage:
+  current_page <- read_html(current_url)
+  
+  # Extract title:
+  Title <- tryCatch({
+    current_page %>%
+      html_nodes(".docsum-title") %>%
+      html_text(trim = TRUE)
+  }, error = function(e) {
+    print(paste("Error extracting title", page + 1))
+    rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
+  })
+  
+  # Extract the PMID:
+  pmid <- current_page %>%
+    html_nodes(".docsum-pmid") %>%
+    html_text(trim = TRUE)
+  
+  # Create a data frame with the extracted data:
+  current_results_behav_addictions <- data.frame(Title = Title,
+                                       PMID = pmid)
+  
+  # Combine the current results with the previous results:
+  results_behav_addictions_rvest <- rbind(results_behav_addictions_rvest, current_results_behav_addictions)
+  
+  # Introduce a delay to avoid overloading the server:
+  sleep_time <- runif(1, min = 5, max = 15)
+  Sys.sleep(sleep_time)
+}
+
+# Print the extracted data:
+print(as_tibble(results_behav_addictions_rvest))
+
+# Now save the titles results before proceeding so we can't lose them!
+write.csv(results_behav_addictions_rvest, "Data extraction/behav_addictions_titles.csv", row.names=FALSE)
+```
+
+#### Refine dataset
+
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
+
+```{r}
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
+results_behav_addictions<- read.csv("Data extraction/behav_addictions_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
+results_behav_addictions_rvest<- read.csv("Data extraction/behav_addictions_titles.csv") %>% 
+  as_tibble()
+
+# Merge the two datasets:
+results_behav_addictions2 <- results_behav_addictions %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from the primary dataset
+  merge(results_behav_addictions_rvest, by = "PMID") %>%
+  relocate(Title) %>% # Place full title first for ease
+  as_tibble() %>%
+  print()
+
+# Check results:
+# View(results_behav_addictions2)
+
+# Check dupliactes based on PMIDs:
+results_behav_addictions2 %>%
+  group_by(PMID) %>%
+  filter(n()>1) %>% 
+  print(n = 100)
+
+# There is no evidence of clear PMID duplicates
+
+# Show duplicate titles:
+results_behav_addictions2 %>% 
+  group_by(Title) %>% 
+  filter(n()>1) 
+# **This is actually two seperate commentaries on the same article**
+
+#  Okay, now we are confident that we have a clean dataset, let's explore!
+
+# Summary of the Year  variable:
+summary(results_behav_addictions2$Year)
+
+# Number of publications per year:
+hist(results_behav_addictions2$Year,
+                     xlim = c(1960,2023),
+                     breaks = 30,
+                     main = "Papers published per year on 'behavioural addictions' (PubMed)",
+                     xlab = "Year") # Even though the earliest year an article was published is 1994, I've set the range to started 1960 as this is where the starting point is across all other behavioural addiction searches.
+
+
+# Number of separate journals:
+results_behav_addictions2 %>% 
+  distinct(Journal_name_short) %>% 
+  arrange(Journal_name_short) %>% 
+  print(n = 50)
+
+# Most popular journals:
+results_behav_addictions2 %>% 
+  group_by(Journal_name_short) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  arrange(desc(n)) %>%
+  print(n = 50)
+
+# View(results_behav_addictions_sans_duplicates) # Visually inspect results
+
+# Now I need to add a label to all of these studies to signify that they Were returned from the behav_addictions search so that we can distinguish them from other studies when we later joined the datasets together:
+Label <- rep("behavioural_addictions", times = count(results_behav_addictions2))
+
+results_behav_addictions_final <- results_behav_addictions2 %>% bind_cols(Label) %>%
+  rename(Label = 14) %>%
+  print()
+
+# View(results_behav_addictions_final)
+# Now save the cleaned results:
+write.csv(results_behav_addictions_final, "Data extraction/behav_addictions_data_cleaned.csv", row.names=FALSE)
 ```
 
 ## Gambling addiction
@@ -179,7 +432,7 @@ write.csv(results_gambling, "Data extraction/gambling_data.csv", row.names=FALSE
 
 #### Extract full title using rvest
 
-Okay, so I'm struggling to get the `rentrez` package to extract the full, non-truncated titles of articles. I want to make sure we have these so we can accurately identify duplicates, so we're going to use the `rvest` package to scrape the titles returned from a manual search in PubMed (it uses the URL from this search), then join the two datasets using the PMID, retaining the title from this new dataset.
+As above, we're going to use the `rvest` package to scrape the titles of gambling papers, then join the two datasets using the PMID, retaining the title from this new dataset.
 
 ```{{r}}
 # Add search URL:
