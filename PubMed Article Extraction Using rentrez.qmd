@@ -39,16 +39,18 @@ https://www.youtube.com/watch?v=yzTuBuRdAyA
 ::: {.callout-note appearance="minimal"}
 ## Code blocks
 
-Please note that any code chunks presented in this document that, when executed, scrape or pull data from PubMed, are specifically set so that they do not execute when this document renders. Thus, these code chunks, as seen here, simply represent documentation rather than working code. This is because extracting this data (particularly for behavioural addictions where there are thousands of studies \[e.g., gambling\]) can take a substantial amount of time and therefore it would take 30-40 minutes every time this document renders if these code chunks executed.
+Please note that any code chunks presented in this document that, when executed, scrape or pull data from PubMed, are specifically set so that they do not execute when this document renders. Thus, these code chunks, as seen here, simply represent documentation rather than working code. This is because extracting this data (particularly for "addictions" where there are thousands of studies \[e.g., gambling\]) can take a substantial amount of time and therefore it would take 30-40 minutes every time this document renders if these code chunks executed.
 
 I only note this for anyone wanting to reproduce this analysis who tries to run the entire script by rendering the document. It's also important as the date at the top of this document may not be the latest date of data extraction (it is only the last date this was rendered).
 
 The latest dates of data extraction for each behavioural addiction are below:
 
+-   Behavioural addiction: 11/07/2023
 -   Gambling: 10/07/2023
 -   Gaming: 10/07/2023
 -   Work: 10/07/2023
 -   Exercise: 10/07/2023
+-   Social media: 20/07/2023
 :::
 
 https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
@@ -1164,7 +1166,7 @@ write.csv(results_work_final, "Data extraction/work_data_cleaned.csv", row.names
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22Exercise+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22exercise+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+exercise%22%5BTitle%2FAbstract%5D%29&size=200)
 
-**Notes post-search:**I manually inspected all of the results returned on PubMed. The search term " compulsory exercise" is slightly problematic for this search as it sometimes used in the context of exercise rehabilitation/animal studies. The following studies were found to be not relevant:
+**Notes post-search:** I manually inspected all of the results returned on PubMed. The search term " compulsory exercise" is slightly problematic for this search as it sometimes used in the context of exercise rehabilitation/animal studies. The following studies were found to be not relevant:
 
 -   "\[Doping in sports\]."
 
@@ -1189,8 +1191,6 @@ write.csv(results_work_final, "Data extraction/work_data_cleaned.csv", row.names
 -   "Does exercise deprivation increase the tendency towards morphine dependence in rats?."
 
 -   "A Polymeric Bilayer Multi-Legged Soft Millirobot with Dual Actuation and Humidity Sensing."
-
-    # EXCLUDE THE ABOVE STUDIES FROM THE FINAL DATASET!
 
 ```{{r}}
 #  Clean environment:
@@ -1402,26 +1402,45 @@ results_exercise2 %>%
   filter(n()>1) %>% 
   print() # None
 
+# We still have lots of irrelevant studies identified in the manual search that need to be removed. Let's do that now:
+exerise_irrelevant_studies <- c( # List of irrelevant studies
+  "[Doping in sports].",
+  "Psychoeducation: a basic psychotherapeutic intervention for patients with schizophrenia and their families.",
+  "Metabolic response to fasting in experimental intrauterine growth retardation induced by surgical and nonsurgical maternal stress.",
+  "[Arguments in favor of Integrated Health Care as regular health care provision in cardiology].",
+  "[What can a chair on alternatives to animal experimentation effectuate?].",
+  "Mandatory Physical Education Classes of Two Hours per Week Can Be Comparable to Losing More than Five Kilograms for Chinese College Students.",
+  "Degeneration of dystrophic or injured skeletal muscles induces high expression of Galectin-1.",
+  "A Pilot Study of a 12-Week Leg Exercise and a 6- and 12-Month Follow-Up in Community-Dwelling Diabetic Elders: Effect on Dynamic Standing Balance.",
+  "Opposite effects of catalase and MnSOD ectopic expression on stress induced defects and mortality in the desmin deficient cardiomyopathy model.",
+  "Beef extract supplementation increases leg muscle mass and modifies skeletal muscle fiber types in rats.",
+  "Does exercise deprivation increase the tendency towards morphine dependence in rats?",
+  "A Polymeric Bilayer Multi-Legged Soft Millirobot with Dual Actuation and Humidity Sensing."
+)
+
+results_exercise3 <- results_exercise2 %>%
+  filter(!Title %in% exerise_irrelevant_studies) # Filter out irrelevant studies
+
 #  Okay, now we're confident we have a clean dataset, let's explore!
 
 # Summary of the Year  variable:
-summary(results_exercise2$Year)
+summary(results_exercise3$Year)
 
 # Number of publications per year:
-exercise_hist<- hist(results_exercise2$Year,
+exercise_hist<- hist(results_exercise3$Year,
                      xlim = c(1960,2023),
                      breaks = 40,
                      main = "Papers published per year on exercise Disorder (PubMed)",
                      xlab = "Year")
 
 # Number of separate journals:
-results_exercise2 %>% 
+results_exercise3 %>% 
   distinct(Journal_name_short) %>% 
   arrange(Journal_name_short) %>% 
   print(n = 20)
 
 # Most popular journals:
-results_exercise2 %>% 
+results_exercise3 %>% 
   group_by(Journal_name_short) %>% 
   summarise(
     n = n()
@@ -1432,9 +1451,9 @@ results_exercise2 %>%
 # View(results_exercise2) # Visually inspect results
 
 # Now I need to add a label to all of these studies to signify that they Were returned from the exercise search so that we can distinguish them from other studies when we later joined the datasets together:
-Label <- rep("exercise", times = count(results_exercise2))
+Label <- rep("exercise", times = count(results_exercise3))
 
-results_exercise_final <- results_exercise2 %>% bind_cols(Label) %>%
+results_exercise_final <- results_exercise3 %>% bind_cols(Label) %>%
   rename(Label = 14) %>%
   print()
 
@@ -1442,3 +1461,323 @@ results_exercise_final <- results_exercise2 %>% bind_cols(Label) %>%
 # Now save the cleaned results
 write.csv(results_exercise_final, "Data extraction/exercise_data_cleaned.csv", row.names=FALSE)
 ```
+
+## Social media addiction
+
+#### Extract studies and perform a basic clean of dataset
+
+**Notes pre-search:** Comes under "Internet addiction disorder" when searching for MeSH terms. Nothing of relevance beyond the term "social media addictions". Looked to literature on the subject to find relevant terms:
+
+-   "disordered online social networking use" used here: https://pubmed.ncbi.nlm.nih.gov/25170590/
+
+-   "social-network-use disorder" is the term used in: https://doi.org/10.1556/2006.2020.00035
+
+**Actual search used:** (((("social_media addiction"\[Title/Abstract\]) OR ("social_media dependence"\[Title/Abstract\])) OR ("compulsory social_media"\[Title/Abstract\])) OR ("obligatory social_media"\[Title/Abstract\])) OR ("Addiction to social_media"\[Title/Abstract\])
+
+-   Not found so removed from search terms: "SnapChat addiction" AND "Twitter addiction"
+
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22social_media+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22social_media+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+social_media%22%5BTitle%2FAbstract%5D%29&size=200)
+
+**Notes post-search:** I manually inspected all of the results returned on PubMed. There were a few results where the key search terms weren't in the title or abstract, but they were in the keywords for the studies, which seems perfectly acceptable considering the types of studies we're trying to detect with this process. All studies appeared relevant as of latest search date (see top of document).
+
+```{{r}}
+#  Clean environment:
+rm(list = ls())
+
+# Define the search term:
+search_term_social_media <- '(((("social_media addiction"[Title/Abstract]) OR ("social_media dependence"[Title/Abstract])) OR ("compulsory social_media"[Title/Abstract])) OR ("obligatory social_media"[Title/Abstract])) OR ("Addiction to social_media"[Title/Abstract])'
+
+# Use entrez_search to get the IDs of the articles:
+search_results_social_media <- entrez_search(db="pubmed", term=search_term_social_media, retmax=20000)
+id_list_social_media <- search_results_social_media$ids
+
+# Split id list into chunks of 500:
+chunks <- split(id_list_social_media, ceiling(seq_along(id_list_social_media)/100))
+
+# Fetch details for each chunk of articles:
+article_details_social_media <- map_dfr(chunks, function(ids) {
+  # Fetch details of the articles:
+  articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
+  
+  # Split the articles into individual articles:
+  articles <- strsplit(articles, "\n\n")[[1]]
+  
+  # Process each article:
+  map_dfr(articles, function(article) {
+    # Split the article into lines:
+    lines <- strsplit(article, "\n")[[1]]
+    
+    # Get the details we're interested in:
+    details_social_media <- list(
+      PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
+      DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
+      TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
+      LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
+      AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
+      FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
+      AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
+      LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
+      PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
+      TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
+      COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
+      JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
+    )
+    
+    # Convert the list of details into a one-row data frame:
+    details_df_social_media <- bind_rows(details_social_media)
+    
+    return(details_df_social_media)
+  })
+})
+
+# Check the results:
+article_details_social_media %>%
+  as_tibble() %>%
+  print()
+
+# Let's remove the identifiers at the beginning of each data point:
+rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',
+             'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',
+             'COIS- ' = '', 'JT  - ' = '')
+
+results_social_media <- article_details_social_media %>%
+  mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers
+  # Now separate the date year and month/day info:
+  separate(DP, c("Year", "Month"), sep = "\\ ") %>%
+  mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric
+  rename(# Let's also provide more descriptive names for each of the columns
+         "Title" = "TI", 
+         "DOI" = "LID", 
+         "Abstract" = "AB", 
+         "Full_Author_Name" = "FAU", 
+         "Author_Address" = "AD", 
+         "Language" = "LA", 
+         "Publication_Type" = "PT", 
+         "Journal_name_short" = "TA",
+         "Conflict_of_Interest_Statement" = "COIS",
+         "Journal_Title" = "JT") %>%
+  print()
+
+# Now save the initial results before proceeding so we can't lose them!
+write.csv(results_social_media, "Data extraction/social_media_data.csv", row.names=FALSE)
+
+```
+
+#### Extract full title using rvest
+
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+
+```{{r}}
+# Add search URL:
+url_social_media_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22social_media+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22social_media+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+social_media%22%5BTitle%2FAbstract%5D%29&size=200" # 303 results returned on 10/07/2023
+
+# Read and parse the webpage
+webpage_social_media_rvest <- read_html(url_social_media_rvest)
+
+# Get the total number of search results
+results_count_social_media <- webpage_social_media_rvest %>%
+  html_node(".results-amount .value") %>%
+  html_text() %>%
+  str_replace(",", "") %>%
+  as.numeric()
+
+# Calculate the number of pages
+results_per_page_social_media <- 50
+total_pages_social_media <- ceiling(results_count_social_media[1] / results_per_page_social_media)
+# Print results_count_social_media and total_pages_social_media
+print(results_count_social_media)
+print(total_pages_social_media)
+
+
+# Initialize an empty data frame
+results_social_media_rvest <- data.frame()
+
+# Loop through each page and scrape the data
+for (page in 0:(total_pages_social_media - 1)) {
+  # Update the page parameter in the URL for the current page
+  current_url <- paste0(url_social_media_rvest, "&page=", page + 1)
+  
+  # Read and parse the current webpage
+  current_page <- read_html(current_url)
+  
+  # Extract title
+  Title <- tryCatch({
+    current_page %>%
+      html_nodes(".docsum-title") %>%
+      html_text(trim = TRUE)
+  }, error = function(e) {
+    print(paste("Error extracting title info on page", page + 1))
+    rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
+  })
+  
+  # Extract the PMID
+  pmid <- current_page %>%
+    html_nodes(".docsum-pmid") %>%
+    html_text(trim = TRUE)
+  
+  # Create a data frame with the extracted data
+  current_results_social_media <- data.frame(Title = Title,
+                                       PMID = pmid)
+  
+  # Combine the current results with the previous results
+  results_social_media_rvest <- rbind(results_social_media_rvest, current_results_social_media)
+  
+  # Introduce a delay to avoid overloading the server
+  sleep_time <- runif(1, min = 5, max = 15)
+  Sys.sleep(sleep_time)
+}
+
+# Print the extracted data
+print(as_tibble(results_social_media_rvest))
+
+
+# Now save the titles before proceeding so we can't lose them!
+write.csv(results_social_media_rvest, "Data extraction/social_media_titles.csv", row.names=FALSE)
+```
+
+#### Refine dataset
+
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
+
+```{r}
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
+results_social_media<- read.csv("Data extraction/social_media_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
+results_social_media_rvest<- read.csv("Data extraction/social_media_titles.csv") %>% 
+  as_tibble()
+
+# Merge our two datasets
+results_social_media2 <- results_social_media %>%
+  as_tibble() %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
+  full_join(results_social_media_rvest, by = "PMID") %>%
+  select(-Title_trunc) %>% # Bye truncated title
+  relocate(Title) %>% # Place full title first for ease
+  print()
+
+# Check results:
+# View(results_social_media2)
+
+# Total number with basic duplication removal based on title:
+Simple_duplicate_removal_n <- results_social_media2 %>%
+  distinct(Title) %>%
+  count() %>% 
+  print() # n = 1 dupes (jUly 2023)
+
+# Show duplicate:
+results_social_media2 %>% 
+  group_by(Title) %>% 
+  filter(n()>1) %>% 
+  # View()
+  print() # In July 2023  this returns to studies with the same title (Technological Addictions). Despite having the same title, authors, and been published at the same time of year in 2022, these are actually separate papers... (Determined by manually searching the articles)
+
+
+# Have a look at duplicates where the title, year, and authors are all the same:
+results_social_media2 %>% 
+  group_by(Title, 
+           Journal_name_short, 
+           Full_Author_Name) %>% 
+  filter(n()>1)
+  # print() # None
+
+# Have a look at duplicates were just the title, journal and year are the same:
+results_social_media2 %>% 
+  group_by(Title, 
+           Journal_name_short, 
+           Year) %>% 
+  filter(n()>1) %>% 
+  print() # None
+
+
+#  Okay, now we're confident we have a clean dataset, let's explore!
+
+# Summary of the Year  variable:
+summary(results_social_media2$Year)
+
+# Number of publications per year:
+social_media_hist<- hist(results_social_media2$Year,
+                     xlim = c(1960,2023),
+                     breaks = 10,
+                     main = "Papers published per year on social_media Disorder (PubMed)",
+                     xlab = "Year")
+
+# Number of separate journals:
+results_social_media2 %>% 
+  distinct(Journal_name_short) %>% 
+  arrange(Journal_name_short) %>% 
+  print(n = 20)
+
+# Most popular journals:
+results_social_media2 %>% 
+  group_by(Journal_name_short) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  arrange(desc(n)) %>%
+  print(n = 20)
+
+# View(results_social_media2) # Visually inspect results
+
+# Now I need to add a label to all of these studies to signify that they Were returned from the social_media search so that we can distinguish them from other studies when we later joined the datasets together:
+Label <- rep("social_media", times = count(results_social_media2))
+
+results_social_media_final <- results_social_media2 %>% bind_cols(Label) %>%
+  rename(Label = 14) %>%
+  print()
+
+# View(results_social_media_final)
+# Now save the cleaned results
+write.csv(results_social_media_final, "Data extraction/social_media_data_cleaned.csv", row.names=FALSE)
+
+```
+
+## Work addiction
+
+::: {.callout-note appearance="minimal"}
+## Workaholism
+
+[Griffiths et al. (2018)](https://doi.org/10.1556/2006.7.2018.05) argue that while work addiction and \"workaholism\" are similar and used interchangeably, the latter can refer more broadly to excessive work and can sometimes be used positively. After reviewing the studies on workaholism, it seems they often [use addiction terminology](https://pubmed.ncbi.nlm.nih.gov/33465021/) and/or focus on the [negative effects on people\'s lives](https://pubmed.ncbi.nlm.nih.gov/34909987/) in a way that resembles addiction research so I decided to retain this search term here.
+:::
+
+|     |
+|-----|
+|     |
+
+#### Extract studies and perform a basic clean of dataset
+
+**Notes pre-search:** Comes under "Internet addiction disorder" when searching for MeSH terms. Nothing of relevance beyond the term "social media addictions". Looked to literature on the subject to find relevant terms:
+
+-   "disordered online social networking use" used here: https://pubmed.ncbi.nlm.nih.gov/25170590/
+
+-   "social-network-use disorder" is the term used in: https://doi.org/10.1556/2006.2020.00035
+
+**Actual search used:** (((("social_media addiction"\[Title/Abstract\]) OR ("social_media dependence"\[Title/Abstract\])) OR ("compulsory social_media"\[Title/Abstract\])) OR ("obligatory social_media"\[Title/Abstract\])) OR ("Addiction to social_media"\[Title/Abstract\])
+
+-   Not found so removed from search terms: "SnapChat addiction" AND "Twitter addiction"
+
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22social_media+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22social_media+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+social_media%22%5BTitle%2FAbstract%5D%29&size=200)
+
+**Notes post-search:** I manually inspected all of the results returned on PubMed. There were a few results where the key search terms weren't in the title or abstract, but they were in the keywords for the studies, which seems perfectly acceptable considering the types of studies we're trying to detect with this process. All studies appeared relevant as of latest search date (see top of document).
+
+```         
+```{r} #  Clean environment: rm(list = ls())  # Define the search term: search_term_social_media <- '(((("social_media addiction"[Title/Abstract]) OR ("social_media dependence"[Title/Abstract])) OR ("compulsory social_media"[Title/Abstract])) OR ("obligatory social_media"[Title/Abstract])) OR ("Addiction to social_media"[Title/Abstract])'  # Use entrez_search to get the IDs of the articles: search_results_social_media <- entrez_search(db="pubmed", term=search_term_social_media, retmax=20000) id_list_social_media <- search_results_social_media$ids  # Split id list into chunks of 500: chunks <- split(id_list_social_media, ceiling(seq_along(id_list_social_media)/100))  # Fetch details for each chunk of articles: article_details_social_media <- map_dfr(chunks, function(ids) {   # Fetch details of the articles:   articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")      # Split the articles into individual articles:   articles <- strsplit(articles, "\n\n")[[1]]      # Process each article:   map_dfr(articles, function(article) {     # Split the article into lines:     lines <- strsplit(article, "\n")[[1]]          # Get the details we're interested in:     details_social_media <- list(       PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,       DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,       TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,       LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,       AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,       FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,       AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,       LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,       PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,       TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,       COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,       JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA     )          # Convert the list of details into a one-row data frame:     details_df_social_media <- bind_rows(details_social_media)          return(details_df_social_media)   }) })  # Check the results: article_details_social_media %>%   as_tibble() %>%   print()  # Let's remove the identifiers at the beginning of each data point: rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',              'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',              'COIS- ' = '', 'JT  - ' = '')  results_social_media <- article_details_social_media %>%   mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers   # Now separate the date year and month/day info:   separate(DP, c("Year", "Month"), sep = "\\ ") %>%   mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric   rename(# Let's also provide more descriptive names for each of the columns          "Title" = "TI",           "DOI" = "LID",           "Abstract" = "AB",           "Full_Author_Name" = "FAU",           "Author_Address" = "AD",           "Language" = "LA",           "Publication_Type" = "PT",           "Journal_name_short" = "TA",          "Conflict_of_Interest_Statement" = "COIS",          "Journal_Title" = "JT") %>%   print()  # Now save the initial results before proceeding so we can't lose them! write.csv(results_social_media, "Data extraction/social_media_data.csv", row.names=FALSE)  ```
+```
+
+#### Extract full title using rvest
+
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+
+```         
+```{r} # Add search URL: url_social_media_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22social_media+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22social_media+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+social_media%22%5BTitle%2FAbstract%5D%29&size=200" # 303 results returned on 10/07/2023  # Read and parse the webpage webpage_social_media_rvest <- read_html(url_social_media_rvest)  # Get the total number of search results results_count_social_media <- webpage_social_media_rvest %>%   html_node(".results-amount .value") %>%   html_text() %>%   str_replace(",", "") %>%   as.numeric()  # Calculate the number of pages results_per_page_social_media <- 50 total_pages_social_media <- ceiling(results_count_social_media[1] / results_per_page_social_media) # Print results_count_social_media and total_pages_social_media print(results_count_social_media) print(total_pages_social_media)   # Initialize an empty data frame results_social_media_rvest <- data.frame()  # Loop through each page and scrape the data for (page in 0:(total_pages_social_media - 1)) {   # Update the page parameter in the URL for the current page   current_url <- paste0(url_social_media_rvest, "&page=", page + 1)      # Read and parse the current webpage   current_page <- read_html(current_url)      # Extract title   Title <- tryCatch({     current_page %>%       html_nodes(".docsum-title") %>%       html_text(trim = TRUE)   }, error = function(e) {     print(paste("Error extracting title info on page", page + 1))     rep(NA, length(Title))  # Return a vector of NAs with the same length as Title   })      # Extract the PMID   pmid <- current_page %>%     html_nodes(".docsum-pmid") %>%     html_text(trim = TRUE)      # Create a data frame with the extracted data   current_results_social_media <- data.frame(Title = Title,                                        PMID = pmid)      # Combine the current results with the previous results   results_social_media_rvest <- rbind(results_social_media_rvest, current_results_social_media)      # Introduce a delay to avoid overloading the server   sleep_time <- runif(1, min = 5, max = 15)   Sys.sleep(sleep_time) }  # Print the extracted data print(as_tibble(results_social_media_rvest))   # Now save the titles before proceeding so we can't lose them! write.csv(results_social_media_rvest, "Data extraction/social_media_titles.csv", row.names=FALSE) ```
+```
+
+#### Refine dataset
+
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
+
+```{r} # Load in first dataset in case environment clean on knit (above sections not executed for render): results_social_media<- read.csv("Data extraction/social_media_data.csv") %>%    as_tibble()  # Load in second dataset in case environment clean on knit (above sections not executed for render): results_social_media_rvest<- read.csv("Data extraction/social_media_titles.csv") %>%    as_tibble()  # Merge our two datasets results_social_media2 <- results_social_media %>%   as_tibble() %>%   rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title   full_join(results_social_media_rvest, by = "PMID") %>%   select(-Title_trunc) %>% # Bye truncated title   relocate(Title) %>% # Place full title first for ease   print()  # Check results: # View(results_social_media2)  # Total number with basic duplication removal based on title: Simple_duplicate_removal_n <- results_social_media2 %>%   distinct(Title) %>%   count() %>%    print() # n = 1 dupes (jUly 2023)  # Show duplicate: results_social_media2 %>%    group_by(Title) %>%    filter(n()>1) %>%    # View()   print() # In July 2023  this returns to studies with the same title (Technological Addictions). Despite having the same title, authors, and been published at the same time of year in 2022, these are actually separate papers... (Determined by manually searching the articles)   # Have a look at duplicates where the title, year, and authors are all the same: results_social_media2 %>%    group_by(Title,             Journal_name_short,             Full_Author_Name) %>%    filter(n()>1)   # print() # None  # Have a look at duplicates were just the title, journal and year are the same: results_social_media2 %>%    group_by(Title,             Journal_name_short,             Year) %>%    filter(n()>1) %>%    print() # None   #  Okay, now we're confident we have a clean dataset, let's explore!  # Summary of the Year  variable: summary(results_social_media2$Year)  # Number of publications per year: social_media_hist<- hist(results_social_media2$Year,                      xlim = c(1960,2023),                      breaks = 10,                      main = "Papers published per year on social_media Disorder (PubMed)",                      xlab = "Year")  # Number of separate journals: results_social_media2 %>%    distinct(Journal_name_short) %>%    arrange(Journal_name_short) %>%    print(n = 20)  # Most popular journals: results_social_media2 %>%    group_by(Journal_name_short) %>%    summarise(     n = n()   ) %>%    arrange(desc(n)) %>%   print(n = 20)  # View(results_social_media2) # Visually inspect results  # Now I need to add a label to all of these studies to signify that they Were returned from the social_media search so that we can distinguish them from other studies when we later joined the datasets together: Label <- rep("social_media", times = count(results_social_media2))  results_social_media_final <- results_social_media2 %>% bind_cols(Label) %>%   rename(Label = 14) %>%   print()  # View(results_social_media_final) # Now save the cleaned results write.csv(results_social_media_final, "Data extraction/social_media_data_cleaned.csv", row.names=FALSE)}
+```
+
+## 
