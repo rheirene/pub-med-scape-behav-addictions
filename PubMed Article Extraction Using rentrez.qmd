@@ -527,13 +527,13 @@ results_gambling2 <- results_gambling %>%
 # Check results:
 # View(results_gambling2)
 
-# Check dupliactes based on PMIDs:
+# Check duplicates based on PMIDs:
 Simple_duplicate_removal_n <- results_gambling2 %>%
   distinct(PMID) %>%
   count() %>% 
-  print()
+  print() # there's a lot here
 
-results_gambling2 %>%
+ results_gambling2 %>%
   group_by(PMID) %>%
   filter(n()>1) %>% 
   print(n = 100)
@@ -566,7 +566,7 @@ results_gambling_sans_duplicates %>%
   print()
 
 # There are a few more of these, suggesting there are some papers with the same title, journal and date but different authors. 
-# The only one of concern is this one (PMID: 31346181) which is  agraphical abstract for another paper by the looks. 
+# The only one of concern is this one (PMID: 31346181) which is  garaphical abstract for another paper by the looks. 
 
 # Remove duplicates based on above observation:
 results_gambling_sans_duplicates2<- results_gambling_sans_duplicates %>%
@@ -811,6 +811,14 @@ results_gaming2 <- results_gaming %>%
 
 # Check results:
 # View(results_gaming2)
+
+
+# Total number with basic duplication removal based on PMID:
+Simple_duplicate_removal_n <- results_gaming2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
+
 
 # Total number with basic duplication removal based on title:
 Simple_duplicate_removal_n <- results_gaming2 %>%
@@ -1377,6 +1385,12 @@ results_exercise2 <- results_exercise %>%
 # Check results:
 # View(results_exercise2)
 
+# Total number with basic duplication removal based on PMID:
+Simple_duplicate_removal_n <- results_exercise2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
+
 # Total number with basic duplication removal based on title:
 Simple_duplicate_removal_n <- results_exercise2 %>%
   distinct(Title) %>%
@@ -1665,6 +1679,12 @@ results_shopping2 <- results_shopping %>%
 # Check results:
 # View(results_shopping2)
 
+# Total number with basic duplication removal based on PMID:
+Simple_duplicate_removal_n <- results_shopping2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
+
 # Total number with basic duplication removal based on title:
 Simple_duplicate_removal_n <- results_shopping2 %>%
   distinct(Title) %>%
@@ -1918,7 +1938,7 @@ Now we need to identify and remove any duplicates, irrelevant studies, or entrie
 
 ```{r}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
-results_social_media<- read.csv("Data extraction/social_media_data.csv") %>% This
+results_social_media<- read.csv("Data extraction/social_media_data.csv") %>% 
   as_tibble()
 
 # Load in second dataset in case environment clean on knit (above sections not executed for render):
@@ -1936,6 +1956,12 @@ results_social_media2 <- results_social_media %>%
 
 # Check results:
 # View(results_social_media2)
+
+# Total number with basic duplication removal based on PMID:
+Simple_duplicate_removal_n <- results_social_media2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
 
 # Total number with basic duplication removal based on title:
 Simple_duplicate_removal_n <- results_social_media2 %>%
@@ -2204,6 +2230,12 @@ results_internet2 <- results_internet %>%
 # Check results:
 # View(results_internet2)
 
+# Total number with basic duplication removal based on PMID:
+Simple_duplicate_removal_n <- results_internet2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
+
 # Total number with basic duplication removal based on title:
 Simple_duplicate_removal_n <- results_internet2 %>%
   distinct(Title) %>%
@@ -2215,7 +2247,7 @@ results_internet2 %>%
   group_by(Title) %>% 
   filter(n()>1) %>% 
   View()
-  print() # In July 2023 this returns 3 studies, 2 which have 2 duplicate titles and one three times. These three identical papers are all called "Internet addiction", and are all separate, distinct papers. One of the two pairs duplicates contains a published erratum so let's remove that (PMID: 32320594). The other parent duplicates ( title: Personality Disorders in Female and Male College Students With Internet Addiction.) are an original study and comment so we will keep those.
+  print() # In July 2023 this returns 3 studies, 2 which have 2 duplicate titles and one three times. These three identical papers are all called "Internet addiction", and are all separate, distinct papers. One of the two pairs duplicates contains a published erratum so let's remove that (PMID: 32320594). The other pair of duplicates (title: Personality Disorders in Female and Male College Students With Internet Addiction.) are an original study and comment so we will keep those.
 
 # Have a look at duplicates where the title, year, and authors are all the same:
 results_internet2 %>% 
