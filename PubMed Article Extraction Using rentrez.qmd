@@ -49,6 +49,7 @@ The latest dates of data extraction for each "behavioural addiction" are below:
 -   Gambling: 10/07/2023
 -   Gaming: 10/07/2023
 -   Work: 10/07/2023
+-   Study: 19/08/2023
 -   Exercise: 10/07/2023
 -   Social media: 19/08/2023
 -   Smartphones: 19/08/2023
@@ -56,6 +57,7 @@ The latest dates of data extraction for each "behavioural addiction" are below:
 -   Sex: 19/08/2023
 -   Ponography: 19/08/2023
 -   Tanning: 19/08/2023
+-   Hair pulling/trichotillomania: 20/08/2023
 :::
 
 https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
@@ -327,7 +329,7 @@ results_behav_addictions2 %>%
 Label_Behavioural_addictions <- rep("behavioural_addictions", times = count(results_behav_addictions2))
 
 results_behav_addictions_final <- results_behav_addictions2 %>% bind_cols(Label_Behavioural_addictions) %>%
-  rename(Label = 14) %>%
+  rename(Label = 14)
   print()
 
 # View(results_behav_addictions_final)
@@ -617,8 +619,8 @@ count(results_gambling_sans_duplicates2)
 Label_Gambling <- rep("gambling", times = count(results_gambling_sans_duplicates2))
 
 results_gambling_final <- results_gambling_sans_duplicates2 %>% bind_cols(Label_Gambling) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_gambling_final)
 # Now save the cleaned results:
@@ -898,9 +900,8 @@ count(results_gaming_sans_duplicates)
 Label_Gaming <- rep("gaming", times = count(results_gaming_sans_duplicates))
 
 results_gaming_final <- results_gaming_sans_duplicates %>% bind_cols(Label_Gaming) %>%
-  rename(Label = 14) %>%
-  print()
-
+  rename(Label = 14)
+  
 # View(results_gaming_final)
 # Now save the cleaned results:
 write.csv(results_gaming_final, "Data extraction/gaming_data_cleaned.csv", row.names=FALSE)
@@ -913,10 +914,9 @@ write.csv(results_gaming_final, "Data extraction/gaming_data_cleaned.csv", row.n
 **Notes pre-search:** Some key terms I have found in the literature are "[work addiction](https://pubmed.ncbi.nlm.nih.gov/30920291)" and "[workaholism](https://pubmed.ncbi.nlm.nih.gov/28425778)"
 
 ::: {.callout-note appearance="minimal"}
-
 ## Workaholism
 
-[Griffiths et al. (2018)](https://doi.org/10.1556/2006.7.2018.05) argue that while work addiction and "workaholism" are similar and used interchangeably, the latter can refer more broadly to excessive work and can sometimes be used positively. After reviewing the studies on workaholism, it seems they often [use addiction terminology](https://pubmed.ncbi.nlm.nih.gov/33465021/) and/or focus on the [negative effects on people\'s lives](https://pubmed.ncbi.nlm.nih.gov/34909987/) in a way that resembles addiction research so I decided to retain this search term here.
+[Griffiths et al. (2018)](https://doi.org/10.1556/2006.7.2018.05) argue that while work addiction and "workaholism" are similar and used interchangeably, the latter can refer more broadly to excessive work and can sometimes be used positively. After reviewing the studies on workaholism, it seems they often [use addiction terminology](https://pubmed.ncbi.nlm.nih.gov/33465021/) and/or focus on the [negative effects on people's lives](https://pubmed.ncbi.nlm.nih.gov/34909987/) in a way that resembles addiction research so I decided to retain this search term here.
 :::
 
 **Actual search used:** (("work addiction"\[Title/Abstract\]) OR ("addiction to work"\[Title/Abstract\])) OR ("workaholism"\[Title/Abstract\])
@@ -1166,15 +1166,13 @@ Label_work <- rep("work", times = count(results_work2))
 
 results_work_final <- results_work2 %>% 
   bind_cols(Label_work) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_work_final)
 # Now save the cleaned results
 write.csv(results_work_final, "Data extraction/work_data_cleaned.csv", row.names=FALSE)
 ```
-
-
 
 ## Study addiction
 
@@ -1182,27 +1180,27 @@ write.csv(results_work_final, "Data extraction/work_data_cleaned.csv", row.names
 
 **Notes pre-search:** No MeSH terms available.
 
-**Actual search used:** "Study addiction"[Title/Abstract]
+**Actual search used:** "Study addiction"\[Title/Abstract\]
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22Study+addiction%22%5BTitle%2FAbstract%5D&size=200)
 
-**Notes post-search:** Had to be careful with the specific terms used here not to pick up phrases that relate to the study of addiction. Despite only including one search phrase, this issue still occurred  where the phrase " study addiction" is included in a sentence like: " behavioural models used to study addiction...". The following studies are irrelevant and need to be removed as a result of this issue:
+**Notes post-search:** Had to be careful with the specific terms used here not to pick up phrases that relate to the study of addiction. Despite only including one search phrase, this issue still occurred where the phrase " study addiction" is included in a sentence like: " behavioural models used to study addiction...". The following studies are irrelevant and need to be removed as a result of this issue:
 
--  Oxytocin and Rodent Models of Addiction.
--  Experimental Models on Effects of Psychostimulants.
--  Self-administration of drugs in animals and humans as a model and an investigative tool.
--  Substance abuse and white matter: Findings, limitations, and future of diffusion tensor imaging research.
--  Quantifying reinforcement value and demand for psychoactive substances in humans.
--  Quantifying reinforcement value and demand for psychoactive substances in humans.
--  How can sociological theory help our understanding of addictions?
--  Kappa-Opioid Antagonists for Psychiatric Disorders: From Bench to Clinical Trials.
--  Virus-delivered RNA interference in mouse brain to study addiction-related behaviors.
--  Prenatal ethanol exposure increases risk of psychostimulant addiction.
--  Prevalence and practice of opioid prescription at a Swiss emergency department: 2013-2017.
--  Operant sensation seeking in the mouse.
--  Place conditioning to apomorphine in rat models of Parkinson's disease: differences by dose and side-effect expression.
--  Conditioned locomotion is not correlated with behavioral sensitization to cocaine: an intra-laboratory multi-sample analysis.
--  Development of a mouse model of ethanol addiction: naltrexone efficacy in reducing consumption but not craving.
+-   Oxytocin and Rodent Models of Addiction.
+-   Experimental Models on Effects of Psychostimulants.
+-   Self-administration of drugs in animals and humans as a model and an investigative tool.
+-   Substance abuse and white matter: Findings, limitations, and future of diffusion tensor imaging research.
+-   Quantifying reinforcement value and demand for psychoactive substances in humans.
+-   Quantifying reinforcement value and demand for psychoactive substances in humans.
+-   How can sociological theory help our understanding of addictions?
+-   Kappa-Opioid Antagonists for Psychiatric Disorders: From Bench to Clinical Trials.
+-   Virus-delivered RNA interference in mouse brain to study addiction-related behaviors.
+-   Prenatal ethanol exposure increases risk of psychostimulant addiction.
+-   Prevalence and practice of opioid prescription at a Swiss emergency department: 2013-2017.
+-   Operant sensation seeking in the mouse.
+-   Place conditioning to apomorphine in rat models of Parkinson's disease: differences by dose and side-effect expression.
+-   Conditioned locomotion is not correlated with behavioral sensitization to cocaine: an intra-laboratory multi-sample analysis.
+-   Development of a mouse model of ethanol addiction: naltrexone efficacy in reducing consumption but not craving.
 
 ```{{r}}
 #  Clean environment:
@@ -1444,18 +1442,13 @@ results_study3 %>%
 Label_Study <- rep("study", times = count(results_study2))
 
 results_study_final <- results_study2 %>% bind_cols(Label_Study) %>%
-  rename(Label = 14) %>%
-  print()
-
+  rename(Label = 14)
+  
 # View(results_study_final)
 # Now save the cleaned results
 write.csv(results_study_final, "Data extraction/study_data_cleaned.csv", row.names=FALSE)
 
 ```
-
-
-
-
 
 ## Exercise addiction
 
@@ -1761,8 +1754,8 @@ results_exercise3 %>%
 Label_Exercise <- rep("exercise", times = count(results_exercise3))
 
 results_exercise_final <- results_exercise3 %>% bind_cols(Label_Exercise) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+ 
 
 # View(results_exercise_final)
 # Now save the cleaned results
@@ -1775,11 +1768,10 @@ write.csv(results_exercise_final, "Data extraction/exercise_data_cleaned.csv", r
 
 **Notes pre-search:** No relevant MeShterms. Looked to literature on the subject to find relevant terms:
 
-- "Buying-shopping disorder" is the term used in: https://doi.org/10.1556/2006.2020.00035
-- "Pathological buying" used here: https://pubmed.ncbi.nlm.nih.gov/25393125/
+-   "Buying-shopping disorder" is the term used in: https://doi.org/10.1556/2006.2020.00035
+-   "Pathological buying" used here: https://pubmed.ncbi.nlm.nih.gov/25393125/
 
-
-**Actual search used:** "buying-shopping disorder"[Title/Abstract] OR "shopping addiction"[Title/Abstract] OR "buying addiction"[Title/Abstract]
+**Actual search used:** "buying-shopping disorder"\[Title/Abstract\] OR "shopping addiction"\[Title/Abstract\] OR "buying addiction"\[Title/Abstract\]
 
 -   None of these returned any results: "pathological shopping", "addiction to shopping", "addiction to buying", "shopping dependence", "buying dependence"
 
@@ -2037,15 +2029,13 @@ results_shopping2 %>%
 Label_Shopping <- rep("shopping", times = count(results_shopping2))
 
 results_shopping_final <- results_shopping2 %>% bind_cols(Label_Shopping) %>%
-  rename(Label = 14) %>%
-  print()
-
+  rename(Label = 14)
+  
 # View(results_shopping_final)
 # Now save the cleaned results
 write.csv(results_shopping_final, "Data extraction/shopping_data_cleaned.csv", row.names=FALSE)
 
 ```
-
 
 ## Social media addiction
 
@@ -2057,7 +2047,7 @@ write.csv(results_shopping_final, "Data extraction/shopping_data_cleaned.csv", r
 
 -   "social-network-use disorder" is the term used in: https://doi.org/10.1556/2006.2020.00035
 
-**Actual search used:** (((("social_media addiction"[Title/Abstract]) OR ("social_media dependence"[Title/Abstract])) OR ("compulsory social_media"[Title/Abstract])) OR ("obligatory social_media"[Title/Abstract])) OR ("Addiction to social_media"[Title/Abstract])
+**Actual search used:** (((("social_media addiction"\[Title/Abstract\]) OR ("social_media dependence"\[Title/Abstract\])) OR ("compulsory social_media"\[Title/Abstract\])) OR ("obligatory social_media"\[Title/Abstract\])) OR ("Addiction to social_media"\[Title/Abstract\])
 
 -   Not found so removed from search terms: "SnapChat addiction" AND "Twitter addiction"
 
@@ -2315,8 +2305,8 @@ results_social_media2 %>%
 Label_Social_media <- rep("social_media", times = count(results_social_media2))
 
 results_social_media_final <- results_social_media2 %>% bind_cols(Label_Social_media) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_social_media_final)
 # Now save the cleaned results
@@ -2324,15 +2314,13 @@ write.csv(results_social_media_final, "Data extraction/social_media_data_cleaned
 
 ```
 
-
-
 ## Internet addiction
 
 #### Extract studies and perform a basic clean of dataset
 
 **Notes pre-search:** MeSH terms: https://www.ncbi.nlm.nih.gov/mesh/?term=internet+addiction
 
-**Actual search used:** ((("internet addiction"[Title/Abstract]) OR ("addictive internet use"[Title/Abstract])) OR ("internet use disorder"[Title/Abstract])) OR ("addiction to the internet"[Title/Abstract])
+**Actual search used:** ((("internet addiction"\[Title/Abstract\]) OR ("addictive internet use"\[Title/Abstract\])) OR ("internet use disorder"\[Title/Abstract\])) OR ("addiction to the internet"\[Title/Abstract\])
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%22internet+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addictive+internet+use%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22internet+use+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22addiction+to+the+internet%22%5BTitle%2FAbstract%5D%29&size=200)
 
@@ -2589,8 +2577,8 @@ results_internet3 %>%
 Label_Internet <- rep("internet", times = count(results_internet3))
 
 results_internet_final <- results_internet3 %>% bind_cols(Label_Internet) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_internet_final)
 # Now save the cleaned results
@@ -2598,16 +2586,13 @@ write.csv(results_internet_final, "Data extraction/internet_data_cleaned.csv", r
 
 ```
 
-
-
-
 ## Smart phone addiction
 
 #### Extract studies and perform a basic clean of dataset
 
-**Notes pre-search:** MeSH terms: There are very few specific terms for smartphone addiction, and instead the general term "Internet addiction" is returned when searching it in the MeSH database (see: [here](https://www.ncbi.nlm.nih.gov/mesh/?term=Smartphone+addiction)). Looking at the literature, it seems like " smartphone addiction"  is the most commonly used term, but sometimes "mobile phone" is used instead of smartphone.
+**Notes pre-search:** MeSH terms: There are very few specific terms for smartphone addiction, and instead the general term "Internet addiction" is returned when searching it in the MeSH database (see: [here](https://www.ncbi.nlm.nih.gov/mesh/?term=Smartphone+addiction)). Looking at the literature, it seems like " smartphone addiction" is the most commonly used term, but sometimes "mobile phone" is used instead of smartphone.
 
-**Actual search used:** "Smartphone addiction"[Title/Abstract] OR "Smartphone disorder"[Title/Abstract] OR "Smartphone dependence"[Title/Abstract] OR "Mobile phone addiction"[Title/Abstract] OR "Mobile phone dependence"[Title/Abstract]
+**Actual search used:** "Smartphone addiction"\[Title/Abstract\] OR "Smartphone disorder"\[Title/Abstract\] OR "Smartphone dependence"\[Title/Abstract\] OR "Mobile phone addiction"\[Title/Abstract\] OR "Mobile phone dependence"\[Title/Abstract\]
 
 -   Not found so removed from search terms: "Mobile phone disorder"
 
@@ -2838,8 +2823,8 @@ results_smart_phone2 %>%
 Label_Smartphone <- rep("smart_phone", times = count(results_smart_phone2))
 
 results_smart_phone_final <- results_smart_phone2 %>% bind_cols(Label_Smartphone) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_smart_phone_final)
 # Now save the cleaned results
@@ -2847,15 +2832,13 @@ write.csv(results_smart_phone_final, "Data extraction/smart_phone_data_cleaned.c
 
 ```
 
-
 ## Cybersex addiction
 
 #### Extract studies and perform a basic clean of dataset
 
 **Notes pre-search:** There are no MeSH terms for this. Searching around the literature it seems like the most commonly Used term is "cybersex addiction". "compulsive cybersex" It is also commonly used and seems to be consistently used to indicate an addiction (see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7044618/). "addictive cybersex" is also sometimes included in study abstracts.
 
-**Actual search used:** "Cybersex addiction"[Title/Abstract] OR "Compulsive Cybersex"[Title/Abstract] OR "Addictive cybersex"[Title/Abstract]
-
+**Actual search used:** "Cybersex addiction"\[Title/Abstract\] OR "Compulsive Cybersex"\[Title/Abstract\] OR "Addictive cybersex"\[Title/Abstract\]
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22Cybersex+addiction%22%5BTitle%2FAbstract%5D+OR+%22Compulsive+Cybersex%22%5BTitle%2FAbstract%5D+OR+%22Addictive+cybersex%22%5BTitle%2FAbstract%5D&size=200)
 
@@ -3084,8 +3067,8 @@ results_cybersex2 %>%
 Label_Cybersex <- rep("cybersex", times = count(results_cybersex2))
 
 results_cybersex_final <- results_cybersex2 %>% bind_cols(Label_Cybersex) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_cybersex_final)
 # Now save the cleaned results
@@ -3093,29 +3076,27 @@ write.csv(results_cybersex_final, "Data extraction/cybersex_data_cleaned.csv", r
 
 ```
 
-
 ## Sex addiction
 
 #### Extract studies and perform a basic clean of dataset
 
 **Notes pre-search:** MeSH terms: None available.
 
-**Actual search used:** "sexual addiction"[Title/Abstract] OR "sex addiction"[Title/Abstract]
+**Actual search used:** "sexual addiction"\[Title/Abstract\] OR "sex addiction"\[Title/Abstract\]
 
--  Originally included “sex dependence” as a search term, but it didn’t return anything related to sexual addiction and returned lots of studies that said the expression/presence of something e.g., a disease) was dependent on sex.
+-   Originally included "sex dependence" as a search term, but it didn't return anything related to sexual addiction and returned lots of studies that said the expression/presence of something e.g., a disease) was dependent on sex.
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22sexual+addiction%22%5BTitle%2FAbstract%5D+OR+%22sex+addiction%22%5BTitle%2FAbstract%5D&size=200)
 
-**Notes post-search:** # The manual search of results revealed that there were multiple irrelevant studies returned here. This is because there were several studies that listed sex and then addiction as variables of interest like “…, sex, addiction, …”. There is also one book called "Drug Addiction". Here’s the full list of irrelevant studies that will need to be removed:
+**Notes post-search:** \# The manual search of results revealed that there were multiple irrelevant studies returned here. This is because there were several studies that listed sex and then addiction as variables of interest like "..., sex, addiction, ...". There is also one book called "Drug Addiction". Here's the full list of irrelevant studies that will need to be removed:
 
-- The SCOPE study: health-care consumption related to patients with chronic obstructive pulmonary disease in France
-- Correlation of addictive factors, human papilloma virus infection and histopathology of oral submucous fibrosis
-- Serum malondialdehyde level: Surrogate stress marker in the Sikkimese diabetics
-- Design in topographical space of peptide and peptidomimetic ligands that affect behavior. A chemist's glimpse at the mind--body problem
-- Tricyclic antidepressants intoxication in Tehran, Iran: epidemiology and associated factors
-- Biochemical aspects of effects of mesenchymal stem cell treatment in chronic wounds progressive healing
-- Drug Addiction
-
+-   The SCOPE study: health-care consumption related to patients with chronic obstructive pulmonary disease in France
+-   Correlation of addictive factors, human papilloma virus infection and histopathology of oral submucous fibrosis
+-   Serum malondialdehyde level: Surrogate stress marker in the Sikkimese diabetics
+-   Design in topographical space of peptide and peptidomimetic ligands that affect behavior. A chemist's glimpse at the mind--body problem
+-   Tricyclic antidepressants intoxication in Tehran, Iran: epidemiology and associated factors
+-   Biochemical aspects of effects of mesenchymal stem cell treatment in chronic wounds progressive healing
+-   Drug Addiction
 
 ```{{r}}
 #  Clean environment:
@@ -3362,8 +3343,8 @@ results_sex2 %>%
 Label_Sex <- rep("sex", times = count(results_sex2))
 
 results_sex_final <- results_sex2 %>% bind_cols(Label_Sex) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_sex_final)
 # Now save the cleaned results
@@ -3371,18 +3352,15 @@ write.csv(results_sex_final, "Data extraction/sex_data_cleaned.csv", row.names=F
 
 ```
 
-
-
-
 ## Pornography addiction
 
 #### Extract studies and perform a basic clean of dataset
 
 **Notes pre-search:** No MeSH terms available. Pornography-use disorder is the term used in https://doi.org/10.1556/2006.2020.00035. Cybersex addiction refers to a more broad focus on internet-related sexual stimulation (E.g., chat rooms and VR), but it seems like there is definitely some overlap between the search returns.
 
-**Actual search used:** "pornography-use disorder"[Title/Abstract] OR "pornography addiction"[Title/Abstract] 
+**Actual search used:** "pornography-use disorder"\[Title/Abstract\] OR "pornography addiction"\[Title/Abstract\]
 
--   Not found so removed from search terms:  "pornography dependence", "addiction to pornography", "cybersex dependence"
+-   Not found so removed from search terms: "pornography dependence", "addiction to pornography", "cybersex dependence"
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22pornography-use+disorder%22%5BTitle%2FAbstract%5D+OR+%22pornography+addiction%22%5BTitle%2FAbstract%5D+&size=200)
 
@@ -3619,11 +3597,11 @@ results_pornography3 %>%
 # View(results_pornography2) # Visually inspect results
 
 # Now I need to add a label to all of these studies to signify that they Were returned from the pornography search so that we can distinguish them from other studies when we later joined the datasets together:
-Label_Pornography <- rep("pornography", times = count(results_pornography2))
+Label_Pornography <- rep("pornography", times = count(results_pornography3))
 
 results_pornography_final <- results_pornography3 %>% bind_cols(Label_Pornography) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_pornography_final)
 # Now save the cleaned results
@@ -3631,16 +3609,13 @@ write.csv(results_pornography_final, "Data extraction/pornography_data_cleaned.c
 
 ```
 
-
-
 ## Tanning addiction
 
 #### Extract studies and perform a basic clean of dataset
 
-**Notes pre-search:** There are obviously no MeSH terms for this.The few studies are confined on this scene to either call it "excessive tanning"  or, more commonly, "tanning addiction"
+**Notes pre-search:** There are obviously no MeSH terms for this.The few studies are confined on this scene to either call it "excessive tanning" or, more commonly, "tanning addiction"
 
-**Actual search used:** "Tanning addiction"[Title/Abstract]
--   Not found so removed from search terms: "Addicted to tanning"[Title/Abstract] AND "Tanning disorder"[Title/Abstract]
+**Actual search used:** "Tanning addiction"\[Title/Abstract\] - Not found so removed from search terms: "Addicted to tanning"\[Title/Abstract\] AND "Tanning disorder"\[Title/Abstract\]
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22Tanning+addiction%22%5BTitle%2FAbstract%5D&size=200)
 
@@ -3869,8 +3844,8 @@ results_tanning2 %>%
 Label_tanning <- rep("tanning", times = count(results_tanning2))
 
 results_tanning_final <- results_tanning2 %>% bind_cols(Label_tanning) %>%
-  rename(Label = 14) %>%
-  print()
+  rename(Label = 14)
+  
 
 # View(results_tanning_final)
 # Now save the cleaned results
@@ -3878,3 +3853,279 @@ write.csv(results_tanning_final, "Data extraction/tanning_data_cleaned.csv", row
 
 ```
 
+
+## Hair pulling addiction
+
+#### Extract studies and perform a basic clean of dataset
+
+**Notes pre-search:** MeSH terms: The only term used here is the official diagnostic term, trichotillomania (see: [here](https://www.ncbi.nlm.nih.gov/mesh/?term=Trichotillomania)). 
+
+**Actual search used:** "Hair pulling addiction" OR "trichotillomania addiction"
+-   Searching just trichotillomania  led to many relevant studies (see notes post-search).
+
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22trichotillomania+addiction%22&size=200)
+
+**Notes post-search:** The strategy here was very different as many people consider here pulling/trichotillomania to be a form of impulse control disorder, rather than behavioural addiction. So, I varied the search terms to get as many studies as possible that discuss it within the context of addiction, and as few studies as possible that do not. Then, from the 68 studies returned in this initial sample, I manually inspected all of them to see which discussed this condition as a behavioural addiction to some extent. The following studies were identified as being relevant:
+
+1. The neurobiology and genetics of impulse control disorders: relationships to drug addictions
+2. Behavioural addiction-A rising tide?
+3. Compulsivity in obsessive-compulsive disorder and addictions
+4. Naltrexone in the Treatment of Broadly Defined Behavioral Addictions: A Review and Meta-Analysis of Randomized Controlled Trials
+5. An A-B-C model of habit disorders: hair-pulling, skin-picking, and other stereotypic conditions
+6. Co-occurrences of substance use and other potentially addictive behaviors: Epidemiological results from the Psychological and Genetic Factors of the Addictive Behaviors (PGA) Study
+7. Epidemiology of behavioral dependence: literature review and results of original studies
+8. Opioid antagonists in broadly defined behavioral addictions: a narrative review
+9. Addicted to hair pulling? How an alternate model of trichotillomania may improve treatment outcome
+10. Tricotillomania: pathopsychology theories and treatment possibilities
+11. [Trichotillomania and comorbidity--lamotrigine in a new perspective]
+12. [Internet addiction]
+13. Naltrexone: A Pan-Addiction Treatment?
+
+
+```{r}
+#  Clean environment:
+rm(list = ls())
+
+# Define the search term:
+search_term_hair_pulling <- '"Hair pulling addiction" OR "trichotillomania addiction"'
+
+# Use entrez_search to get the IDs of the articles:
+search_results_hair_pulling <- entrez_search(db="pubmed", term=search_term_hair_pulling, retmax=20000)
+id_list_hair_pulling <- search_results_hair_pulling$ids
+
+# Split id list into chunks of 100 for chunk/batches:
+chunks <- split(id_list_hair_pulling, ceiling(seq_along(id_list_hair_pulling)/100))
+
+# Fetch details for each chunk of articles:
+article_details_hair_pulling <- map_dfr(chunks, function(ids) {
+  # Fetch details of the articles:
+  articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
+  
+  # Split the articles into individual articles:
+  articles <- strsplit(articles, "\n\n")[[1]]
+  
+  # Process each article:
+  map_dfr(articles, function(article) {
+    # Split the article into lines:
+    lines <- strsplit(article, "\n")[[1]]
+    
+    # Get the details we're interested in:
+    details_hair_pulling <- list(
+      PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
+      DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
+      TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
+      LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
+      AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
+      FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
+      AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
+      LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
+      PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
+      TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
+      COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
+      JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
+    )
+    
+    # Convert the list of details into a one-row data frame:
+    details_df_hair_pulling <- bind_rows(details_hair_pulling)
+    
+    return(details_df_hair_pulling)
+  })
+})
+
+# Check the results:
+article_details_hair_pulling %>%
+  as_tibble() %>%
+  print()
+
+# Let's remove the identifiers at the beginning of each data point:
+rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',
+             'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',
+             'COIS- ' = '', 'JT  - ' = '')
+
+results_hair_pulling <- article_details_hair_pulling %>%
+  mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers
+  # Now separate the date year and month/day info:
+  separate(DP, c("Year", "Month"), sep = "\\ ") %>%
+  mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric
+  rename(# Let's also provide more descriptive names for each of the columns
+         "Title" = "TI", 
+         "DOI" = "LID", 
+         "Abstract" = "AB", 
+         "Full_Author_Name" = "FAU", 
+         "Author_Address" = "AD", 
+         "Language" = "LA", 
+         "Publication_Type" = "PT", 
+         "Journal_name_short" = "TA",
+         "Conflict_of_Interest_Statement" = "COIS",
+         "Journal_Title" = "JT") %>%
+  print()
+
+# Now save the initial results before proceeding so we can't lose them!
+write.csv(results_hair_pulling, "Data extraction/hair_pulling_data.csv", row.names=FALSE)
+
+```
+
+#### Extract full title using rvest
+
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+
+```{r}
+# Add search URL:
+url_hair_pulling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Hair+pulling+addiction%22+OR+%22trichotillomania+addiction%22&size=200" # 68 results returned on 20/08/2023
+
+# Read and parse the webpage
+webpage_hair_pulling_rvest <- read_html(url_hair_pulling_rvest)
+
+# Get the total number of search results
+results_count_hair_pulling <- webpage_hair_pulling_rvest %>%
+  html_node(".results-amount .value") %>%
+  html_text() %>%
+  str_replace(",", "") %>%
+  as.numeric()
+
+# Calculate the number of pages
+results_per_page_hair_pulling <- 50
+total_pages_hair_pulling <- ceiling(results_count_hair_pulling[1] / results_per_page_hair_pulling)
+# Print results_count_hair_pulling and total_pages_hair_pulling
+print(results_count_hair_pulling)
+print(total_pages_hair_pulling)
+
+
+# Initialize an empty data frame
+results_hair_pulling_rvest <- data.frame()
+
+# Loop through each page and scrape the data
+for (page in 0:(total_pages_hair_pulling - 1)) {
+  # Update the page parameter in the URL for the current page
+  current_url <- paste0(url_hair_pulling_rvest, "&page=", page + 1)
+  
+  # Read and parse the current webpage
+  current_page <- read_html(current_url)
+  
+  # Extract title
+  Title <- tryCatch({
+    current_page %>%
+      html_nodes(".docsum-title") %>%
+      html_text(trim = TRUE)
+  }, error = function(e) {
+    print(paste("Error extracting title info on page", page + 1))
+    rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
+  })
+  
+  # Extract the PMID
+  pmid <- current_page %>%
+    html_nodes(".docsum-pmid") %>%
+    html_text(trim = TRUE)
+  
+  # Create a data frame with the extracted data
+  current_results_hair_pulling <- data.frame(Title = Title,
+                                       PMID = pmid)
+  
+  # Combine the current results with the previous results
+  results_hair_pulling_rvest <- rbind(results_hair_pulling_rvest, current_results_hair_pulling)
+  
+  # Introduce a delay to avoid overloading the server
+  sleep_time <- runif(1, min = 5, max = 15)
+  Sys.sleep(sleep_time)
+}
+
+# Print the extracted data
+print(as_tibble(results_hair_pulling_rvest))
+
+
+# Now save the titles before proceeding so we can't lose them!
+write.csv(results_hair_pulling_rvest, "Data extraction/hair_pulling_titles.csv", row.names=FALSE)
+```
+
+#### Refine dataset
+
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
+
+```{r}
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
+results_hair_pulling<- read.csv("Data extraction/hair_pulling_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
+results_hair_pulling_rvest<- read.csv("Data extraction/hair_pulling_titles.csv") %>% 
+  as_tibble()
+
+# Merge our two datasets
+results_hair_pulling2 <- results_hair_pulling %>%
+  as_tibble() %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
+  full_join(results_hair_pulling_rvest, by = "PMID") %>%
+  select(-Title_trunc) %>% # Bye truncated title
+  relocate(Title) %>% # Place full title first for ease
+  print()
+
+# Check results:
+# View(results_hair_pulling2)
+
+# Total number with basic duplication removal based on title:
+results_hair_pulling2 %>%
+  distinct(Title) %>%
+  count() %>% 
+  print() # n = 0 dupes (August 2023)
+
+# Total number with basic duplication removal based on PMID:
+results_hair_pulling2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
+
+# Now isolate the relevant studies:
+results_hair_pulling3 <-  results_hair_pulling2 %>% 
+  filter(Title %in% c(
+"The neurobiology and genetics of impulse control disorders: relationships to drug addictions.",
+"Behavioural addiction-A rising tide?",
+"Compulsivity in obsessive-compulsive disorder and addictions.",
+"Naltrexone in the Treatment of Broadly Defined Behavioral Addictions: A Review and Meta-Analysis of Randomized Controlled Trials.",
+"An A-B-C model of habit disorders: hair-pulling, skin-picking, and other stereotypic conditions.",
+"Co-occurrences of substance use and other potentially addictive behaviors: Epidemiological results from the Psychological and Genetic Factors of the Addictive Behaviors (PGA) Study.",
+"Epidemiology of behavioral dependence: literature review and results of original studies.",
+"Opioid antagonists in broadly defined behavioral addictions: a narrative review.",
+"Addicted to hair pulling? How an alternate model of trichotillomania may improve treatment outcome.",
+"Tricotillomania: pathopsychology theories and treatment possibilities.",
+"[Trichotillomania and comorbidity--lamotrigine in a new perspective].",
+"[Internet addiction].",
+"Naltrexone: A Pan-Addiction Treatment?"))
+
+# Summary of the year variable:
+summary(results_hair_pulling3$Year)
+
+# Number of publications per year:
+hair_pulling_hist<- hist(results_hair_pulling3$Year,
+                     xlim = c(1960,2023),
+                       breaks = 15,
+                     main = "Papers published per year on Hair Pulling Addiction (PubMed)",
+                     xlab = "Year")
+
+# Number of separate journals:
+results_hair_pulling3 %>% 
+  distinct(Journal_name_short) %>% 
+  arrange(Journal_name_short) %>% 
+  print(n = 20)
+
+# Most popular journals:
+results_hair_pulling3 %>% 
+  group_by(Journal_name_short) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  arrange(desc(n)) %>%
+  print(n = 20)
+
+# View(results_hair_pulling2) # Visually inspect results
+
+# Now I need to add a label to all of these studies to signify that they Were returned from the hair_pulling search so that we can distinguish them from other studies when we later joined the datasets together:
+Label_hair_pulling <- rep("hair_pulling", times = count(results_hair_pulling3))
+
+results_hair_pulling_final <- results_hair_pulling3 %>% bind_cols(Label_hair_pulling) %>%
+  rename(Label = 14)
+
+# View(results_hair_pulling_final)
+# Now save the cleaned results
+write.csv(results_hair_pulling_final, "Data extraction/hair_pulling_data_cleaned.csv", row.names=FALSE)
+
+```
