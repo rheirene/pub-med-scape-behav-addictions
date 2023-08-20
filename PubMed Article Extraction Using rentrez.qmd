@@ -61,6 +61,8 @@ The latest dates of data extraction for each "behavioural addiction" are below:
 -   Love: 20/08/2023
 -   Selfies: 20/08/2023
 -   Extreme sport: 20/08/2023
+-   Running: 20/08/2023
+-   Dance: 20/08/2023
 :::
 
 https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
@@ -101,7 +103,7 @@ groundhog.library(packages, "2023-06-07")
 
 **Notes post-search:** I manually scanned the results returned on the PubMed site for relevance and all appeared to meet the inclusion criteria. There will certainly be one of overlap between the studies returned from this search and the search is specific to individual behavioural addictions.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 # rm(list = ls())
 
@@ -193,7 +195,7 @@ Okay, so I'm struggling to get the `rentrez` package to extract the full, non-tr
 It's important to note that, unlike using the `rentrez` package X uses data via PubMed's API, using the `rvest` package involves scraping the PubMed website for information, and there are many important ethical and legal considerations surrounding web scraping (some of which vary from country to country) that you may need to consider before proceeding. See, for example, this useful [paper](https://www.researchgate.net/profile/Vlad-Krotov/publication/324907302_Legality_and_Ethics_of_Web_Scraping/links/5aea622345851588dd8287dc/Legality-and-Ethics-of-Web-Scraping.pdf).
 :::
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_behav_addictions_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&size=200" # 856 results on 11/07/2023. 
 
@@ -264,7 +266,7 @@ write.csv(results_behav_addictions_rvest, "Data extraction/behav_addictions_titl
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_behav_addictions<- read.csv("Data extraction/behav_addictions_data.csv") %>% 
   as_tibble()
@@ -352,7 +354,7 @@ A simple reminder to look into this.
 
 **Notes post-search:** I manually inspected the results directly in the PubMed site. Many duplicates that require removal (performed below), but all studies appeared relevant (July 2023).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -438,7 +440,7 @@ write.csv(results_gambling, "Data extraction/gambling_data.csv", row.names=FALSE
 
 As above, we're going to use the `rvest` package to scrape the titles of gambling papers, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200" # 3502 results on 10/07/2023
 
@@ -509,7 +511,7 @@ write.csv(results_gambling_rvest, "Data extraction/gambling_titles.csv", row.nam
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_gambling<- read.csv("Data extraction/gambling_data.csv") %>% 
   as_tibble()
@@ -628,7 +630,7 @@ write.csv(results_gambling_final, "Data extraction/gambling_data_cleaned.csv", r
 
 **Notes post-search:** "video game dependence" returned no results and so was removed. I manually inspected the results directly in the PubMed site and all appeared relevant (July 2023).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 # rm(list = ls())
 
@@ -715,7 +717,7 @@ write.csv(results_gaming, "Data extraction/gaming_data.csv", row.names=FALSE)
 
 As with the gambling study extraction, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_gaming_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%28%22gaming+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22internet+gaming+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22video+game+disorder%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22gaming+dependence%22%29&size=200"
 
@@ -786,7 +788,7 @@ write.csv(results_gaming_rvest, "Data extraction/gaming_titles.csv", row.names=F
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_gaming<- read.csv("Data extraction/gaming_data.csv") %>% 
@@ -909,7 +911,7 @@ write.csv(results_gaming_final, "Data extraction/gaming_data_cleaned.csv", row.n
 
 **Notes post-search:** Again, I manually inspected all of the results directly in the PubMed site. All appeared relevant.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -996,7 +998,7 @@ write.csv(results_work, "Data extraction/work_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Define the URL
 url_work_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%22work+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addiction+to+work%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22workaholism%22%5BTitle%2FAbstract%5D%29&size=200" # 275 results on 20/07/2023
 
@@ -1064,7 +1066,7 @@ print(as_tibble(results_work_rvest))
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_work<- read.csv("Data extraction/work_data.csv") %>% 
   as_tibble()
@@ -1180,7 +1182,7 @@ write.csv(results_work_final, "Data extraction/work_data_cleaned.csv", row.names
 -   Conditioned locomotion is not correlated with behavioral sensitization to cocaine: an intra-laboratory multi-sample analysis.
 -   Development of a mouse model of ethanol addiction: naltrexone efficacy in reducing consumption but not craving.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -1267,7 +1269,7 @@ write.csv(results_study, "Data extraction/study_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_study_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Study+addiction%22%5BTitle%2FAbstract%5D&size=200" # 33 results returned on 19/08/2023
 
@@ -1339,7 +1341,7 @@ write.csv(results_study_rvest, "Data extraction/study_titles.csv", row.names=FAL
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_study<- read.csv("Data extraction/study_data.csv") %>% 
   as_tibble()
@@ -1459,7 +1461,7 @@ write.csv(results_study_final, "Data extraction/study_data_cleaned.csv", row.nam
 
 -   "A Polymeric Bilayer Multi-Legged Soft Millirobot with Dual Actuation and Humidity Sensing."
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -1546,7 +1548,7 @@ write.csv(results_exercise, "Data extraction/exercise_data.csv", row.names=FALSE
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_exercise_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22Exercise+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22exercise+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+exercise%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+exercise%22%5BTitle%2FAbstract%5D%29&size=200" # 386 results returned on 10/07/2023
 
@@ -1618,7 +1620,7 @@ write.csv(results_exercise_rvest, "Data extraction/exercise_titles.csv", row.nam
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_exercise<- read.csv("Data extraction/exercise_data.csv") %>% 
   as_tibble()
@@ -1746,7 +1748,7 @@ write.csv(results_exercise_final, "Data extraction/exercise_data_cleaned.csv", r
 
 **Notes post-search:** I manually inspected all of the results returned on PubMed. All studies appeared relevant as of latest search date (see top of document).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -1833,7 +1835,7 @@ write.csv(results_shopping, "Data extraction/shopping_data.csv", row.names=FALSE
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_shopping_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%22buying-shopping+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22shopping+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22buying+addiction%22%5BTitle%2FAbstract%5D%29&size=200" # 74 results returned on 19/08/2023
 
@@ -1905,7 +1907,7 @@ write.csv(results_shopping_rvest, "Data extraction/shopping_titles.csv", row.nam
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_shopping<- read.csv("Data extraction/shopping_data.csv") %>% 
   as_tibble()
@@ -2017,7 +2019,7 @@ write.csv(results_shopping_final, "Data extraction/shopping_data_cleaned.csv", r
 
 **Notes post-search:** I manually inspected all of the results returned on PubMed. There were a few results where the key search terms weren't in the title or abstract, but they were in the keywords for the studies, which seems perfectly acceptable considering the types of studies we're trying to detect with this process. All studies appeared relevant as of latest search date (see top of document).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -2104,7 +2106,7 @@ write.csv(results_social_media, "Data extraction/social_media_data.csv", row.nam
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_social_media_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22social_media+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22social_media+dependence%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22compulsory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22obligatory+social_media%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22Addiction+to+social_media%22%5BTitle%2FAbstract%5D%29&size=200" # 303 results returned on 20/07/2023
 
@@ -2176,7 +2178,7 @@ write.csv(results_social_media_rvest, "Data extraction/social_media_titles.csv",
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_social_media<- read.csv("Data extraction/social_media_data.csv") %>% 
   as_tibble()
@@ -2282,7 +2284,7 @@ write.csv(results_social_media_final, "Data extraction/social_media_data_cleaned
 
 **Notes post-search:** I manually inspected all of the results returned on PubMed. This took quite some time given the number of studies available. As far as I can see, all studies appeared relevant as of latest search date (see top of document).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -2369,7 +2371,7 @@ write.csv(results_internet, "Data extraction/internet_data.csv", row.names=FALSE
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_internet_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=(((%22internet%20addiction%22%5BTitle%2FAbstract%5D)%20OR%20(%22addictive%20internet%20use%22%5BTitle%2FAbstract%5D))%20OR%20(%22internet%20use%20disorder%22%5BTitle%2FAbstract%5D))%20OR%20(%22addiction%20to%20the%20internet%22%5BTitle%2FAbstract%5D)&size=200" # 2335 results returned on 20/07/2023
 
@@ -2441,7 +2443,7 @@ write.csv(results_internet_rvest, "Data extraction/internet_titles.csv", row.nam
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_internet<- read.csv("Data extraction/internet_data.csv") %>% 
   as_tibble()
@@ -2550,7 +2552,7 @@ write.csv(results_internet_final, "Data extraction/internet_data_cleaned.csv", r
 
 **Notes post-search:** I manually inspected all of the results returned on PubMed. As far as I can see, all studies appeared relevant as of latest search date (see top of document).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -2637,7 +2639,7 @@ write.csv(results_smart_phone, "Data extraction/smart_phone_data.csv", row.names
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_smart_phone_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Smartphone+addiction%22%5BTitle%2FAbstract%5D+OR+%22Smartphone+disorder%22%5BTitle%2FAbstract%5D+OR+%22Smartphone+dependence%22%5BTitle%2FAbstract%5D+OR+%22Mobile+phone+addiction%22%5BTitle%2FAbstract%5D+OR+%22Mobile+phone+dependence%22%5BTitle%2FAbstract%5D&size=200" # 882 results returned on 19/08/2023
 
@@ -2709,7 +2711,7 @@ write.csv(results_smart_phone_rvest, "Data extraction/smart_phone_titles.csv", r
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_smart_phone<- read.csv("Data extraction/smart_phone_data.csv") %>% 
   as_tibble()
@@ -2789,7 +2791,7 @@ write.csv(results_smart_phone_final, "Data extraction/smart_phone_data_cleaned.c
 
 **Notes post-search:** I manually inspected all of the results returned on PubMed (there aren't too many this time). As far as I can see, all studies appeared relevant as of latest search date (see top of document).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -2876,7 +2878,7 @@ write.csv(results_cybersex, "Data extraction/cybersex_data.csv", row.names=FALSE
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_cybersex_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Cybersex+addiction%22%5BTitle%2FAbstract%5D+OR+%22Compulsive+Cybersex%22%5BTitle%2FAbstract%5D+OR+%22Addictive+cybersex%22%5BTitle%2FAbstract%5D&size=200" # 28 results returned on 19/08/2023
 
@@ -2948,7 +2950,7 @@ write.csv(results_cybersex_rvest, "Data extraction/cybersex_titles.csv", row.nam
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_cybersex<- read.csv("Data extraction/cybersex_data.csv") %>% 
   as_tibble()
@@ -3037,7 +3039,7 @@ write.csv(results_cybersex_final, "Data extraction/cybersex_data_cleaned.csv", r
 -   Biochemical aspects of effects of mesenchymal stem cell treatment in chronic wounds progressive healing
 -   Drug Addiction
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -3124,7 +3126,7 @@ write.csv(results_sex, "Data extraction/sex_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_sex_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22sexual+addiction%22%5BTitle%2FAbstract%5D+OR+%22sex+addiction%22%5BTitle%2FAbstract%5D&size=200" # 275 results returned on 19/08/2023
 
@@ -3196,7 +3198,7 @@ write.csv(results_sex_rvest, "Data extraction/sex_titles.csv", row.names=FALSE)
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_sex<- read.csv("Data extraction/sex_data.csv") %>% 
   as_tibble()
@@ -3300,7 +3302,7 @@ write.csv(results_sex_final, "Data extraction/sex_data_cleaned.csv", row.names=F
 
 **Notes post-search:** I manually inspected all of the results returned on PubMed. As far as I can see, all studies appeared relevant as of latest search date (see top of document).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -3387,7 +3389,7 @@ write.csv(results_pornography, "Data extraction/pornography_data.csv", row.names
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_pornography_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22pornography-use+disorder%22%5BTitle%2FAbstract%5D+OR+%22pornography+addiction%22%5BTitle%2FAbstract%5D+&size=200" # 71 results returned on 19/08/2023
 
@@ -3459,7 +3461,7 @@ write.csv(results_pornography_rvest, "Data extraction/pornography_titles.csv", r
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_pornography<- read.csv("Data extraction/pornography_data.csv") %>% 
   as_tibble()
@@ -3550,7 +3552,7 @@ write.csv(results_pornography_final, "Data extraction/pornography_data_cleaned.c
 
 **Notes post-search:** I manually inspected all of the results returned on PubMed. As far as I can see, all studies appeared relevant as of latest search date (see top of document).
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -3637,7 +3639,7 @@ write.csv(results_tanning, "Data extraction/tanning_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_tanning_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Tanning+addiction%22%5BTitle%2FAbstract%5D&size=200" # 29 results returned on 19/08/2023
 
@@ -3709,7 +3711,7 @@ write.csv(results_tanning_rvest, "Data extraction/tanning_titles.csv", row.names
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_tanning<- read.csv("Data extraction/tanning_data.csv") %>% 
   as_tibble()
@@ -3805,7 +3807,7 @@ write.csv(results_tanning_final, "Data extraction/tanning_data_cleaned.csv", row
 13. Naltrexone: A Pan-Addiction Treatment?
 
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -3892,7 +3894,7 @@ write.csv(results_hair_pulling, "Data extraction/hair_pulling_data.csv", row.nam
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{ {r}}
+```{ {r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_hair_pulling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Hair+pulling+addiction%22+OR+%22trichotillomania+addiction%22&size=200" # 68 results returned on 20/08/2023
 
@@ -3964,7 +3966,7 @@ write.csv(results_hair_pulling_rvest, "Data extraction/hair_pulling_titles.csv",
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_hair_pulling<- read.csv("Data extraction/hair_pulling_data.csv") %>% 
   as_tibble()
@@ -4064,7 +4066,7 @@ write.csv(results_hair_pulling_final, "Data extraction/hair_pulling_data_cleaned
 
 - The sexual response as exercise. A brief review and theoretical proposal
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -4151,7 +4153,7 @@ write.csv(results_love, "Data extraction/love_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_love_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Love+addiction%22%5BTitle%2FAbstract%5D&size=200" # 12 results returned on 20/08/2023
 
@@ -4223,7 +4225,7 @@ write.csv(results_love_rvest, "Data extraction/love_titles.csv", row.names=FALSE
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_love<- read.csv("Data extraction/love_data.csv") %>% 
   as_tibble()
@@ -4316,7 +4318,7 @@ write.csv(results_love_final, "Data extraction/love_data_cleaned.csv", row.names
 - Social Media Interventions for Risky Drinking Among Adolescents and Emerging Adults: Protocol for a Randomized Controlled Trial
 
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -4403,7 +4405,7 @@ write.csv(results_selfie, "Data extraction/selfie_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{{r}}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_selfie_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22selfie+addiction%22&size=200" # 13 results returned on 20/08/2023
 
@@ -4475,7 +4477,7 @@ write.csv(results_selfie_rvest, "Data extraction/selfie_titles.csv", row.names=F
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_selfie<- read.csv("Data extraction/selfie_data.csv") %>% 
   as_tibble()
@@ -4579,7 +4581,7 @@ write.csv(results_selfie_final, "Data extraction/selfie_data_cleaned.csv", row.n
 ))
 
 
-```{r}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -4666,7 +4668,7 @@ write.csv(results_extreme_sport, "Data extraction/extreme_sport_data.csv", row.n
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_extreme_sport_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%E2%80%9Cextreme+sports+addiction%E2%80%9D+OR+%E2%80%9CAdventure+sports+addiction%E2%80%9D+&size=200" # 50 results returned on 20/08/2023
 
@@ -4738,7 +4740,7 @@ write.csv(results_extreme_sport_rvest, "Data extraction/extreme_sport_titles.csv
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_extreme_sport<- read.csv("Data extraction/extreme_sport_data.csv") %>% 
   as_tibble()
@@ -4825,7 +4827,7 @@ write.csv(results_extreme_sport_final, "Data extraction/extreme_sport_data_clean
 
 **Notes pre-search:** No available MeSH terms. The simple phrase "running addiction" seems to be most commonly used.
 
-**Actual search used:** "Running addiction"[Title/Abstract]"Running addiction"[Title/Abstract] 
+**Actual search used:** "Running addiction"[Title/Abstract]
 
 -   Removed as it did not return any results: "addiction to running"[Title/Abstract]
 
@@ -4835,7 +4837,7 @@ write.csv(results_extreme_sport_final, "Data extraction/extreme_sport_data_clean
 **Notes post-search:** I manually inspected all of the results returned on PubMed. As far as I can see, all studies appeared relevant as of latest search date (see top of document). 
 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 #  Clean environment:
 rm(list = ls())
 
@@ -4922,7 +4924,7 @@ write.csv(results_running, "Data extraction/running_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Add search URL:
 url_running_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Running+addiction%22%5BTitle%2FAbstract%5D&size=200" # 11 results returned on 20/08/2023
 
@@ -4994,7 +4996,7 @@ write.csv(results_running_rvest, "Data extraction/running_titles.csv", row.names
 
 Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
 results_running<- read.csv("Data extraction/running_data.csv") %>% 
   as_tibble()
@@ -5059,6 +5061,259 @@ results_running_final <- results_running2 %>% bind_cols(Label_Running) %>%
 # View(results_running_final)
 # Now save the cleaned results
 write.csv(results_running_final, "Data extraction/running_data_cleaned.csv", row.names=FALSE)
+
+```
+
+## Dance addiction
+
+#### Extract studies and perform a basic clean of dataset
+
+**Notes pre-search:** No available MeSH terms. The simple phrase "dance addiction" seems to be most commonly used. Adding in the [Title/Abstract] filter resulted in no results and so it was removed.
+
+**Actual search used:** "dance addiction"
+
+-   Removed as it did not return any results: "Dancing addiction" OR "addiction to dancing"
+
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22dance+addiction%22+&size=200)
+
+- 
+**Notes post-search:** I manually inspected all of the results returned on PubMed. Only the following studies appeared relevant and will be isolated when refining the dataset:
+
+-  An empirical investigation of dance addiction
+-  Argentine tango: Another behavioral addiction?
+
+```{r warning=FALSE, message=FALSE}
+#  Clean environment:
+rm(list = ls())
+
+# Define the search term:
+search_term_dance <- '"dance addiction"'
+
+# Use entrez_search to get the IDs of the articles:
+search_results_dance <- entrez_search(db="pubmed", term=search_term_dance, retmax=20000)
+id_list_dance <- search_results_dance$ids
+
+# Split id list into chunks of 100 for chunk/batches:
+chunks <- split(id_list_dance, ceiling(seq_along(id_list_dance)/100))
+
+# Fetch details for each chunk of articles:
+article_details_dance <- map_dfr(chunks, function(ids) {
+  # Fetch details of the articles:
+  articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
+  
+  # Split the articles into individual articles:
+  articles <- strsplit(articles, "\n\n")[[1]]
+  
+  # Process each article:
+  map_dfr(articles, function(article) {
+    # Split the article into lines:
+    lines <- strsplit(article, "\n")[[1]]
+    
+    # Get the details we're interested in:
+    details_dance <- list(
+      PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
+      DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
+      TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
+      LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
+      AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
+      FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
+      AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
+      LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
+      PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
+      TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
+      COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
+      JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
+    )
+    
+    # Convert the list of details into a one-row data frame:
+    details_df_dance <- bind_rows(details_dance)
+    
+    return(details_df_dance)
+  })
+})
+
+# Check the results:
+article_details_dance %>%
+  as_tibble() %>%
+  print()
+
+# Let's remove the identifiers at the beginning of each data point:
+rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',
+             'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',
+             'COIS- ' = '', 'JT  - ' = '')
+
+results_dance <- article_details_dance %>%
+  mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers
+  # Now separate the date year and month/day info:
+  separate(DP, c("Year", "Month"), sep = "\\ ") %>%
+  mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric
+  rename(# Let's also provide more descriptive names for each of the columns
+         "Title" = "TI", 
+         "DOI" = "LID", 
+         "Abstract" = "AB", 
+         "Full_Author_Name" = "FAU", 
+         "Author_Address" = "AD", 
+         "Language" = "LA", 
+         "Publication_Type" = "PT", 
+         "Journal_name_short" = "TA",
+         "Conflict_of_Interest_Statement" = "COIS",
+         "Journal_Title" = "JT") %>%
+  print()
+
+# Now save the initial results before proceeding so we can't lose them!
+write.csv(results_dance, "Data extraction/dance_data.csv", row.names=FALSE)
+
+```
+
+#### Extract full title using rvest
+
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+
+```{r warning=FALSE, message=FALSE}
+# Add search URL:
+url_dance_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22dance+addiction%22+&size=200" # 103 results returned on 20/08/2023
+
+# Read and parse the webpage
+webpage_dance_rvest <- read_html(url_dance_rvest)
+
+# Get the total number of search results
+results_count_dance <- webpage_dance_rvest %>%
+  html_node(".results-amount .value") %>%
+  html_text() %>%
+  str_replace(",", "") %>%
+  as.numeric()
+
+# Calculate the number of pages
+results_per_page_dance <- 50
+total_pages_dance <- ceiling(results_count_dance[1] / results_per_page_dance)
+# Print results_count_dance and total_pages_dance
+print(results_count_dance)
+print(total_pages_dance)
+
+
+# Initialize an empty data frame
+results_dance_rvest <- data.frame()
+
+# Loop through each page and scrape the data
+for (page in 0:(total_pages_dance - 1)) {
+  # Update the page parameter in the URL for the current page
+  current_url <- paste0(url_dance_rvest, "&page=", page + 1)
+  
+  # Read and parse the current webpage
+  current_page <- read_html(current_url)
+  
+  # Extract title
+  Title <- tryCatch({
+    current_page %>%
+      html_nodes(".docsum-title") %>%
+      html_text(trim = TRUE)
+  }, error = function(e) {
+    print(paste("Error extracting title info on page", page + 1))
+    rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
+  })
+  
+  # Extract the PMID
+  pmid <- current_page %>%
+    html_nodes(".docsum-pmid") %>%
+    html_text(trim = TRUE)
+  
+  # Create a data frame with the extracted data
+  current_results_dance <- data.frame(Title = Title,
+                                       PMID = pmid)
+  
+  # Combine the current results with the previous results
+  results_dance_rvest <- rbind(results_dance_rvest, current_results_dance)
+  
+  # Introduce a delay to avoid overloading the server
+  sleep_time <- runif(1, min = 5, max = 15)
+  Sys.sleep(sleep_time)
+}
+
+# Print the extracted data
+print(as_tibble(results_dance_rvest))
+
+
+# Now save the titles before proceeding so we can't lose them!
+write.csv(results_dance_rvest, "Data extraction/dance_titles.csv", row.names=FALSE)
+```
+
+#### Refine dataset
+
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
+
+```{r warning=FALSE, message=FALSE}
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
+results_dance<- read.csv("Data extraction/dance_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
+results_dance_rvest<- read.csv("Data extraction/dance_titles.csv") %>% 
+  as_tibble()
+
+# Merge our two datasets
+results_dance2 <- results_dance %>%
+  as_tibble() %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
+  full_join(results_dance_rvest, by = "PMID") %>%
+  select(-Title_trunc) %>% # Bye truncated title
+  relocate(Title) %>% # Place full title first for ease
+  print()
+
+# Check results:
+# View(results_dance2)
+
+# Total number with basic duplication removal based on title:
+results_dance2 %>%
+  distinct(Title) %>%
+  count() %>% 
+  print() # n = 1 dupes: This is to studies of the title "dance addiction" which are clearly distinct (different year, author, and journal)
+
+# Total number with basic duplication removal based on PMID:
+results_dance2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
+
+
+
+# Now isolate the relevant studies:
+results_dance3 <-  results_dance2 %>% 
+filter(Title %in% c(
+  "An empirical investigation of dance addiction.",
+  "Argentine tango: Another behavioral addiction?"
+))
+
+# Summary of the year variable:
+summary(results_dance3$Year)
+
+# Number of publications per year:
+dance_hist<- hist(results_dance3$Year,
+                     xlim = c(1960,2023),
+                     breaks = 2,
+                     main = "Papers published per year on dance Addiction (PubMed)",
+                     xlab = "Year")
+
+# Most popular journals:
+results_dance3 %>% 
+  group_by(Journal_name_short) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  arrange(desc(n)) %>%
+  print(n = 20)
+
+# View(results_dance2) # Visually inspect results
+
+# Now I need to add a label to all of these studies to signify that they Were returned from the dance search so that we can distinguish them from other studies when we later joined the datasets together:
+Label_dance <- rep("dance", times = count(results_dance3))
+
+results_dance_final <- results_dance3 %>% bind_cols(Label_dance) %>%
+  rename(Label = 14)
+  
+
+# View(results_dance_final)
+# Now save the cleaned results
+write.csv(results_dance_final, "Data extraction/dance_data_cleaned.csv", row.names=FALSE)
 
 ```
 
