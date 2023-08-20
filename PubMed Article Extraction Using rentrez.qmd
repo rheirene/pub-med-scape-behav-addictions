@@ -64,8 +64,8 @@ The latest dates of data extraction for each "behavioural addiction" are below:
 -   Running: 20/08/2023
 -   Dance: 20/08/2023
 -   Joy riding: 20/08/2023
--   Crime:
--   Polysurgical addiction:
+-   Crime: 20/08/2023
+-   Polysurgical addiction: 20/08/2023
 -   Fortune-telling:
 -   YouTube:
 -   Death:
@@ -5806,7 +5806,7 @@ write.csv(results_crime_final, "Data extraction/crime_data_cleaned.csv", row.nam
 
 - Hypnosis in living systems theory: a living systems autopsy in a polysurgical, polymedical, polypsychiatric patient addicted to talwin.
 
-```{r warning=FALSE, message=FALSE}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -5893,7 +5893,7 @@ write.csv(results_polysurgical, "Data extraction/polysurgical_data.csv", row.nam
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r warning=FALSE, message=FALSE}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_polysurgical_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Polysurgical+addiction%22&size=200" # 3 results returned on 20/08/2023
 
@@ -5990,7 +5990,7 @@ results_polysurgical2 <- results_polysurgical %>%
 # Remove irrelevant study:
 
 results_polysurgical3 <-  results_polysurgical2 %>% 
-  filter(Title != "The Politics of Tackling Inequalities: The Rise of Psychological Fundamentalism in Public Health and Welfare Reform.")
+  filter(Title != "Hypnosis in living systems theory: a living systems autopsy in a polysurgical, polymedical, polypsychiatric patient addicted to talwin.")
 
 # Summary of the year variable:
 summary(results_polysurgical3$Year)
@@ -5998,8 +5998,8 @@ summary(results_polysurgical3$Year)
 # Number of publications per year:
 polysurgical_hist<- hist(results_polysurgical3$Year,
                      xlim = c(1960,2023),
-                     breaks = 5,
-                     main = "Papers published per year on polysurgical Addiction (PubMed)",
+                     breaks = 10,
+                     main = "Papers published per year on Polysurgical Addiction (PubMed)",
                      xlab = "Year")
 
 # Most popular journals:
@@ -6011,7 +6011,7 @@ results_polysurgical3 %>%
   arrange(desc(n)) %>%
   print(n = 20)
 
-# View(results_polysurgical2) # Visually inspect results
+# View(results_polysurgical3) # Visually inspect results
 
 # Now I need to add a label to all of these studies to signify that they Were returned from the polysurgical search so that we can distinguish them from other studies when we later joined the datasets together:
 Label_polysurgical <- rep("polysurgical", times = count(results_polysurgical3))
@@ -6023,6 +6023,236 @@ results_polysurgical_final <- results_polysurgical3 %>% bind_cols(Label_polysurg
 # View(results_polysurgical_final)
 # Now save the cleaned results
 write.csv(results_polysurgical_final, "Data extraction/polysurgical_data_cleaned.csv", row.names=FALSE)
+
+```
+
+
+## Fortune telling addiction
+
+#### Extract studies and perform a basic clean of dataset
+
+**Notes pre-search:** No available MeSH terms. The simple phrase "fortune telling addiction" seems to be used in the literature. 
+
+**Actual search used:** "fortune telling addiction"[Title/Abstract]
+
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22fortune+telling+addiction%22%5BTitle%2FAbstract%5D&size=200)
+
+- 
+**Notes post-search:** I manually inspected all of the results returned on PubMed. Only 3 studies are returned and all appear relevant. 
+
+```{r warning=FALSE, message=FALSE}
+#  Clean environment:
+rm(list = ls())
+
+# Define the search term:
+search_term_fortune_telling <- 'fortune telling addiction"[Title/Abstract]'
+
+# Use entrez_search to get the IDs of the articles:
+search_results_fortune_telling <- entrez_search(db="pubmed", term=search_term_fortune_telling, retmax=20000)
+id_list_fortune_telling <- search_results_fortune_telling$ids
+
+# Split id list into chunks of 100 for chunk/batches:
+chunks <- split(id_list_fortune_telling, ceiling(seq_along(id_list_fortune_telling)/100))
+
+# Fetch details for each chunk of articles:
+article_details_fortune_telling <- map_dfr(chunks, function(ids) {
+  # Fetch details of the articles:
+  articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
+  
+  # Split the articles into individual articles:
+  articles <- strsplit(articles, "\n\n")[[1]]
+  
+  # Process each article:
+  map_dfr(articles, function(article) {
+    # Split the article into lines:
+    lines <- strsplit(article, "\n")[[1]]
+    
+    # Get the details we're interested in:
+    details_fortune_telling <- list(
+      PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
+      DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
+      TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
+      LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
+      AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
+      FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
+      AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
+      LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
+      PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
+      TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
+      COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
+      JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
+    )
+    
+    # Convert the list of details into a one-row data frame:
+    details_df_fortune_telling <- bind_rows(details_fortune_telling)
+    
+    return(details_df_fortune_telling)
+  })
+})
+
+# Check the results:
+article_details_fortune_telling %>%
+  as_tibble() %>%
+  print()
+
+# Let's remove the identifiers at the beginning of each data point:
+rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',
+             'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',
+             'COIS- ' = '', 'JT  - ' = '')
+
+results_fortune_telling <- article_details_fortune_telling %>%
+  mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers
+  # Now separate the date year and month/day info:
+  separate(DP, c("Year", "Month"), sep = "\\ ") %>%
+  mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric
+  rename(# Let's also provide more descriptive names for each of the columns
+         "Title" = "TI", 
+         "DOI" = "LID", 
+         "Abstract" = "AB", 
+         "Full_Author_Name" = "FAU", 
+         "Author_Address" = "AD", 
+         "Language" = "LA", 
+         "Publication_Type" = "PT", 
+         "Journal_name_short" = "TA",
+         "Conflict_of_Interest_Statement" = "COIS",
+         "Journal_Title" = "JT") %>%
+  print()
+
+# Now save the initial results before proceeding so we can't lose them!
+write.csv(results_fortune_telling, "Data extraction/fortune_telling_data.csv", row.names=FALSE)
+
+```
+
+#### Extract full title using rvest
+
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+
+```{r warning=FALSE, message=FALSE}
+# Add search URL:
+url_fortune_telling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22fortune+telling+addiction%22%5BTitle%2FAbstract%5D&size=200" # 3 results returned on 20/08/2023
+
+# Read and parse the webpage
+webpage_fortune_telling_rvest <- read_html(url_fortune_telling_rvest)
+
+# Get the total number of search results
+results_count_fortune_telling <- webpage_fortune_telling_rvest %>%
+  html_node(".results-amount .value") %>%
+  html_text() %>%
+  str_replace(",", "") %>%
+  as.numeric()
+
+# Calculate the number of pages
+results_per_page_fortune_telling <- 50
+total_pages_fortune_telling <- ceiling(results_count_fortune_telling[1] / results_per_page_fortune_telling)
+# Print results_count_fortune_telling and total_pages_fortune_telling
+print(results_count_fortune_telling)
+print(total_pages_fortune_telling)
+
+
+# Initialize an empty data frame
+results_fortune_telling_rvest <- data.frame()
+
+# Loop through each page and scrape the data
+for (page in 0:(total_pages_fortune_telling - 1)) {
+  # Update the page parameter in the URL for the current page
+  current_url <- paste0(url_fortune_telling_rvest, "&page=", page + 1)
+  
+  # Read and parse the current webpage
+  current_page <- read_html(current_url)
+  
+  # Extract title
+  Title <- tryCatch({
+    current_page %>%
+      html_nodes(".docsum-title") %>%
+      html_text(trim = TRUE)
+  }, error = function(e) {
+    print(paste("Error extracting title info on page", page + 1))
+    rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
+  })
+  
+  # Extract the PMID
+  pmid <- current_page %>%
+    html_nodes(".docsum-pmid") %>%
+    html_text(trim = TRUE)
+  
+  # Create a data frame with the extracted data
+  current_results_fortune_telling <- data.frame(Title = Title,
+                                       PMID = pmid)
+  
+  # Combine the current results with the previous results
+  results_fortune_telling_rvest <- rbind(results_fortune_telling_rvest, current_results_fortune_telling)
+  
+  # Introduce a delay to avoid overloading the server
+  sleep_time <- runif(1, min = 5, max = 15)
+  Sys.sleep(sleep_time)
+}
+
+# Print the extracted data
+print(as_tibble(results_fortune_telling_rvest))
+
+
+# Now save the titles before proceeding so we can't lose them!
+write.csv(results_fortune_telling_rvest, "Data extraction/fortune_telling_titles.csv", row.names=FALSE)
+```
+
+#### Refine dataset
+
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
+
+```{r warning=FALSE, message=FALSE}
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
+results_fortune_telling<- read.csv("Data extraction/fortune_telling_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
+results_fortune_telling_rvest<- read.csv("Data extraction/fortune_telling_titles.csv") %>% 
+  as_tibble()
+
+# Merge our two datasets
+results_fortune_telling2 <- results_fortune_telling %>%
+  as_tibble() %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
+  full_join(results_fortune_telling_rvest, by = "PMID") %>%
+  select(-Title_trunc) %>% # Bye truncated title
+  relocate(Title) %>% # Place full title first for ease
+  print()
+
+# Check results:
+# View(results_fortune_telling2)
+
+# We know there's no duplicate so no point even checking.
+
+# Summary of the year variable:
+summary(results_fortune_telling2$Year)
+
+# Number of publications per year:
+fortune_telling_hist<- hist(results_fortune_telling2$Year,
+                     xlim = c(1960,2023),
+                     breaks = 5,
+                     main = "Papers published per year on Fortune Telling Addiction (PubMed)",
+                     xlab = "Year")
+
+# Most popular journals:
+results_fortune_telling2 %>% 
+  group_by(Journal_name_short) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  arrange(desc(n)) %>%
+  print(n = 20)
+
+# View(results_fortune_telling2) # Visually inspect results
+
+# Now I need to add a label to all of these studies to signify that they Were returned from the fortune_telling search so that we can distinguish them from other studies when we later joined the datasets together:
+Label_fortune_telling <- rep("fortune_telling", times = count(results_fortune_telling2))
+
+results_fortune_telling_final <- results_fortune_telling2 %>% bind_cols(Label_fortune_telling) %>%
+  rename(Label = 14)
+  
+
+# View(results_fortune_telling_final)
+# Now save the cleaned results
+write.csv(results_fortune_telling_final, "Data extraction/fortune_telling_data_cleaned.csv", row.names=FALSE)
 
 ```
 
