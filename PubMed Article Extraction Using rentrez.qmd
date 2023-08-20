@@ -326,7 +326,6 @@ Label_Behavioural_addictions <- rep("behavioural_addictions", times = count(resu
 
 results_behav_addictions_final <- results_behav_addictions2 %>% bind_cols(Label_Behavioural_addictions) %>%
   rename(Label = 14)
-  print()
 
 # View(results_behav_addictions_final)
 # Now save the cleaned results:
@@ -4541,9 +4540,9 @@ results_selfie3 %>%
 # View(results_selfie2) # Visually inspect results
 
 # Now I need to add a label to all of these studies to signify that they Were returned from the selfie search so that we can distinguish them from other studies when we later joined the datasets together:
-Label_Smartphone <- rep("selfie", times = count(results_selfie3))
+Label_Selfie <- rep("selfie", times = count(results_selfie3))
 
-results_selfie_final <- results_selfie3 %>% bind_cols(Label_Smartphone) %>%
+results_selfie_final <- results_selfie3 %>% bind_cols(Label_Selfie) %>%
   rename(Label = 14)
   
 
@@ -4559,7 +4558,7 @@ write.csv(results_selfie_final, "Data extraction/selfie_data_cleaned.csv", row.n
 
 #### Extract studies and perform a basic clean of dataset
 
-**Notes pre-search:** No available MeSH terms. Use my own knowledge of this research area to develop the range of terms, most of which were ultimately removed for a simple search strategy brackets see below).
+**Notes pre-search:** No available MeSH terms. Used my own knowledge of this research area to develop the range of terms, most of which were ultimately removed for a simple search strategy brackets see below).
 
 **Actual search used:** "extreme sports addiction" OR "Adventure sports addiction"
 
@@ -4808,9 +4807,9 @@ results_extreme_sport3 %>%
 # View(results_extreme_sport2) # Visually inspect results
 
 # Now I need to add a label to all of these studies to signify that they Were returned from the extreme_sport search so that we can distinguish them from other studies when we later joined the datasets together:
-Label_Smartphone <- rep("extreme_sport", times = count(results_extreme_sport3))
+Label_Extreme_sport <- rep("extreme_sport", times = count(results_extreme_sport3))
 
-results_extreme_sport_final <- results_extreme_sport3 %>% bind_cols(Label_Smartphone) %>%
+results_extreme_sport_final <- results_extreme_sport3 %>% bind_cols(Label_Extreme_sport) %>%
   rename(Label = 14)
   
 
@@ -4819,5 +4818,249 @@ results_extreme_sport_final <- results_extreme_sport3 %>% bind_cols(Label_Smartp
 write.csv(results_extreme_sport_final, "Data extraction/extreme_sport_data_cleaned.csv", row.names=FALSE)
 
 ```
+
+## Running addiction
+
+#### Extract studies and perform a basic clean of dataset
+
+**Notes pre-search:** No available MeSH terms. The simple phrase "running addiction" seems to be most commonly used.
+
+**Actual search used:** "Running addiction"[Title/Abstract]"Running addiction"[Title/Abstract] 
+
+-   Removed as it did not return any results: "addiction to running"[Title/Abstract]
+
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22Running+addiction%22%5BTitle%2FAbstract%5D&size=200)
+
+- 
+**Notes post-search:** I manually inspected all of the results returned on PubMed. As far as I can see, all studies appeared relevant as of latest search date (see top of document). 
+
+
+```{r}
+#  Clean environment:
+rm(list = ls())
+
+# Define the search term:
+search_term_running <- '"Running addiction"[Title/Abstract]'
+
+# Use entrez_search to get the IDs of the articles:
+search_results_running <- entrez_search(db="pubmed", term=search_term_running, retmax=20000)
+id_list_running <- search_results_running$ids
+
+# Split id list into chunks of 100 for chunk/batches:
+chunks <- split(id_list_running, ceiling(seq_along(id_list_running)/100))
+
+# Fetch details for each chunk of articles:
+article_details_running <- map_dfr(chunks, function(ids) {
+  # Fetch details of the articles:
+  articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
+  
+  # Split the articles into individual articles:
+  articles <- strsplit(articles, "\n\n")[[1]]
+  
+  # Process each article:
+  map_dfr(articles, function(article) {
+    # Split the article into lines:
+    lines <- strsplit(article, "\n")[[1]]
+    
+    # Get the details we're interested in:
+    details_running <- list(
+      PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
+      DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
+      TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
+      LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
+      AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
+      FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
+      AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
+      LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
+      PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
+      TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
+      COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
+      JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
+    )
+    
+    # Convert the list of details into a one-row data frame:
+    details_df_running <- bind_rows(details_running)
+    
+    return(details_df_running)
+  })
+})
+
+# Check the results:
+article_details_running %>%
+  as_tibble() %>%
+  print()
+
+# Let's remove the identifiers at the beginning of each data point:
+rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',
+             'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',
+             'COIS- ' = '', 'JT  - ' = '')
+
+results_running <- article_details_running %>%
+  mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers
+  # Now separate the date year and month/day info:
+  separate(DP, c("Year", "Month"), sep = "\\ ") %>%
+  mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric
+  rename(# Let's also provide more descriptive names for each of the columns
+         "Title" = "TI", 
+         "DOI" = "LID", 
+         "Abstract" = "AB", 
+         "Full_Author_Name" = "FAU", 
+         "Author_Address" = "AD", 
+         "Language" = "LA", 
+         "Publication_Type" = "PT", 
+         "Journal_name_short" = "TA",
+         "Conflict_of_Interest_Statement" = "COIS",
+         "Journal_Title" = "JT") %>%
+  print()
+
+# Now save the initial results before proceeding so we can't lose them!
+write.csv(results_running, "Data extraction/running_data.csv", row.names=FALSE)
+
+```
+
+#### Extract full title using rvest
+
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+
+```{r}
+# Add search URL:
+url_running_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Running+addiction%22%5BTitle%2FAbstract%5D&size=200" # 11 results returned on 20/08/2023
+
+# Read and parse the webpage
+webpage_running_rvest <- read_html(url_running_rvest)
+
+# Get the total number of search results
+results_count_running <- webpage_running_rvest %>%
+  html_node(".results-amount .value") %>%
+  html_text() %>%
+  str_replace(",", "") %>%
+  as.numeric()
+
+# Calculate the number of pages
+results_per_page_running <- 50
+total_pages_running <- ceiling(results_count_running[1] / results_per_page_running)
+# Print results_count_running and total_pages_running
+print(results_count_running)
+print(total_pages_running)
+
+
+# Initialize an empty data frame
+results_running_rvest <- data.frame()
+
+# Loop through each page and scrape the data
+for (page in 0:(total_pages_running - 1)) {
+  # Update the page parameter in the URL for the current page
+  current_url <- paste0(url_running_rvest, "&page=", page + 1)
+  
+  # Read and parse the current webpage
+  current_page <- read_html(current_url)
+  
+  # Extract title
+  Title <- tryCatch({
+    current_page %>%
+      html_nodes(".docsum-title") %>%
+      html_text(trim = TRUE)
+  }, error = function(e) {
+    print(paste("Error extracting title info on page", page + 1))
+    rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
+  })
+  
+  # Extract the PMID
+  pmid <- current_page %>%
+    html_nodes(".docsum-pmid") %>%
+    html_text(trim = TRUE)
+  
+  # Create a data frame with the extracted data
+  current_results_running <- data.frame(Title = Title,
+                                       PMID = pmid)
+  
+  # Combine the current results with the previous results
+  results_running_rvest <- rbind(results_running_rvest, current_results_running)
+  
+  # Introduce a delay to avoid overloading the server
+  sleep_time <- runif(1, min = 5, max = 15)
+  Sys.sleep(sleep_time)
+}
+
+# Print the extracted data
+print(as_tibble(results_running_rvest))
+
+
+# Now save the titles before proceeding so we can't lose them!
+write.csv(results_running_rvest, "Data extraction/running_titles.csv", row.names=FALSE)
+```
+
+#### Refine dataset
+
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
+
+```{r}
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
+results_running<- read.csv("Data extraction/running_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
+results_running_rvest<- read.csv("Data extraction/running_titles.csv") %>% 
+  as_tibble()
+
+# Merge our two datasets
+results_running2 <- results_running %>%
+  as_tibble() %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
+  full_join(results_running_rvest, by = "PMID") %>%
+  select(-Title_trunc) %>% # Bye truncated title
+  relocate(Title) %>% # Place full title first for ease
+  print()
+
+# Check results:
+# View(results_running2)
+
+# Total number with basic duplication removal based on title:
+results_running2 %>%
+  distinct(Title) %>%
+  count() %>% 
+  print() # n = 1 dupes: This is to studies of the title "running addiction" which are clearly distinct (different year, author, and journal)
+
+# Total number with basic duplication removal based on PMID:
+results_running2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
+
+
+# Summary of the year variable:
+summary(results_running2$Year)
+
+# Number of publications per year:
+running_hist<- hist(results_running2$Year,
+                     xlim = c(1960,2023),
+                     breaks = 15,
+                     main = "Papers published per year on Running Addiction (PubMed)",
+                     xlab = "Year")
+
+# Most popular journals:
+results_running2 %>% 
+  group_by(Journal_name_short) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  arrange(desc(n)) %>%
+  print(n = 20)
+
+# View(results_running2) # Visually inspect results
+
+# Now I need to add a label to all of these studies to signify that they Were returned from the running search so that we can distinguish them from other studies when we later joined the datasets together:
+Label_Running <- rep("running", times = count(results_running2))
+
+results_running_final <- results_running2 %>% bind_cols(Label_Running) %>%
+  rename(Label = 14)
+  
+
+# View(results_running_final)
+# Now save the cleaned results
+write.csv(results_running_final, "Data extraction/running_data_cleaned.csv", row.names=FALSE)
+
+```
+
 
 ### END
