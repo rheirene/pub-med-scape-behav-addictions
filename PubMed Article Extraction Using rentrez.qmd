@@ -57,7 +57,7 @@ The latest dates of data extraction for each "behavioural addiction" are below:
 -   Sex: 19/08/2023
 -   Ponography: 19/08/2023
 -   Tanning: 19/08/2023
--   Hair pulling/trichotillomania: 20/08/2023
+-   Hair pulling/ trichotillomania: 20/08/2023
 -   Love: 20/08/2023
 
 :::
@@ -308,13 +308,6 @@ hist(results_behav_addictions2$Year,
                      breaks = 30,
                      main = "Papers published per year on 'Behavioural Addictions' (PubMed)",
                      xlab = "Year") # Even though the earliest year an article was published is 1994, I've set the range to started 1960 as this is where the starting point is across all other behavioural addiction searches.
-
-
-# Number of separate journals:
-results_behav_addictions2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 50)
 
 # Most popular journals:
 results_behav_addictions2 %>% 
@@ -598,12 +591,6 @@ Gambling_hist<- hist(results_gambling_sans_duplicates2$Year,
                      xlab = "Year")
 
 
-# Number of separate journals:
-results_gambling_sans_duplicates2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 50)
-
 # Most popular journals:
 results_gambling_sans_duplicates2 %>% 
   group_by(Journal_name_short) %>% 
@@ -879,11 +866,6 @@ gaming_hist<- hist(results_gaming_sans_duplicates$Year,
                      main = "Papers published per year on Gaming Disorder (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_gaming_sans_duplicates %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
 
 # Most popular journals:
 results_gaming_sans_duplicates %>% 
@@ -1146,12 +1128,6 @@ work_hist<- hist(results_work2$Year,
                      breaks = 40,
                      main = "Papers published per year on Work Addiction (PubMed)",
                      xlab = "Year")
-
-# Number of separate journals:
-results_work2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
 
 # Most popular journals:
 results_work2 %>% 
@@ -1423,11 +1399,6 @@ study_hist<- hist(results_study3$Year,
                      main = "Papers published per year on Study Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_study3 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
 
 # Most popular journals:
 results_study3 %>% 
@@ -1735,12 +1706,6 @@ exercise_hist<- hist(results_exercise3$Year,
                      main = "Papers published per year on Exercise Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_exercise3 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
-
 # Most popular journals:
 results_exercise3 %>% 
   group_by(Journal_name_short) %>% 
@@ -2010,11 +1975,6 @@ shopping_hist<- hist(results_shopping2$Year,
                      main = "Papers published per year on Shopping Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_shopping2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
 
 # Most popular journals:
 results_shopping2 %>% 
@@ -2286,12 +2246,6 @@ social_media_hist<- hist(results_social_media2$Year,
                      main = "Papers published per year on Social Media Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_social_media2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
-
 # Most popular journals:
 results_social_media2 %>% 
   group_by(Journal_name_short) %>% 
@@ -2558,12 +2512,6 @@ internet_hist<- hist(results_internet3$Year,
                      main = "Papers published per year on Internet Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_internet3 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
-
 # Most popular journals:
 results_internet3 %>% 
   group_by(Journal_name_short) %>% 
@@ -2804,11 +2752,6 @@ smart_phone_hist<- hist(results_smart_phone2$Year,
                      main = "Papers published per year on Smartphone Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_smart_phone2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
 
 # Most popular journals:
 results_smart_phone2 %>% 
@@ -3048,12 +2991,6 @@ cybersex_hist<- hist(results_cybersex2$Year,
                      main = "Papers published per year on Cybersex Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_cybersex2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
-
 # Most popular journals:
 results_cybersex2 %>% 
   group_by(Journal_name_short) %>% 
@@ -3090,7 +3027,7 @@ write.csv(results_cybersex_final, "Data extraction/cybersex_data_cleaned.csv", r
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22sexual+addiction%22%5BTitle%2FAbstract%5D+OR+%22sex+addiction%22%5BTitle%2FAbstract%5D&size=200)
 
-**Notes post-search:** \# The manual search of results revealed that there were multiple irrelevant studies returned here. This is because there were several studies that listed sex and then addiction as variables of interest like "..., sex, addiction, ...". There is also one book called "Drug Addiction". Here's the full list of irrelevant studies that will need to be removed:
+**Notes post-search:** \# The manual search of results revealed that there were multiple irrelevant studies returned here. This is because there were several studies that listed sex and then addiction as variables of interest like "..., sex, addiction, ...". There is also one book called "Drug Addiction". Here's the full list of irrelevant studies that will need to be removed when refining the dataset:
 
 -   The SCOPE study: health-care consumption related to patients with chronic obstructive pulmonary disease in France
 -   Correlation of addictive factors, human papilloma virus infection and histopathology of oral submucous fibrosis
@@ -3324,11 +3261,6 @@ sex_hist<- hist(results_sex3$Year,
                      main = "Papers published per year on Sex Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_sex2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
 
 # Most popular journals:
 results_sex2 %>% 
@@ -3581,11 +3513,6 @@ pornography_hist<- hist(results_pornography3$Year,
                      main = "Papers published per year on Pornography Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_pornography3 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
 
 # Most popular journals:
 results_pornography3 %>% 
@@ -3825,12 +3752,6 @@ tanning_hist<- hist(results_tanning2$Year,
                      main = "Papers published per year on Tanning Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_tanning2 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
-
 # Most popular journals:
 results_tanning2 %>% 
   group_by(Journal_name_short) %>% 
@@ -3867,7 +3788,7 @@ write.csv(results_tanning_final, "Data extraction/tanning_data_cleaned.csv", row
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22trichotillomania+addiction%22&size=200)
 
-**Notes post-search:** The strategy here was very different as many people consider here pulling/trichotillomania to be a form of impulse control disorder, rather than behavioural addiction. So, I varied the search terms to get as many studies as possible that discuss it within the context of addiction, and as few studies as possible that do not. Then, from the 68 studies returned in this initial sample, I manually inspected all of them to see which discussed this condition as a behavioural addiction to some extent. The following studies were identified as being relevant:
+**Notes post-search:** The strategy here was very different as many people consider here pulling/trichotillomania to be a form of impulse control disorder, rather than behavioural addiction. So, I varied the search terms to get as many studies as possible that discuss it within the context of addiction, and as few studies as possible that do not. Then, from the 68 studies returned in this initial sample, I manually inspected all of them to see which discussed this condition as a behavioural addiction to some extent. The following studies were identified as being relevant and will be removed when refining the dataset:
 
 1. The neurobiology and genetics of impulse control disorders: relationships to drug addictions
 2. Behavioural addiction-A rising tide?
@@ -4103,11 +4024,6 @@ hair_pulling_hist<- hist(results_hair_pulling3$Year,
                      main = "Papers published per year on Hair Pulling Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_hair_pulling3 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
 
 # Most popular journals:
 results_hair_pulling3 %>% 
@@ -4144,7 +4060,7 @@ write.csv(results_hair_pulling_final, "Data extraction/hair_pulling_data_cleaned
 
 **Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22Love+addiction%22%5BTitle%2FAbstract%5D&size=200)
 
-**Notes post-search:** I manually inspected all of the results returned on PubMed. The following study is not relevant to include:
+**Notes post-search:** I manually inspected all of the results returned on PubMed. The following study is not relevant to include and will be removed when refining the dataset:
 
 - The sexual response as exercise. A brief review and theoretical proposal
 
@@ -4354,12 +4270,6 @@ love_hist<- hist(results_love3$Year,
                      main = "Papers published per year on Love Addiction (PubMed)",
                      xlab = "Year")
 
-# Number of separate journals:
-results_love3 %>% 
-  distinct(Journal_name_short) %>% 
-  arrange(Journal_name_short) %>% 
-  print(n = 20)
-
 # Most popular journals:
 results_love3 %>% 
   group_by(Journal_name_short) %>% 
@@ -4383,3 +4293,263 @@ results_love_final <- results_love3 %>% bind_cols(Label_Love) %>%
 write.csv(results_love_final, "Data extraction/love_data_cleaned.csv", row.names=FALSE)
 
 ```
+
+
+## Selfie addiction
+
+#### Extract studies and perform a basic clean of dataset
+
+**Notes pre-search:** No available MeSH terms, The term "selfitis" Is included in the title of some studies, the reason it seems like this actually came from a hoax perpetrated by the media who claimed that selfie addiction was a new craze... an now genuine academic research on this has been done!
+
+**Actual search used:** "selfie addiction"
+
+-   Including the "[Title/Abstract]"  indicator in PubMed  did not return any studies, for some reason, so I removed it from the search string.
+
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%22selfie+addiction%22&size=200)
+
+- 
+**Notes post-search:** I manually inspected all of the results returned on PubMed. The following studies are not relevant to include and will be removed when refining the dataset:
+
+- Selfie-engagement on social media: Pathological narcissism, positive expectation, and body objectification - Which is more influential?
+- Association between physiological oscillations in self-esteem, narcissism and internet addiction: A cross-sectional study
+- The Influence of Social Media on Addictive Behaviors in College Students
+- Social Media Interventions for Risky Drinking Among Adolescents and Emerging Adults: Protocol for a Randomized Controlled Trial
+
+
+```{r}
+#  Clean environment:
+rm(list = ls())
+
+# Define the search term:
+search_term_selfie <- '"selfie addiction"'
+
+# Use entrez_search to get the IDs of the articles:
+search_results_selfie <- entrez_search(db="pubmed", term=search_term_selfie, retmax=20000)
+id_list_selfie <- search_results_selfie$ids
+
+# Split id list into chunks of 100 for chunk/batches:
+chunks <- split(id_list_selfie, ceiling(seq_along(id_list_selfie)/100))
+
+# Fetch details for each chunk of articles:
+article_details_selfie <- map_dfr(chunks, function(ids) {
+  # Fetch details of the articles:
+  articles <- entrez_fetch(db="pubmed", id=ids, rettype="medline", retmode="text")
+  
+  # Split the articles into individual articles:
+  articles <- strsplit(articles, "\n\n")[[1]]
+  
+  # Process each article:
+  map_dfr(articles, function(article) {
+    # Split the article into lines:
+    lines <- strsplit(article, "\n")[[1]]
+    
+    # Get the details we're interested in:
+    details_selfie <- list(
+      PMID = if (any(grepl("^PMID", lines))) lines[grepl("^PMID", lines)] else NA,
+      DP = if (any(grepl("^DP", lines))) lines[grepl("^DP", lines)] else NA,
+      TI = if (any(grepl("^TI", lines))) lines[grepl("^TI", lines)] else NA,
+      LID = if (any(grepl("^LID", lines))) paste(lines[grepl("^LID", lines)], collapse="; ") else NA,
+      AB = if (any(grepl("^AB", lines))) paste(lines[grepl("^AB", lines)], collapse=" ") else NA,
+      FAU = if (any(grepl("^FAU", lines))) paste(lines[grepl("^FAU", lines)], collapse="; ") else NA,
+      AD = if (any(grepl("^AD", lines))) paste(lines[grepl("^AD", lines)], collapse="; ") else NA,
+      LA = if (any(grepl("^LA", lines))) paste(lines[grepl("^LA", lines)], collapse="; ") else NA,
+      PT = if (any(grepl("^PT", lines))) paste(lines[grepl("^PT", lines)], collapse="; ") else NA,
+      TA = if (any(grepl("^TA", lines))) lines[grepl("^TA", lines)] else NA,
+      COIS = if (any(grepl("^COIS", lines))) paste(lines[grepl("^COIS", lines)], collapse=" ") else NA,
+      JT = if (any(grepl("^JT", lines))) lines[grepl("^JT", lines)] else NA
+    )
+    
+    # Convert the list of details into a one-row data frame:
+    details_df_selfie <- bind_rows(details_selfie)
+    
+    return(details_df_selfie)
+  })
+})
+
+# Check the results:
+article_details_selfie %>%
+  as_tibble() %>%
+  print()
+
+# Let's remove the identifiers at the beginning of each data point:
+rep_str <- c('PMID- ' = '', 'DP  - ' = '', 'TI  - ' = '', 'LID - ' = '', 'AB  - ' = '',
+             'FAU - ' = '', 'AD  - ' = '', 'LA  - ' = '', 'PT  - ' = '', 'TA  - ' = '',
+             'COIS- ' = '', 'JT  - ' = '')
+
+results_selfie <- article_details_selfie %>%
+  mutate(across(everything(), ~str_replace_all(., rep_str))) %>% # Remove identifiers
+  # Now separate the date year and month/day info:
+  separate(DP, c("Year", "Month"), sep = "\\ ") %>%
+  mutate(Year = as.numeric(Year)) %>% # Convert Year to numeric
+  rename(# Let's also provide more descriptive names for each of the columns
+         "Title" = "TI", 
+         "DOI" = "LID", 
+         "Abstract" = "AB", 
+         "Full_Author_Name" = "FAU", 
+         "Author_Address" = "AD", 
+         "Language" = "LA", 
+         "Publication_Type" = "PT", 
+         "Journal_name_short" = "TA",
+         "Conflict_of_Interest_Statement" = "COIS",
+         "Journal_Title" = "JT") %>%
+  print()
+
+# Now save the initial results before proceeding so we can't lose them!
+write.csv(results_selfie, "Data extraction/selfie_data.csv", row.names=FALSE)
+
+```
+
+#### Extract full title using rvest
+
+Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
+
+```{r}
+# Add search URL:
+url_selfie_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22selfie+addiction%22&size=200" # 13 results returned on 20/08/2023
+
+# Read and parse the webpage
+webpage_selfie_rvest <- read_html(url_selfie_rvest)
+
+# Get the total number of search results
+results_count_selfie <- webpage_selfie_rvest %>%
+  html_node(".results-amount .value") %>%
+  html_text() %>%
+  str_replace(",", "") %>%
+  as.numeric()
+
+# Calculate the number of pages
+results_per_page_selfie <- 50
+total_pages_selfie <- ceiling(results_count_selfie[1] / results_per_page_selfie)
+# Print results_count_selfie and total_pages_selfie
+print(results_count_selfie)
+print(total_pages_selfie)
+
+
+# Initialize an empty data frame
+results_selfie_rvest <- data.frame()
+
+# Loop through each page and scrape the data
+for (page in 0:(total_pages_selfie - 1)) {
+  # Update the page parameter in the URL for the current page
+  current_url <- paste0(url_selfie_rvest, "&page=", page + 1)
+  
+  # Read and parse the current webpage
+  current_page <- read_html(current_url)
+  
+  # Extract title
+  Title <- tryCatch({
+    current_page %>%
+      html_nodes(".docsum-title") %>%
+      html_text(trim = TRUE)
+  }, error = function(e) {
+    print(paste("Error extracting title info on page", page + 1))
+    rep(NA, length(Title))  # Return a vector of NAs with the same length as Title
+  })
+  
+  # Extract the PMID
+  pmid <- current_page %>%
+    html_nodes(".docsum-pmid") %>%
+    html_text(trim = TRUE)
+  
+  # Create a data frame with the extracted data
+  current_results_selfie <- data.frame(Title = Title,
+                                       PMID = pmid)
+  
+  # Combine the current results with the previous results
+  results_selfie_rvest <- rbind(results_selfie_rvest, current_results_selfie)
+  
+  # Introduce a delay to avoid overloading the server
+  sleep_time <- runif(1, min = 5, max = 15)
+  Sys.sleep(sleep_time)
+}
+
+# Print the extracted data
+print(as_tibble(results_selfie_rvest))
+
+
+# Now save the titles before proceeding so we can't lose them!
+write.csv(results_selfie_rvest, "Data extraction/selfie_titles.csv", row.names=FALSE)
+```
+
+#### Refine dataset
+
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be books)
+
+```{r}
+# Load in first dataset in case environment clean on knit (above sections not executed for render):
+results_selfie<- read.csv("Data extraction/selfie_data.csv") %>% 
+  as_tibble()
+
+# Load in second dataset in case environment clean on knit (above sections not executed for render):
+results_selfie_rvest<- read.csv("Data extraction/selfie_titles.csv") %>% 
+  as_tibble()
+
+# Merge our two datasets
+results_selfie2 <- results_selfie %>%
+  as_tibble() %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
+  full_join(results_selfie_rvest, by = "PMID") %>%
+  select(-Title_trunc) %>% # Bye truncated title
+  relocate(Title) %>% # Place full title first for ease
+  print()
+
+# Check results:
+# View(results_selfie2)
+
+# Total number with basic duplication removal based on title:
+results_selfie2 %>%
+  distinct(Title) %>%
+  count() %>% 
+  print() # n = 0 dupes (August 2023)
+
+# Total number with basic duplication removal based on PMID:
+results_selfie2 %>%
+  distinct(PMID) %>%
+  count() %>% 
+  print() # None
+
+
+# Now remove the irrelevant studies:
+results_selfie3 <-  results_selfie2 %>% 
+  filter(!(Title %in% c(
+"Selfie-engagement on social media: Pathological narcissism, positive expectation, and body objectification - Which is more influential?",
+"Association between physiological oscillations in self-esteem, narcissism and internet addiction: A cross-sectional study.",
+"The Influence of Social Media on Addictive Behaviors in College Students.",
+"Social Media Interventions for Risky Drinking Among Adolescents and Emerging Adults: Protocol for a Randomized Controlled Trial."
+  )))
+
+# Summary of the year variable:
+summary(results_selfie3$Year)
+
+# Number of publications per year:
+selfie_hist<- hist(results_selfie3$Year,
+                     xlim = c(1960,2023),
+                     breaks = 5,
+                     main = "Papers published per year on Selfie Addiction (PubMed)",
+                     xlab = "Year")
+
+# Most popular journals:
+results_selfie3 %>% 
+  group_by(Journal_name_short) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  arrange(desc(n)) %>%
+  print(n = 20)
+
+# View(results_selfie2) # Visually inspect results
+
+# Now I need to add a label to all of these studies to signify that they Were returned from the selfie search so that we can distinguish them from other studies when we later joined the datasets together:
+Label_Smartphone <- rep("selfie", times = count(results_selfie3))
+
+results_selfie_final <- results_selfie3 %>% bind_cols(Label_Smartphone) %>%
+  rename(Label = 14)
+  
+
+# View(results_selfie_final)
+# Now save the cleaned results
+write.csv(results_selfie_final, "Data extraction/selfie_data_cleaned.csv", row.names=FALSE)
+
+```
+
+### END
