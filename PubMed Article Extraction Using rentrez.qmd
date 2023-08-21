@@ -5089,7 +5089,7 @@ write.csv(results_running_final, "Data extraction/running_data_cleaned.csv", row
 -  An empirical investigation of dance addiction
 -  Argentine tango: Another behavioral addiction?
 
-```{r warning=FALSE, message=FALSE}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -5176,7 +5176,7 @@ write.csv(results_dance, "Data extraction/dance_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r warning=FALSE, message=FALSE}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_dance_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22dance+addiction%22+&size=200" # 103 results returned on 20/08/2023
 
@@ -6527,7 +6527,7 @@ write.csv(results_YouTube_final, "Data extraction/YouTube_data_cleaned.csv", row
 **Notes post-search:** As mentioned above, the only relevant study returned here is called: "Addiction to death.". This will be isolated later when I refine the dataset.
 
 
-```{r warning=FALSE, message=FALSE}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -6614,7 +6614,7 @@ write.csv(results_death, "Data extraction/death_data.csv", row.names=FALSE)
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r warning=FALSE, message=FALSE}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_death_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=Addiction+to+death%5BTitle%2FAbstract%5D&size=200" # 103 results returned on 20/08/2023
 
@@ -6774,7 +6774,7 @@ write.csv(results_death_final, "Data extraction/death_data_cleaned.csv", row.nam
 **Notes post-search:** As mentioned above, the only relevant study returned here is called: "Addiction to near-death.". This will be isolated later when I refine the dataset.
 
 
-```{r warning=FALSE, message=FALSE}
+```{{r warning=FALSE, message=FALSE}}
 #  Clean environment:
 rm(list = ls())
 
@@ -6861,7 +6861,7 @@ write.csv(results_near_death, "Data extraction/near_death_data.csv", row.names=F
 
 Again, we're going to use the `rvest` package to scrape the titles returned from the manual search in PubMed, then join the two datasets using the PMID, retaining the title from this new dataset.
 
-```{r warning=FALSE, message=FALSE}
+```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
 url_near_death_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%22Addiction+to+near-death%22&size=200" # 103 results returned on 20/08/2023
 
@@ -7003,6 +7003,43 @@ results_near_death_final <- results_near_death3 %>% bind_cols(Label_near_death) 
 # Now save the cleaned results
 write.csv(results_near_death_final, "Data extraction/near_death_data_cleaned.csv", row.names=FALSE)
 
+```
+
+
+## Join all final datasets
+
+Now I'll produce one clean dataset that contains all of the refined datasets for each of the behavioural addictions.
+
+```{r}
+combined_results_clean <- bind_rows(results_behav_addictions_final,
+          results_gambling_final,
+          results_gaming_final,
+          results_work_final,
+          results_study_final,
+          results_exercise_final,
+          results_social_media_final,
+          results_smart_phone_final,
+          results_cybersex_final,
+          results_sex_final,
+          results_pornography_final,
+          results_tanning_final,
+          results_hair_pulling_final,
+          results_love_final,
+          results_selfie_final,
+          results_extreme_sport_final,
+          results_running_final,
+          results_dance_final,
+          results_joyriding_final,
+          results_crime_final,
+          results_polysurgical_final,
+          results_fortune_telling_final,
+          results_YouTube_final,
+          results_death_final,
+          results_near_death_final
+          )
+
+# Now save the cleaned results
+write.csv(combined_results_clean, "Data extraction/combined_results_clean.csv", row.names=FALSE)
 ```
 
 ### END
