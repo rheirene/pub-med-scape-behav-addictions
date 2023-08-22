@@ -45,7 +45,7 @@ I only note this for anyone wanting to reproduce this analysis who tries to run 
 
 The latest dates of data extraction for each "behavioural addiction" are below:
 
--   Behavioural addiction: 11/07/2023
+-   Behavioural addiction: 23/08/2023
 -   Gambling: 10/07/2023
 -   Gaming: 10/07/2023
 -   Work: 10/07/2023
@@ -204,7 +204,7 @@ It's important to note that, unlike using the `rentrez` package X uses data via 
 
 ```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
-url_behav_addictions_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&size=200" # 856 results on 11/07/2023. 
+url_behav_addictions_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&size=200" # 877 results on 123/08/2023. 
 
 # Read and parse the webpage:
 webpage_behav_addictions_rvest <- read_html(url_behav_addictions_rvest)
@@ -282,13 +282,15 @@ results_behav_addictions<- read.csv("Data extraction/behav_addictions_data.csv")
 results_behav_addictions_rvest<- read.csv("Data extraction/behav_addictions_titles.csv") %>% 
   as_tibble()
 
-# Merge the two datasets:
+# Merge our two datasets:
 results_behav_addictions2 <- results_behav_addictions %>%
-  rename("Title_trunc" = "Title") %>% # Designate the truncated title from the primary dataset
-  merge(results_behav_addictions_rvest, by = "PMID") %>%
-  relocate(Title) %>% # Place full title first for ease
   as_tibble() %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
+  full_join(results_behav_addictions_rvest, by = "PMID") %>%
+  select(-Title_trunc) %>% # Bye truncated title
+  relocate(Title) %>% # Place full title first for ease
   print()
+
 
 # Check results:
 # View(results_behav_addictions2)
@@ -449,7 +451,7 @@ As above, we're going to use the `rvest` package to scrape the titles of gamblin
 
 ```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
-url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200" # 3502 results on 10/07/2023
+url_gambling_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%22gambling+disorder%22%5BTitle%2FAbstract%5D%29+OR+%28%22disordered+gambling%22%5BTitle%2FAbstract%5D+OR+%22gambling+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22addicted+gambler*%22%5BTitle%2FAbstract%5D%29+OR+%28%22pathological+gambl*%22%5BTitle%2FAbstract%5D%29+OR+%28%22compulsive+gambl*%22%5BTitle%2FAbstract%5D%29&size=200" # 3501 results on 10/07/2023
 
 # Read and parse the webpage:
 webpage_gambling_rvest <- read_html(url_gambling_rvest)
@@ -527,13 +529,15 @@ results_gambling<- read.csv("Data extraction/gambling_data.csv") %>%
 results_gambling_rvest<- read.csv("Data extraction/gambling_titles.csv") %>% 
   as_tibble()
 
-# Merge the two datasets:
+# Merge our two datasets:
 results_gambling2 <- results_gambling %>%
-  rename("Title_trunc" = "Title") %>% # Designate the truncated title from the primary dataset
-  merge(results_gambling_rvest, by = "PMID") %>%
-  relocate(Title) %>% # Place full title first for ease
   as_tibble() %>%
+  rename("Title_trunc" = "Title") %>% # Designate the truncated title from our primary dataset so we can remove it once we get the full title
+  full_join(results_gambling_rvest, by = "PMID") %>%
+  select(-Title_trunc) %>% # Bye truncated title
+  relocate(Title) %>% # Place full title first for ease
   print()
+
 
 # Check results:
 # View(results_gambling2)
