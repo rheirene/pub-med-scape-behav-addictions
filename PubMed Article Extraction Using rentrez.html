@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Rob Heirene">
-<meta name="dcterms.date" content="2023-08-23">
+<meta name="dcterms.date" content="2023-08-26">
 
 <title>PubMed Article Extraction Using rentrez</title>
 <style>
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 23, 2023</p>
+      <p class="date">August 26, 2023</p>
     </div>
   </div>
   
@@ -3723,20 +3723,20 @@ return(details_df_smart_phone)</code></pre>
 <span id="cb186-15"><a href="#cb186-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(Title) <span class="sc">%&gt;%</span> <span class="co"># Place full title first for ease</span></span>
 <span id="cb186-16"><a href="#cb186-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 275 × 13
+<pre><code># A tibble: 884 × 13
    Title         PMID  Year Month DOI   Abstract Full_Author_Name Author_Address
    &lt;chr&gt;        &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;         
- 1 Decision m… 3.76e7  2023 &lt;NA&gt;  10.3… "INTROD… Muller, Silke M… "Department o…
- 2 Mapping th… 3.75e7  2023 Jul   S016… "Contem… Hunt, Brian; Za… "Institute fo…
- 3 The World … 3.75e7  2022 Dec   10.1… "OBJECT… Turner, Daniel;… "Department o…
- 4 Should pro… 3.75e7  2023 Dec   10.1… "Despit… Pistre, Natasha… "Department o…
- 5 Measuring … 3.75e7  2023 Jul   10.1… "BACKGR… Miele, Cecile; … "Laboratory Q…
- 6 Fetal Fant… 3.75e7  2023 Jul   10.1… "This a… Erdman, Andrew L "LCSW, 235 We…
- 7 Personalit… 3.74e7  2023 Jun   10.1… "BACKGR… Engel, Jannis; … "Department o…
- 8 How the Ri… 3.73e7  2023 Jun   10.7… "On Jan… Irizarry, Ricar… "Psychiatry, …
- 9 Childhood … 3.72e7  2023 Jan   10.1… "Object… Zashchirinskaia… "Saint-Peters…
-10 Frequency … 3.71e7  2023 &lt;NA&gt;  10.1… "INTROD… Schreck, Benoit… "Nantes Unive…
-# ℹ 265 more rows
+ 1 "Is There … 3.76e7  2023 Aug   1501… "Purpos… AlSaif, Haytham… "Department o…
+ 2 "The Relat… 3.76e7  2023 Aug   647 … "Smartp… Gong, Yanbin; Y… "College of H…
+ 3 "Impact of… 3.76e7  2023 &lt;NA&gt;  10.2… "PURPOS… Wu, Rong; Luo, … "Department o…
+ 4 "An Integr… 3.76e7  2023 Jan-… 10.4… "BACKGR… Tadpatrikar, As… "Service for …
+ 5 "The effec… 3.76e7  2023 Aug   10.1… "AIM: T… Erden, Ibrahim … "Enka Adapaza…
+ 6 "The role … 3.76e7  2023 &lt;NA&gt;  10.3… "BACKGR… Zhang, Li; Wang… "School of Pu…
+ 7 "Toward th… 3.76e7  2023 Jul   10.3… "Orthos… Shinno, Kazuma;… "Department o…
+ 8 "Factors a… 3.75e7  2023 Aug   S016… "BACKGR… Kim, Jinyung; L… "University o…
+ 9 "Can restr… 3.75e7  2023 Jul   S030… "BACKGR… Tu, Zhihao; He,… "Navy Special…
+10 "Intoleran… 3.75e7  2023 Jul   10.1… "OBJECT… Zhang, Sensen; … "Institute of…
+# ℹ 874 more rows
 # ℹ 5 more variables: Language &lt;chr&gt;, Publication_Type &lt;chr&gt;,
 #   Journal_name_short &lt;chr&gt;, Conflict_of_Interest_Statement &lt;chr&gt;,
 #   Journal_Title &lt;chr&gt;</code></pre>
@@ -3753,7 +3753,7 @@ return(details_df_smart_phone)</code></pre>
 <pre><code># A tibble: 1 × 1
       n
   &lt;int&gt;
-1   273</code></pre>
+1   884</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb190"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb190-1"><a href="#cb190-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Total number with basic duplication removal based on PMID:</span></span>
 <span id="cb190-2"><a href="#cb190-2" aria-hidden="true" tabindex="-1"></a>Simple_duplicate_removal_n <span class="ot">&lt;-</span> results_smart_phone2 <span class="sc">%&gt;%</span></span>
@@ -3764,13 +3764,13 @@ return(details_df_smart_phone)</code></pre>
 <pre><code># A tibble: 1 × 1
       n
   &lt;int&gt;
-1   275</code></pre>
+1   884</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb192"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary of the year variable:</span></span>
 <span id="cb192-2"><a href="#cb192-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results_smart_phone2<span class="sc">$</span>Year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-   1987    2010    2016    2014    2020    2023 </code></pre>
+   2008    2019    2021    2020    2022    2023 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb194"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of publications per year:</span></span>
 <span id="cb194-2"><a href="#cb194-2" aria-hidden="true" tabindex="-1"></a>smart_phone_hist<span class="ot">&lt;-</span> <span class="fu">hist</span>(results_smart_phone2<span class="sc">$</span>Year,</span>
@@ -3790,30 +3790,30 @@ return(details_df_smart_phone)</code></pre>
 <span id="cb195-7"><a href="#cb195-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span></span>
 <span id="cb195-8"><a href="#cb195-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 143 × 2
+<pre><code># A tibble: 258 × 2
    Journal_name_short                  n
    &lt;chr&gt;                           &lt;int&gt;
- 1 J Behav Addict                     25
- 2 J Sex Med                          17
- 3 J Sex Marital Ther                 13
- 4 Arch Sex Behav                      9
- 5 Cureus                              7
- 6 Int J Environ Res Public Health     5
- 7 J Addict Med                        5
- 8 J Sex Res                           5
- 9 Addiction                           4
-10 Encephale                           4
-11 Front Psychiatry                    4
-12 Addict Behav Rep                    3
-13 BMC Psychiatry                      3
-14 Braz J Psychiatry                   3
-15 CNS Spectr                          3
-16 Clin Psychol Rev                    3
-17 Front Psychol                       3
-18 Indian J Psychiatry                 3
-19 J Clin Med                          3
-20 J Psychoactive Drugs                3
-# ℹ 123 more rows</code></pre>
+ 1 Int J Environ Res Public Health    94
+ 2 Front Psychol                      77
+ 3 Front Psychiatry                   41
+ 4 J Behav Addict                     38
+ 5 PLoS One                           38
+ 6 Addict Behav                       25
+ 7 Front Public Health                24
+ 8 BMC Psychiatry                     22
+ 9 Perspect Psychiatr Care            17
+10 Psychol Res Behav Manag            17
+11 Cyberpsychol Behav Soc Netw        15
+12 J Affect Disord                    14
+13 Healthcare (Basel)                 13
+14 Heliyon                            11
+15 Psychiatry Investig                11
+16 Psychiatry Res                     10
+17 Int J Ment Health Addict            8
+18 J Family Med Prim Care              8
+19 J Educ Health Promot                6
+20 J Korean Med Sci                    6
+# ℹ 238 more rows</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb197"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb197-1"><a href="#cb197-1" aria-hidden="true" tabindex="-1"></a><span class="co"># View(results_smart_phone2) # Visually inspect results</span></span>
 <span id="cb197-2"><a href="#cb197-2" aria-hidden="true" tabindex="-1"></a></span>
