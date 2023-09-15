@@ -22,7 +22,7 @@ The criteria for inclusion are:
 
     -   the direct use of the terms "addiction" or "dependence"
 
-    -   the use of accepted (DSM/ICD) or previosuly accepted (e.g., "pathological gambling") diagnostic terms (e.g., "gambling disorder")
+    -   the use of accepted (DSM/ICD) or previously accepted (e.g., "pathological gambling") diagnostic terms (e.g., "gambling disorder")
 
     -   the use of a term or phrase which is not a clinically/medically accepted diagnostic term (i.e., it is not included in any nosological system), but is used in the research area as such (e.g., "compulsory exercise", "workaholism")
 
@@ -104,9 +104,9 @@ groundhog.library(packages, "2023-06-07")
 
 **Notes pre-search:** MeSH terms were pretty useless here (unlike the more specific behavioural addiction searches used below) so I relied on my knowledge of the field for terms to use.
 
-**Actual search used:** (((("behavioural addiction"\[Title/Abstract\]) OR ("behavioral addiction"\[Title/Abstract\])) OR ("non-drug addiction"\[Title/Abstract\])) OR ("non-substance addiction"\[Title/Abstract\])) OR ("non-chemical addiction"\[Title/Abstract\])
+**Actual search used:** (((("behavioural addiction*"[Title/Abstract]) OR ("behavioral addiction*"[Title/Abstract])) OR ("non-drug addiction*"[Title/Abstract])) OR ("non-substance addiction*"[Title/Abstract])) OR ("non-chemical addiction*"[Title/Abstract])
 
-**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&size=200). PubMed format display can be found [here](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&format=pubmed&size=200)
+**Manual search results:** [link](https://pubmed.ncbi.nlm.nih.gov/?term=((((%22behavioural%20addiction*%22%5C%5BTitle%2FAbstract%5C%5D)%20OR%20(%22behavioral%20addiction%22%5C%5BTitle%2FAbstract%5C%5D))%20OR%20(%22non-drug%20addiction%22%5C%5BTitle%2FAbstract%5C%5D))%20OR%20(%22non-substance%20addiction%22%5C%5BTitle%2FAbstract%5C%5D))%20OR%20(%22non-chemical%20addiction%22%5C%5BTitle%2FAbstract%5C%5D)&sort=pubdate&size=200). PubMed format display can be found [here](https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&format=pubmed&size=200)
 
 **Notes post-search:** I manually scanned the results returned on the PubMed site for relevance and all appeared to meet the inclusion criteria. There will certainly be one of overlap between the studies returned from this search and the search is specific to individual behavioural addictions.
 
@@ -115,7 +115,7 @@ groundhog.library(packages, "2023-06-07")
 # rm(list = ls())
 
 # Define the search terms/string:
-search_term_behav_addictions <- '(((("behavioural addiction"[Title/Abstract]) OR ("behavioral addiction"[Title/Abstract])) OR ("non-drug addiction"[Title/Abstract])) OR ("non-substance addiction"[Title/Abstract])) OR ("non-chemical addiction"[Title/Abstract])'
+search_term_behav_addictions <- '(((("behavioural addiction*"[Title/Abstract]) OR ("behavioral addiction*"[Title/Abstract])) OR ("non-drug addiction*"[Title/Abstract])) OR ("non-substance addiction*"[Title/Abstract])) OR ("non-chemical addiction*"[Title/Abstract])'
 
 # Use entrez_search to get the IDs of the articles:
 search_results_behav_addictions <- entrez_search(db="pubmed", term=search_term_behav_addictions, retmax=20000)
@@ -204,7 +204,7 @@ It's important to note that, unlike using the `rentrez` package X uses data via 
 
 ```{{r warning=FALSE, message=FALSE}}
 # Add search URL:
-url_behav_addictions_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&size=200" # 877 results on 123/08/2023. 
+url_behav_addictions_rvest <- "https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction*%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction*%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction*%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction*%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction*%22%5BTitle%2FAbstract%5D%29&sort=pubdate&size=200" # 1455 results on 07/09/2023. 
 
 # Read and parse the webpage:
 webpage_behav_addictions_rvest <- read_html(url_behav_addictions_rvest)
@@ -306,23 +306,27 @@ results_behav_addictions2 %>%
 # Show duplicate titles:
 results_behav_addictions2 %>% 
   group_by(Title) %>% 
-  filter(n()>1) 
-# **This is actually two seperate commentaries on the same article**
+  filter(n()>1)
+  # View() # Manually inspect duplicates
 
+# **There are quite a few duplicates but most of these are not true duplicates and instead two seperate commentaries on the same article or just articles with the same title published on different years by different people. There is, however, one duplicate that does appear to be genuine with the PMID: 32094908. Let's remove that next:**
+
+results_behav_addictions3 <- results_behav_addictions2 %>% 
+  filter(PMID != "32094908")
 #  Okay, now we are confident that we have a clean dataset, let's explore!
 
 # Summary of the Year  variable:
-summary(results_behav_addictions2$Year)
+summary(results_behav_addictions3$Year)
 
 # Number of publications per year:
-hist(results_behav_addictions2$Year,
+hist(results_behav_addictions3$Year,
                      xlim = c(1960,2023),
                      breaks = 30,
                      main = "Papers published per year on 'Behavioural Addictions' (PubMed)",
                      xlab = "Year") # Even though the earliest year an article was published is 1994, I've set the range to started 1960 as this is where the starting point is across all other behavioural addiction searches.
 
 # Most popular journals:
-results_behav_addictions2 %>% 
+results_behav_addictions3 %>% 
   group_by(Journal_name_short) %>% 
   summarise(
     n = n()
@@ -333,9 +337,9 @@ results_behav_addictions2 %>%
 # View(results_behav_addictions_sans_duplicates) # Visually inspect results
 
 # Now I need to add a label to all of these studies to signify that they Were returned from the behav_addictions search so that we can distinguish them from other studies when we later joined the datasets together:
-Label_Behavioural_addictions <- rep("behavioural_addictions", times = count(results_behav_addictions2))
+Label_Behavioural_addictions <- rep("behavioural_addictions", times = count(results_behav_addictions3))
 
-results_behav_addictions_final <- results_behav_addictions2 %>% bind_cols(Label_Behavioural_addictions) %>%
+results_behav_addictions_final <- results_behav_addictions3 %>% bind_cols(Label_Behavioural_addictions) %>%
   rename(Label = 14)
 
 # View(results_behav_addictions_final)
@@ -7021,7 +7025,8 @@ combined_results_clean <- bind_rows(results_behav_addictions_final,
           results_work_final,
           results_study_final,
           results_exercise_final,
-          results_social_media_final,
+          # results_social_media_final,
+          results_internet_final,
           results_smart_phone_final,
           results_cybersex_final,
           results_sex_final,
@@ -7042,6 +7047,7 @@ combined_results_clean <- bind_rows(results_behav_addictions_final,
           results_near_death_final
           )
 
+# INTERNET
 # Now save the cleaned results
 write.csv(combined_results_clean, "Data extraction/combined_results_clean.csv", row.names=FALSE)
 ```

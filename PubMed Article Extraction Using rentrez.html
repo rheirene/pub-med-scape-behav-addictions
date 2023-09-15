@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Rob Heirene">
-<meta name="dcterms.date" content="2023-08-26">
+<meta name="dcterms.date" content="2023-09-15">
 
 <title>PubMed Article Extraction Using rentrez</title>
 <style>
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 26, 2023</p>
+      <p class="date">September 15, 2023</p>
     </div>
   </div>
   
@@ -485,15 +485,15 @@ Code blocks
 <section id="extract-studies-and-perform-a-basic-clean-of-dataset" class="level4">
 <h4 class="anchored" data-anchor-id="extract-studies-and-perform-a-basic-clean-of-dataset">Extract studies and perform a basic clean of dataset</h4>
 <p><strong>Notes pre-search:</strong> MeSH terms were pretty useless here (unlike the more specific behavioural addiction searches used below) so I relied on my knowledge of the field for terms to use.</p>
-<p><strong>Actual search used:</strong> ((((“behavioural addiction”[Title/Abstract]) OR (“behavioral addiction”[Title/Abstract])) OR (“non-drug addiction”[Title/Abstract])) OR (“non-substance addiction”[Title/Abstract])) OR (“non-chemical addiction”[Title/Abstract])</p>
-<p><strong>Manual search results:</strong> <a href="https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&amp;size=200">link</a>. PubMed format display can be found <a href="https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&amp;format=pubmed&amp;size=200">here</a></p>
+<p><strong>Actual search used:</strong> ((((“behavioural addiction<em>”[Title/Abstract]) OR (”behavioral addiction</em>”[Title/Abstract])) OR (“non-drug addiction<em>”[Title/Abstract])) OR (”non-substance addiction</em>”[Title/Abstract])) OR (“non-chemical addiction*“[Title/Abstract])</p>
+<p><strong>Manual search results:</strong> <a href="https://pubmed.ncbi.nlm.nih.gov/?term=((((%22behavioural%20addiction*%22%5C%5BTitle%2FAbstract%5C%5D)%20OR%20(%22behavioral%20addiction%22%5C%5BTitle%2FAbstract%5C%5D))%20OR%20(%22non-drug%20addiction%22%5C%5BTitle%2FAbstract%5C%5D))%20OR%20(%22non-substance%20addiction%22%5C%5BTitle%2FAbstract%5C%5D))%20OR%20(%22non-chemical%20addiction%22%5C%5BTitle%2FAbstract%5C%5D)&amp;sort=pubdate&amp;size=200">link</a>. PubMed format display can be found <a href="https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&amp;format=pubmed&amp;size=200">here</a></p>
 <p><strong>Notes post-search:</strong> I manually scanned the results returned on the PubMed site for relevance and all appeared to meet the inclusion criteria. There will certainly be one of overlap between the studies returned from this search and the search is specific to individual behavioural addictions.</p>
 <p>```{{r warning=FALSE, message=FALSE}} # Clean environment: # rm(list = ls())</p>
 </section>
 </section>
 <section id="define-the-search-termsstring" class="level1">
 <h1>Define the search terms/string:</h1>
-<p>search_term_behav_addictions &lt;- ‘((((“behavioural addiction”[Title/Abstract]) OR (“behavioral addiction”[Title/Abstract])) OR (“non-drug addiction”[Title/Abstract])) OR (“non-substance addiction”[Title/Abstract])) OR (“non-chemical addiction”[Title/Abstract])’</p>
+<p>search_term_behav_addictions &lt;- ’((((“behavioural addiction<em>”[Title/Abstract]) OR (”behavioral addiction</em>”[Title/Abstract])) OR (“non-drug addiction<em>”[Title/Abstract])) OR (”non-substance addiction</em>”[Title/Abstract])) OR (“non-chemical addiction*“[Title/Abstract])’</p>
 </section>
 <section id="use-entrez_search-to-get-the-ids-of-the-articles" class="level1">
 <h1>Use entrez_search to get the IDs of the articles:</h1>
@@ -555,7 +555,7 @@ return(details_df_behav_addictions)</code></pre>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{r warning=FALSE, message=FALSE}</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Add search URL:</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>url_behav_addictions_rvest <span class="ot">&lt;-</span> <span class="st">"https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction%22%5BTitle%2FAbstract%5D%29&amp;size=200"</span> <span class="co"># 877 results on 123/08/2023. </span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>url_behav_addictions_rvest <span class="ot">&lt;-</span> <span class="st">"https://pubmed.ncbi.nlm.nih.gov/?term=%28%28%28%28%22behavioural+addiction*%22%5BTitle%2FAbstract%5D%29+OR+%28%22behavioral+addiction*%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-drug+addiction*%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-substance+addiction*%22%5BTitle%2FAbstract%5D%29%29+OR+%28%22non-chemical+addiction*%22%5BTitle%2FAbstract%5D%29&amp;sort=pubdate&amp;size=200"</span> <span class="co"># 1455 results on 07/09/2023. </span></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Read and parse the webpage:</span></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>webpage_behav_addictions_rvest <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url_behav_addictions_rvest)</span>
@@ -639,20 +639,20 @@ return(details_df_behav_addictions)</code></pre>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(Title) <span class="sc">%&gt;%</span> <span class="co"># Place full title first for ease</span></span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 877 × 13
+<pre><code># A tibble: 1,455 × 13
    Title         PMID  Year Month DOI   Abstract Full_Author_Name Author_Address
    &lt;chr&gt;        &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;         
- 1 I feel add… 3.76e7  2023 &lt;NA&gt;  10.7… "BACKGR… Favieri, France… "Department o…
- 2 Working me… 3.76e7  2023 Jul   S001… "BACKGR… Ngetich, Ronald… "Centre of Ex…
- 3 A Systemat… 3.76e7  2023 Aug   10.3… "OBJECT… Sa, Rafael Rich… "Department o…
- 4 Self-exclu… 3.76e7  2023 Aug   10.1… "BACKGR… Hakansson, A; K… "Department o…
- 5 Mapping th… 3.75e7  2023 Jul   S016… "Contem… Hunt, Brian; Za… "Institute fo…
- 6 Biopsychos… 3.75e7  2023 &lt;NA&gt;  10.3… "BACKGR… Chang, Rose Seo… "Department o…
- 7 Effectiven… 3.75e7  2023 Jul   10.3… "Althou… Carrascosa-Arte… "498-Research…
- 8 Abnormal s… 3.75e7  2023 Jul   10.1… "BACKGR… Zeng, Xinglin; … "1Centre for …
- 9 Editorial:… 3.75e7  2023 &lt;NA&gt;  10.3…  &lt;NA&gt;    Dong, Huixi; Zh… "Mental Healt…
-10 Early mala… 3.75e7  2023 Jul   10.1… "BACKGR… Sakulsriprasert… "Department o…
-# ℹ 867 more rows
+ 1 Systematic… 3.77e7  2023 Sep   10.1… "Playin… Hurel, Elodie; … "CHU Nantes, …
+ 2 Standalone… 3.76e7  2023 Dec   S030… "Proble… Hamamura, Toshi… "KDDI Researc…
+ 3 The Role o… 3.76e7  2023 Aug   10.1… "Intern… Demirci, Esra; … "Department o…
+ 4 Addiction … 3.76e7  2023 Aug   10.1… "OBJECT… Kim, Hyoun S; M… "1Department …
+ 5 I feel add… 3.76e7  2023 &lt;NA&gt;  10.7… "BACKGR… Favieri, France… "Department o…
+ 6 Working me… 3.76e7  2023 Jul   S001… "BACKGR… Ngetich, Ronald… "Centre of Ex…
+ 7 Abnormal f… 3.76e7  2023 Aug   10.1… "BACKGR… Bellmunt-Gil, A… "1Turku Brain…
+ 8 A Systemat… 3.76e7  2023 Aug   10.3… "OBJECT… Sa, Rafael Rich… "Department o…
+ 9 Self-exclu… 3.76e7  2023 Aug   10.1… "BACKGR… Hakansson, A; K… "Department o…
+10 Mapping th… 3.75e7  2023 Sep   S016… "Contem… Hunt, Brian; Za… "Institute fo…
+# ℹ 1,445 more rows
 # ℹ 5 more variables: Language &lt;chr&gt;, Publication_Type &lt;chr&gt;,
 #   Journal_name_short &lt;chr&gt;, Conflict_of_Interest_Statement &lt;chr&gt;,
 #   Journal_Title &lt;chr&gt;</code></pre>
@@ -678,30 +678,43 @@ return(details_df_behav_addictions)</code></pre>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Show duplicate titles:</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>results_behav_addictions2 <span class="sc">%&gt;%</span> </span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Title) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">n</span>()<span class="sc">&gt;</span><span class="dv">1</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">n</span>()<span class="sc">&gt;</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 13
-# Groups:   Title [1]
-  Title          PMID  Year Month DOI   Abstract Full_Author_Name Author_Address
-  &lt;chr&gt;         &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;         
-1 Commentary … 2.66e7  2015 Sep   10.1… "This c… Blaszczynski, A… "School of Ps…
-2 Commentary … 2.66e7  2015 Sep   10.1… "This c… Spada, Marcanto… "Division of …
+<pre><code># A tibble: 11 × 13
+# Groups:   Title [5]
+   Title         PMID  Year Month DOI   Abstract Full_Author_Name Author_Address
+   &lt;chr&gt;        &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;         
+ 1 Psychology… 3.06e7  2018 Dec   10.1… "Having… Chung, Tammy     "University o…
+ 2 Psychology… 3.05e7  2018 Nov   10.1… "Having… Chung, Tammy     "University o…
+ 3 Impulse co… 2.95e7  2018 Aug   10.1… "Impuls… Marques, Ana; D… "EA 7280, Uni…
+ 4 Call for r… 2.95e7  2018 Mar   10.1…  &lt;NA&gt;    Potenza, Marc N…  &lt;NA&gt;         
+ 5 Call for r… 3.21e7  2018 Mar   10.1…  &lt;NA&gt;    Potenza, Marc N…  &lt;NA&gt;         
+ 6 [Behaviora… 3.05e7  2016 Feb   &lt;NA&gt;   &lt;NA&gt;    Karila, Laurent  "Service de p…
+ 7 Commentary… 2.66e7  2015 Sep   10.1… "This c… Blaszczynski, A… "School of Ps…
+ 8 Commentary… 2.66e7  2015 Sep   10.1… "This c… Spada, Marcanto… "Division of …
+ 9 [Behaviora… 2.60e7  2015 May   10.1…  &lt;NA&gt;    Boning, Jobst    "Zentrum fur …
+10 [Behaviora… 2.31e7  2012 Dec   S075… "Each a… Guillou-Landrea… "Institut fed…
+11 Impulse co… 2.22e7  2012 Jan   10.1… "Impuls… Vilas, Dolores;… "Institut Cli…
 # ℹ 5 more variables: Language &lt;chr&gt;, Publication_Type &lt;chr&gt;,
 #   Journal_name_short &lt;chr&gt;, Conflict_of_Interest_Statement &lt;chr&gt;,
 #   Journal_Title &lt;chr&gt;</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># **This is actually two seperate commentaries on the same article**</span></span>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>  <span class="co"># View() # Manually inspect duplicates</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#  Okay, now we are confident that we have a clean dataset, let's explore!</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># **There are quite a few duplicates but most of these are not true duplicates and instead two seperate commentaries on the same article or just articles with the same title published on different years by different people. There is, however, one duplicate that does appear to be genuine with the PMID: 32094908. Let's remove that next:**</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary of the Year  variable:</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results_behav_addictions2<span class="sc">$</span>Year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>results_behav_addictions3 <span class="ot">&lt;-</span> results_behav_addictions2 <span class="sc">%&gt;%</span> </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PMID <span class="sc">!=</span> <span class="st">"32094908"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#  Okay, now we are confident that we have a clean dataset, let's explore!</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary of the Year  variable:</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results_behav_addictions3<span class="sc">$</span>Year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-   1994    2016    2018    2018    2021    2023 </code></pre>
+   1990    2015    2018    2018    2021    2023 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of publications per year:</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(results_behav_addictions2<span class="sc">$</span>Year,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(results_behav_addictions3<span class="sc">$</span>Year,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">1960</span>,<span class="dv">2023</span>),</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks =</span> <span class="dv">30</span>,</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">main =</span> <span class="st">"Papers published per year on 'Behavioural Addictions' (PubMed)"</span>,</span>
@@ -710,7 +723,7 @@ return(details_df_behav_addictions)</code></pre>
 <p><img src="PubMed-Article-Extraction-Using-rentrez_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Most popular journals:</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>results_behav_addictions2 <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>results_behav_addictions3 <span class="sc">%&gt;%</span> </span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Journal_name_short) <span class="sc">%&gt;%</span> </span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>()</span>
@@ -718,67 +731,67 @@ return(details_df_behav_addictions)</code></pre>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 277 × 2
-   Journal_name_short                                                n
-   &lt;chr&gt;                                                         &lt;int&gt;
- 1 J Behav Addict                                                  107
- 2 Front Psychiatry                                                 58
- 3 Addict Behav                                                     39
- 4 Int J Environ Res Public Health                                  37
- 5 Addiction                                                        28
- 6 Front Psychol                                                    27
- 7 PLoS One                                                         17
- 8 Psychiatry Res                                                   17
- 9 J Gambl Stud                                                     16
-10 Addict Biol                                                      14
-11 Adv Exp Med Biol                                                 12
-12 Cyberpsychol Behav Soc Netw                                      10
-13 CNS Spectr                                                        9
-14 Compr Psychiatry                                                  8
-15 Neurosci Biobehav Rev                                             8
-16 Clin Psychol Rev                                                  7
-17 Front Behav Neurosci                                              7
-18 Addict Behav Rep                                                  6
-19 Am J Drug Alcohol Abuse                                           6
-20 Int J Ment Health Addict                                          6
-21 J Addict Dis                                                      6
-22 J Clin Med                                                        6
-23 Aust N Z J Psychiatry                                             5
-24 BMC Psychiatry                                                    5
-25 Cureus                                                            5
-26 Drug Alcohol Depend                                               5
-27 Eur Addict Res                                                    5
-28 Eur Neuropsychopharmacol                                          5
-29 Neuropsychopharmacology                                           5
-30 Psychol Med                                                       5
-31 Sci Rep                                                           5
-32 Curr Addict Rep                                                   4
-33 Curr Psychol                                                      4
-34 Ir J Psychol Med                                                  4
-35 Nervenarzt                                                        4
-36 Prog Neuropsychopharmacol Biol Psychiatry                         4
-37 Psychiatr Danub                                                   4
-38 Psychiatr Hung                                                    4
-39 Psychiatry Investig                                               4
-40 Psychol Addict Behav                                              4
-41 Psychol Rep                                                       4
-42 Psychopharmacology (Berl)                                         4
-43 Transl Psychiatry                                                 4
-44 Z Kinder Jugendpsychiatr Psychother                               4
-45 BMC Psychol                                                       3
-46 BMC Public Health                                                 3
-47 Behav Brain Res                                                   3
-48 Behav Sci (Basel)                                                 3
-49 Brain Behav                                                       3
-50 Bundesgesundheitsblatt Gesundheitsforschung Gesundheitsschutz     3
-# ℹ 227 more rows</code></pre>
+<pre><code># A tibble: 378 × 2
+   Journal_name_short                            n
+   &lt;chr&gt;                                     &lt;int&gt;
+ 1 J Behav Addict                              184
+ 2 Front Psychiatry                             85
+ 3 Int J Environ Res Public Health              61
+ 4 Addict Behav                                 58
+ 5 Front Psychol                                40
+ 6 Addiction                                    36
+ 7 PLoS One                                     29
+ 8 J Gambl Stud                                 28
+ 9 Psychiatry Res                               24
+10 CNS Spectr                                   18
+11 Addict Biol                                  17
+12 Cyberpsychol Behav Soc Netw                  16
+13 J Clin Med                                   15
+14 Adv Exp Med Biol                             14
+15 Compr Psychiatry                             13
+16 Neurosci Biobehav Rev                        11
+17 Addict Behav Rep                             10
+18 J Addict Dis                                 10
+19 Aust N Z J Psychiatry                         9
+20 Drug Alcohol Depend                           9
+21 Encephale                                     9
+22 Eur Addict Res                                9
+23 Eur Neuropsychopharmacol                      9
+24 Neuropsychopharmacology                       9
+25 Prog Neuropsychopharmacol Biol Psychiatry     9
+26 Adicciones                                    8
+27 Am J Drug Alcohol Abuse                       8
+28 BMC Psychiatry                                8
+29 Clin Psychol Rev                              8
+30 Front Behav Neurosci                          8
+31 Nervenarzt                                    8
+32 Psychiatr Danub                               8
+33 Psychiatr Hung                                8
+34 Psychol Addict Behav                          8
+35 Psychopharmacology (Berl)                     8
+36 Subst Use Misuse                              8
+37 Int J Ment Health Addict                      7
+38 Transl Psychiatry                             7
+39 Appetite                                      6
+40 Asian J Psychiatr                             6
+41 Cureus                                        6
+42 Curr Pharm Des                                6
+43 J Neurosci                                    6
+44 J Psychiatr Res                               6
+45 Psychol Med                                   6
+46 Sci Rep                                       6
+47 Zh Nevrol Psikhiatr Im S S Korsakova          6
+48 Am J Addict                                   5
+49 Behav Sci (Basel)                             5
+50 Brain Behav                                   5
+# ℹ 328 more rows</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># View(results_behav_addictions_sans_duplicates) # Visually inspect results</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Now I need to add a label to all of these studies to signify that they Were returned from the behav_addictions search so that we can distinguish them from other studies when we later joined the datasets together:</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>Label_Behavioural_addictions <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"behavioural_addictions"</span>, <span class="at">times =</span> <span class="fu">count</span>(results_behav_addictions2))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>Label_Behavioural_addictions <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"behavioural_addictions"</span>, <span class="at">times =</span> <span class="fu">count</span>(results_behav_addictions3))</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>results_behav_addictions_final <span class="ot">&lt;-</span> results_behav_addictions2 <span class="sc">%&gt;%</span> <span class="fu">bind_cols</span>(Label_Behavioural_addictions) <span class="sc">%&gt;%</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>results_behav_addictions_final <span class="ot">&lt;-</span> results_behav_addictions3 <span class="sc">%&gt;%</span> <span class="fu">bind_cols</span>(Label_Behavioural_addictions) <span class="sc">%&gt;%</span></span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Label =</span> <span class="dv">14</span>)</span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># View(results_behav_addictions_final)</span></span>
