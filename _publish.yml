@@ -1,0 +1,4 @@
+- source: PubMed Article Extraction Using rentrez.qmd
+  quarto-pub:
+    - id: cf34fc94-33aa-412f-82d3-5a30d77c7a26
+      url: 'https://robheirene.quarto.pub/pubmed-article-extraction-using-rentrez'
