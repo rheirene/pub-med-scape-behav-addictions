@@ -125,7 +125,9 @@ groundhog.library(packages, "2023-06-07")
 
 #### Extract studies and perform a basic clean of dataset
 
-**Notes pre-search:** MeSH terms were pretty useless here (unlike the more specific behavioural addiction searches used below) so I relied on my knowledge of the field for terms to use.
+**Notes pre-search:** MeSH terms were pretty useless here (unlike the more specific behavioural
+
+addiction searches used below) so I relied on my knowledge of the field for terms to use.
 
 **Actual search used:** (((("behavioural addiction*"\[Title/Abstract\]) OR ("behavioral addiction*"\[Title/Abstract\])) OR ("non-drug addiction*"\[Title/Abstract\])) OR ("non-substance addiction*"\[Title/Abstract\])) OR ("non-chemical addiction\*"\[Title/Abstract\])
 
@@ -294,7 +296,7 @@ It's important to note that, unlike using the `rentrez` package X uses data via 
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -545,7 +547,7 @@ As above, we're going to use the `rvest` package to scrape the titles of gamblin
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -824,7 +826,7 @@ As with the gambling study extraction, we're going to use the `rvest` package to
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 
@@ -1102,7 +1104,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -1377,7 +1379,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -1656,7 +1658,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -1943,7 +1945,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -2214,7 +2216,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -2479,7 +2481,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -2747,7 +2749,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -2986,7 +2988,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -3234,7 +3236,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -3497,7 +3499,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -3747,7 +3749,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -3999,7 +4001,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -4258,7 +4260,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -4510,7 +4512,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -4774,7 +4776,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -5028,7 +5030,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -5273,7 +5275,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -5520,7 +5522,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -5751,7 +5753,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -5987,7 +5989,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -6219,7 +6221,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -6453,7 +6455,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -6700,7 +6702,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -6943,7 +6945,7 @@ Again, we're going to use the `rvest` package to scrape the titles returned from
 
 #### Refine dataset
 
-Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be erratums)
+Now we need to identify and remove any duplicates, irrelevant studies, or entries with any other issues (e.g., those that turn out to be errata)
 
 ```{r warning=FALSE, message=FALSE, results=FALSE}
 # Load in first dataset in case environment clean on knit (above sections not executed for render):
@@ -7028,6 +7030,7 @@ combined_results_clean <- bind_rows(results_behav_addictions_final,
           results_work_final,
           results_study_final,
           results_exercise_final,
+          results_shopping_final,
           results_social_media_final,
           results_internet_final,
           results_smart_phone_final,
