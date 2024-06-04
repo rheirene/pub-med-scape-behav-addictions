@@ -34,7 +34,7 @@ The criteria for inclusion are:
 
 -   There are no restrictions on language publication, provided the title and abstract are presented in English as well as the primary language.
 
-The above criteria were used to design of the search terms/strings employed to extract data from the PubMed database (the search string for each behavioural addiction is included before the code used to extract the associated studies). A manual scan of all return studies for relevance according to the above criteria has been made.
+The above criteria were used to design of the search terms/strings employed to extract data from the PubMed database (the search string for each behavioural addiction is included before the code used to extract the associated studies). A manual scan of all returned studies for relevance according to the above criteria has been made.
 
 ::: {.callout-note appearance="minimal"}
 ## Code blocks
@@ -7069,7 +7069,7 @@ This document is rendered in HTML format and published online using [Quarto Pub]
 
 -   `quarto publish quarto-pub`
 
-The published online version of this document can be accessed here\[ADD\].
+The published online version of this document can be accessed here\[TO ADD\].
 
 ### Git/ Github
 
