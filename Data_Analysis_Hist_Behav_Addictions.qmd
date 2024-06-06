@@ -1,0 +1,516 @@
+---
+title: "Behavioural addictions research past & present: A bibliographic review"
+author: "Rob Heirene$^1$"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+execute:
+  echo: false
+format:
+  pdf:
+    toc: false
+    include-in-header:
+      text: |
+       \usepackage{setspace}
+       \onehalfspacing
+       \addtokomafont{disposition}{\rmfamily}
+        \setlength{\parindent}{2em}  
+---
+
+```{=tex}
+\begin{center}
+
+$^1$ School of Psychology, Brain \& Mind Centre, University of Sydney, Australia
+
+\end{center}
+```
+
+------------------------------------------------------------------------
+
+ 
+
+**Correspondence:** robert.heirene\@sydney.edu.au
+
+**Conflicts of interest:** None
+
+**Funding:** No funding was received for this project.
+
+\newpage
+
+```{r output=FALSE, warning = FALSE, messages=FALSE}
+# Install and load the groundhog package to ensure consistency of the package versions used here:
+# install.packages("groundhog") # Install
+
+# Load in packages using `groundhog` to ensure consistency of the versions used here:
+
+library(groundhog) # Load
+
+# List desired packages:
+packages <- c('tidyverse', # Clean, organise, and visualise data
+              'readr', # Load dataset from GitHib
+              'RCurl', # Load dataset from GitHib
+              'gt', #  table data
+              'gtExtras', # Add colours to gt tables
+              'plotly', # Add interactive elements to figures
+              'gganimate', # Make animated plots
+              'transformr', # Needed for certain animations (dumbell lines)
+              'png',# Helps render gganimate plots
+              'gifski', # Helps render gganimate plots
+              'rmarkdown', # Helps render gganimate plots
+              'av', # render gganimate plots as videos
+              'Cairo', # Anti-aliasing for the line plots (smoothing output)
+              'ggtext', # make fancy labels in plots
+              'sysfonts', # Special fonts for figures
+              'showtext', # Special fonts for figures
+              'htmlwidgets', # Make plotly plots HTML format for rendering in Quarto
+              'scico', # Colour palette
+              'kableExtra', # Make tables
+              'formattable', #  Add visualisations to tables
+              'gt', # Alternative table options
+              'gtExtras', # Add colours to gt tables
+              'gtsummary', # Create summary tables
+              'scales', # Allows for the removal of scientific notation in axis labels
+              'plotly', # Add interactive elements to figures
+              'htmlwidgets', # Make plotly plots HTML format
+              'ggrain', # Make rain cloud plots
+              'waffle', # make waffle plots for proportions
+              'networkD3', # Make Sankey plots to show relationships
+              'patchwork', # Join plots in multipanel layouts
+              'pwr', # Check statistical power
+              'car', # Perform ANCOVA stats tests
+              'rstatix', # Perform ANCOVA stats tests
+              'ggpubr', # Plots for linearity checks 
+              'broom', # Print summaries of statistical test outputs
+              'psych', # get detailed summary figures to Supplement statistical tests
+              'sysfonts', # Special fonts for figures
+              'showtext', # Special fonts for figures
+              'ggstatsplot', # Plots with statistical outputs
+              'janitor', # Make column names consistent format
+              'caret', # Compute model performance indices
+              'sessioninfo', # Detailed session info for reproducibility
+              "osfr",
+              "readxl",
+              "googlesheets4",# Access data from Google sheets
+              "Gmisc", # Produce prisma flow diagram
+              'grid', # Produce prisma flow diagram
+              "glue", # Produce prisma flow diagram
+              "httpuv", # supports access to Google sheets
+              "irr", # Compute interrater reliability stats
+              "apa", # print test results in apa format
+              "apaTables", # print test results in apa format
+              "ggh4x", # truncate graph axis lines
+              "truncnorm", # Generate normally distributed data with limits
+              "ComplexUpset" # produce upset plots
+)
+# Load desired package with versions specific to project start date:
+groundhog.library(packages, "2023-12-29")
+```
+
+```{r message = FALSE, warning = FALSE}
+
+## Setup presentation & graph specifications. Set up a standard theme for plots/data visualisations:
+
+# Load new font for figures/graphs
+font_add_google("Poppins")
+font_add_google("Reem Kufi", "Reem Kufi")
+font_add_google("Share Tech Mono", "techmono")
+windowsFonts(`Segoe UI` = windowsFont('Segoe UI'))
+showtext_auto()
+showtext_auto(enable = TRUE)
+
+# Save new theme for figures/graphs.This will determine the layout, presentation, font type and font size used in all data visualisations presented here:
+plot_theme<- theme_classic() +
+  theme(
+    text=element_text(family="Poppins"),
+    plot.title = element_text(hjust = 0.5, size = 16),
+          plot.subtitle = element_text(hjust = 0.5, size = 13),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+    plot.caption = element_text(size = 12),
+    legend.title=element_text(size=12), 
+    legend.text=element_text(size=10)
+        ) 
+```
+
+\newpage
+
+# Introduction
+
+The phrase "behavioural addiction" starts to appear in academic articles in the late 1980s and early 1990s (e.g., Alexander & Schweighofer, 1988). Soon after, Jaffe (1990) made the argument that the term "addiction" was being used too liberally---it was being applied to many non-drug-related behaviours and there was a risk of "*trivializing dependence*". These concerns did little to stem the expanding definition of the term. Since Jaffe's 1990 article the net of addiction has been cast wider and wider, capturing increasingly more repetitive or compulsive behaviour patterns.
+
+Fears that the term addiction will lose it seriousness or weight remain heightened today (). These may be justified---individuals who experience addictions to opioid-based drugs or alcohol can suffer serious, life-threatening harm and withdrawal episodes. Assigning the same label to describe their experience and someone who has a largely inconsequential difficulty controlling their spending or screen use could indeed trivialise the condition. Yet, there is increasing evidence that people are compulsively engaging with behaviours like gambling (), gaming (), smart phones (), and exercise () in a way that resembles substance addictions. Neuroscientific studies have indicated that the neurobiology underlying substance and behavioural addictions may also be similar (see ...). 
+
+Buoyed by this evidence, clinicians and researchers have lobbied for increased recognition of behavioural addictions as official mental health diagnoses. Success in this endeavour was most notable in 2013 when the American Psychological Association included *Gambling Disorder* as a behavioural addiction in the fifth edition of the Diagnostic & Statistical Manual of mental disorders (DSM-5) under the rubric of . More recently in 2018,
+
+While the addition of Gambling Disorder to the DSM-5 appears to have been widely accepted as a positive step forward, the addition of Gaming Disorder to the ICD-11 has been met with contention.
+
+Such concerns are not unique to the addiction field. "Psychiatrization" and "concept creep" have been used to describe the seemingly ever-widening definitions mental health disorders, abuse, and trauma, as well as the "medicalisation" of these in the form of over-diagnosis and treatment (Haslam, 2016; Haslam et al., 2021).
+
+
+Whilst I'm aware of some bizarre publications on this topic (like [this 2015 study](https://doi.org/10.1556/jba.4.2015.1.7) on fortune telling addiction), ... the extent to which this is really occurring in the addictions field. 
+
+
+
+# Methods
+
+## Design
+
+kay, so my goal here was to try and find every peer-reviewed paper that has ever discussed a behaviour (e.g., gaming, social media use etc.) as a form of addiction. Well, every paper published on the PubMed database. I chose PubMed for two reasons:
+
+1.  it indexes around 30,000 different journals/outlets, including most of the journals that I know publish research in this area
+2.  the search results and article data can be automatically downloaded using the `rentrez` R package (trying to manually download summary data for every study ever published on behavioural addictions would be prohibitively time consuming!).
+
+So, I first developed and trialed a PubMed search string to try and identify relevant papers on each behavioural addiction (e.g., "social-network-use disorder" OR "social media addiction"). After trialing and refining each search string on the PubMed site, I used `rentrez` to pull the results from the search string for every "addiction" I could find, individually screening the results for duplicates or irrelevant articles (e.g., errata).
+
+I used a combination of personal knowledge of this area, results from PubMed searches for other addictions, and Google searches for phrases akin to "bizarre addictions" (a very systematic approach) to identify the different types of "addiction" to search for.
+
+## Search & selection process
+
+## Data analysis
+
+```{r results=FALSE, warning=FALSE, message=FALSE}
+# Now I'll load in the dataset and do a little cleaning. Of note, I'm going to remove all publications from 2023 so that we only have data for complete years (see comments in the code chunk below for any other exclusions).
+
+#| code-fold: true
+#| code-summary: "Code: load dataset"
+
+url_behav_addic_data_link <- "https://raw.githubusercontent.com/rheirene/pub-med-scape-behav-addictions/main/Data%20extraction/combined_results_clean.csv"
+
+raw_data <- read_csv(url_behav_addic_data_link) %>%
+  as_tibble()
+
+str(raw_data)
+
+# Despite my best efforts with manual searching, my explorations of this dataset in R revealed that there are a few erratums/corrigendums and one notice of retraction included in the data. Let's remove these before moving forward:
+filtered_data <- raw_data %>%
+  filter(str_detect(Publication_Type, "Erratum") | 
+         str_detect(Publication_Type, "corrigendum") | 
+         str_detect(Publication_Type, "Retraction")) %>% 
+  distinct(PMID, .keep_all = TRUE)
+
+# Let's now remove these pubs and any from 2023 so we have data for all "full" years:
+data <- raw_data %>% 
+  anti_join(filtered_data) %>%
+    filter(Year != "2023") 
+
+# View(data)
+
+```
+
+```{r include=FALSE}
+data %>%
+  distinct(PMID) %>%
+  nrow() %>%
+  as_tibble() %>%
+  mutate(full_count = nrow(data)) %>%
+  mutate(full_unique_discrepancy = full_count-value) %>%
+  rename(unique_count = value)
+
+# Get palette colors
+num_labels <- length(unique(data$Label))
+palette_colors <- rev(scico(n = num_labels, palette = 'imola'))
+
+
+# data %>%
+#   distinct(PMID, .keep_all = TRUE) %>%
+#   group_by(Label) %>% 
+#   filter(Year %in% c(min(Year), max(Year)))
+
+# Find the first and last study for each "addiction" with number of papers at these years:
+data %>%
+  distinct(PMID, .keep_all = TRUE) %>%
+  group_by(Label) %>% 
+  summarise(
+    min = min(Year), # identify first year
+    max = max(Year) # identify last  year
+  ) %>% 
+  arrange(min) 
+```
+
+### 
+
+```{r warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Code: Table all addictions"
+
+# Arrange data:
+data %>%
+  group_by(Label) %>% 
+  summarise(
+    n = n()
+  ) %>%
+  mutate(percent = round(n/sum(n)*100,2)) %>%
+  arrange(desc(n)) %>%
+      # Tidy the behavioural addiction labels:
+    mutate(Label = str_replace_all(Label, "_", " ") %>%
+                 str_to_title()) %>%
+   gt() %>% # Turn dataframe into gt table
+   tab_header(
+    title = md("**Number of behavioural addiction articles on PubMed**"),
+    subtitle = md("*Up to end of 2022*"))  %>%
+  tab_options(data_row.padding = px(1.6)) %>% # decrease row height
+    tab_style(
+    style = cell_borders(sides = c("t", "b"),
+                         weight = px(2)),
+    locations = list(cells_column_labels(), cells_stubhead())
+  ) %>%
+   cols_align(align = "center", columns = c(n, percent)) %>%
+   cols_align(align = "right", columns = Label) %>%
+  tab_style(
+    style = cell_borders(sides = c("t"),
+                         weight = px(2)),
+    locations = list(cells_footnotes(), cells_source_notes())
+  ) %>%
+       cols_label(
+    Label = "Behavioural addiction",
+    n = "N",
+    percent = "%") 
+  
+
+```
+
+# Results
+
+```{r  warning=FALSE, message=FALSE, results= FALSE}
+#| code-fold: true
+#| code-summary: "Code: Bar chart of total pubs"
+#| fig-align: center
+
+
+# Compute some summary values will use in the labels:
+n_papers_2022<- data %>%
+  distinct(PMID, .keep_all = TRUE) %>%
+  filter(Year == 2022) %>%
+  distinct(PMID) %>% 
+  count() %>%
+  pull()
+
+n_journals_2022<- data %>%
+  distinct(PMID, .keep_all = TRUE) %>%
+  filter(Year == 2022) %>%
+  distinct(Journal_Title) %>% 
+  count() %>%
+  pull()
+
+# Prepare data:
+data_total_per_year_pubs <- data %>%
+   distinct(PMID, .keep_all = TRUE) %>%
+   filter(Year != "2023") %>%
+   group_by(Year) %>%
+   count() %>%
+   ungroup()
+ 
+                   
+ # Make plot: 
+hist_yearly_total<- data_total_per_year_pubs %>%
+  ggplot(aes(x = as.integer(Year), y = n)) + 
+  geom_bar(stat = "identity", fill = "#00798c", color = "black", width = 0.9) +
+  labs(y = "", x = "") +
+  # labs(y = "No. of publications", x = "") +
+  scale_x_continuous(breaks = seq(1960, 2020, by = 20)) +
+  scale_y_continuous(breaks = seq(0, 1200, by = 400)) +
+  plot_theme 
+  # theme(plot.margin = unit(c(0, 0, 0, -2), 'cm'))
+
+```
+
+```{r warning=FALSE,  message=FALSE, results= FALSE}
+
+# Arrange data:
+dumbbell_plot_data<- data %>%
+  # filter(Year != "2023") %>%
+  filter(Label != "behavioural_addictions") %>%
+  group_by(Label) %>% 
+  summarise(
+    min = min(Year), # identify first year
+    max = max(Year), # identify last  year
+    min_papers = sum(Year == min(Year)),  # Count papers for first year
+    max_papers = sum(Year == max(Year))   # Count papers for last year
+  ) %>% 
+  arrange(min) %>% 
+  pivot_longer(cols = c(min, max),
+    names_to = "Range",
+    values_to = "Year"
+  ) %>%
+  # Compute a single column that contains our n papers for the first and last pub years:
+  mutate(papers_this_year = case_when(Range == "max" ~ max_papers, 
+                                      Range == "min" ~ min_papers)) %>%
+  select(-min_papers,
+         -max_papers) %>% 
+  # Add a value that tells us whether a date is min or max for colouring later:
+    # Tidy the behavioural addiction labels:
+    mutate(Label = str_replace_all(Label, "_", " ") %>%
+                 str_to_title())
+
+# Order the behavioural addictions based on the first year of publication
+label_order <- dumbbell_plot_data %>% 
+  filter(Range == "min") %>% 
+  arrange(Year) %>% 
+  pull(Label)
+
+# Fix the order:
+dumbbell_plot_data$Label <- factor(dumbbell_plot_data$Label, levels = rev(label_order))
+
+# Create data for every publication year per label
+every_year_data <- data %>%
+  filter(Label != "behavioural_addictions") %>%
+  group_by(Label, Year) %>%
+  summarise(n_papers = n()) %>%
+  ungroup() %>%
+  mutate(Label = str_replace_all(Label, "_", " ") %>%
+                 str_to_title())
+
+  # Plot: 
+dumbbell_plot_first_last <- ggplot() +
+  geom_line(data = dumbbell_plot_data, aes(x= Year, y= Label),
+            size = 1,
+            colour="#666666") +
+  geom_point(data = every_year_data, aes(x = Year, y = Label, size=n_papers), color="black", alpha=0.2) +
+  geom_point(data = dumbbell_plot_data, aes(x = Year, y = Label, color=Range, size=papers_this_year)) +
+  # scale_size_continuous(guide="none") +
+  scale_color_manual(values = c("min" = "#00798c", "max" = "#00798c"), guide= "none") +
+  plot_theme +
+  labs(y = "", x = "Year") +
+  theme(
+        legend.position = c(0.3, 0.14),  # Position the legend in the bottom left corner
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8),
+        legend.background = element_rect(color = "black", size = 1))+ # Add border around the legend) +
+  guides(size = guide_legend(title = "No. papers", override.aes = list(color = "#00798c"))) 
+
+ # labs(
+  #  title = sprintf("<span style = 'color: #70A377;'>Earliest</span> and <span style = 'color: #50B5C8;'>most recent</span> studies of behavioural addictions on PubMed"))
+
+ # View static plot
+```
+
+```{r}
+#| fig-align: center
+#| fig-width: 4
+#| fig-height: 7.5
+# Join plots together and present them:
+
+hist_yearly_total / dumbbell_plot_first_last +
+  plot_layout(heights = c(3.5, 14)) +
+  plot_annotation(tag_levels = 'A') &
+  theme(plot.tag.position = c(0.03, 1))
+```
+
+
+```{r}
+# install.packages('devtools')
+library('devtools')
+
+devtools::install_github('krassowski/complex-upset')
+library("ComplexUpset")
+
+
+# Prepare the data for UpSet plot
+upset_data <- data %>%
+  select(Title, Label) %>%
+  group_by(Title, Label) %>%
+  summarize(Presence = TRUE, .groups = 'drop') %>%
+  pivot_wider(names_from = Title, values_from = Presence, values_fill = list(Presence = FALSE)) %>%
+  mutate(Label = str_replace_all(Label, "_", " ")) %>%
+  mutate(Label = str_to_title(Label)) %>%
+  rename(Behav_addiction = Label) %>%
+  as.data.frame()
+
+Behav_addiction <- data$Label %>%
+  unique() 
+  str_replace_all("_", " ") %>%
+  str_to_title() 
+
+
+# Make plot:
+upset(upset_data, Behav_addiction, name='genre', width_ratio=0.1)
+
+
+
+upset(
+  upset_data, 
+  Behav_addiction, 
+  name = '', 
+  width_ratio = 0.25, 
+  min_size = 1,
+  set_sizes = FALSE, 
+  base_annotations = list(
+    'Intersection size' = intersection_size(
+      text = list(
+        vjust = -0.4,
+        hjust = 0.2,
+        angle = 45,
+        family = "Poppins",
+        size = 2
+      ),
+      text_colors = c(
+        on_background = 'black', 
+        on_bar = 'white'
+      )
+    )
+  ),
+  themes = upset_modify_themes(
+    list(
+      'intersections_matrix' = theme(
+        axis.text = element_text(colour = "black", size = 8, family = "Poppins")
+      ),
+      'overall_sizes' = theme(
+        axis.text.x = element_text(colour = "black", family = "Poppins")
+      ),
+      'Intersection size' = theme(
+        axis.text = element_text(colour = "black", size = 8, family = "Poppins"),
+        axis.title = element_blank()
+      ),
+      'default' = theme(
+        text = element_text(family = "Poppins")
+      )
+    )
+  )
+) & 
+  theme(
+    text = element_text(family = "Poppins", size = 8),
+    panel.grid.major = element_blank()
+  )
+
+```
+
+
+```{r}
+
+# Prepare the data for UpSet plot
+upset_data <- data %>%
+  mutate(Presence = TRUE) %>%
+  pivot_wider(names_from = Title, values_from = Presence, values_fill = list(Presence = FALSE))
+
+# Ensure the Behav_addiction labels are correct
+Behav_addiction <- colnames(upset_data)[-1]
+
+# Print to verify
+print(upset_data)
+print(Behav_addiction)
+
+# Make plot:
+upset(
+  upset_data,
+  Behav_addiction,
+  name = 'genre',
+  width_ratio = 0.1
+)
+```
+
+# Discussion
+
+# References
+
+-   Alexander, B. K., & Schweighofer, A. R. F. (1988). Behavioural Addictions. *Canadian Journal of Psychology*, 29, 151-163.
+
+-   Grall-Bronnec, M., Bulteau, S., Victorri-Vigneau, C., Bouju, G., & Sauvaget, A. (2015). Fortune telling addiction: Unfortunately a serious topic about a case report. *Journal of Behavioral Addictions*, *4*(1), 27-31. <https://doi.org/10.1556/jba.4.2015.1.7>
+
+-   Haslam, N. (2016). Concept creep: Psychology's expanding concepts of harm and pathology. *Psychological Inquiry, 27*(1), 1--17. [https://doi.org/10.1080/1047840X.2016.1082418](https://psycnet.apa.org/doi/10.1080/1047840X.2016.1082418)
+
+-   Jaffe J. H. (1990). Trivializing dependence. British journal of addiction, 85(11), 1425--1431. <https://doi.org/10.1111/j.1360-0443.1990.tb01624.x>
+
+```{r}
+#| code-fold: true
+#| code-summary: "Code: Get session info"
+
+# session_info(pkgs = "attached")
+```
