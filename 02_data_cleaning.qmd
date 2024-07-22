@@ -1,0 +1,300 @@
+---
+title: "Data Cleaning --- Behavioural addictions research past & present: A bibliographic review"
+author: "Rob Heirene$^1$"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+execute: # prevent code and execution messages showing
+  echo: false
+  warning: false
+  message: false
+format: html
+---
+
+```{r output=FALSE, warning = FALSE, messages=FALSE}
+# Install and load the groundhog package to ensure consistency of the package versions used here:
+# install.packages("groundhog") # Install
+
+# Load in packages using `groundhog` to ensure consistency of the versions used here:
+
+library(groundhog) # Load
+ 
+# set.groundhog.folder("C:/Users/rhei4496/Groundhog packages") # Set in a writable directory
+get.groundhog.folder()
+
+# List desired packages:
+packages <- c("tidyverse", 
+              'readr', # Load dataset from GitHib
+              'RCurl', # Load dataset from GitHib
+              'gtExtras', # Add colours to gt tables
+              'transformr', # Needed for certain animations (dumbell lines)
+              'png',# Helps render gganimate plots
+              'gifski', # Helps render gganimate plots
+              'rmarkdown', # Helps render gganimate plots
+              'av', # render gganimate plots as videos
+              'Cairo', # Anti-aliasing for the line plots (smoothing output)
+              'ggtext', # make fancy labels in plots
+              'sysfonts', # Special fonts for figures
+              'showtext', # Special fonts for figures
+              'scico', # Colour palette
+              'kableExtra', # Make tabless
+              'formattable', #  Add visualisations to tables
+              'gt', # Alternative table options
+              'gtsummary', # Create summary tables
+              'scales', # Allows for the removal of scientific notation in axis labels
+              'ggrain', # Make rain cloud plots
+              'waffle', # make waffle plots for proportions
+              'networkD3', # Make Sankey plots to show relationships
+              'patchwork', # Join plots in multipanel layouts
+              'pwr', # Check statistical power
+              'car', # Perform ANCOVA stats tests
+              'rstatix', # Perform ANCOVA stats tests
+              'ggpubr', # Plots for linearity checks 
+              'broom', # Print summaries of statistical test outputs
+              'psych', # get detailed summary figures to Supplement statistical tests
+              'ggstatsplot', # Plots with statistical outputs
+              'janitor', # Make column names consistent format
+              'caret', # Compute model performance indices
+              'sessioninfo', # Detailed session info for reproducibility
+              "osfr",
+              "readxl",
+              # "Gmisc", # Produce prisma flow diagram
+              # 'grid', # Produce prisma flow diagram
+              # "glue", # Produce prisma flow diagram
+              "apa", # print test results in apa format
+              "apaTables", # print test results in apa format
+              "ggh4x", # truncate graph axis lines
+              "truncnorm", # Generate normally distributed data with limits
+              "ComplexUpset" # produce upset plots
+)
+# Load desired package with versions specific to project start date:
+groundhog.library(packages, "2024-05-30")
+                  # force.install=TRUE) 
+                  # tolerate.R.version = '4.4.0')
+
+# groundhog.library(packages, "2023-12-29") 
+
+```
+
+```{r message = FALSE, warning = FALSE}
+
+## Setup presentation & graph specifications. Set up a standard theme for plots/data visualisations:
+
+# Load new font for figures/graphs
+font_add_google("Poppins")
+font_add_google("Reem Kufi", "Reem Kufi")
+font_add_google("Share Tech Mono", "techmono")
+windowsFonts(`Segoe UI` = windowsFont('Segoe UI'))
+showtext_auto()
+showtext_auto(enable = TRUE)
+
+# Save new theme for figures/graphs.This will determine the layout, presentation, font type and font size used in all data visualisations presented here:
+plot_theme<- theme_classic() +
+  theme(
+    text=element_text(family="Poppins"),
+    plot.title = element_text(hjust = 0.5, size = 16),
+          plot.subtitle = element_text(hjust = 0.5, size = 13),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+    plot.caption = element_text(size = 12),
+    legend.title=element_text(size=12), 
+    legend.text=element_text(size=10)
+        ) 
+```
+
+# Load Data
+
+```{r results=FALSE, warning=FALSE, message=FALSE}
+# Now I'll load in the dataset and do a little cleaning. Of note, I'm going to remove all publications from 2023 so that we only have data for complete years (see comments in the code chunk below for any other exclusions).
+
+#| code-fold: true
+#| code-summary: "Code: load dataset"
+
+url_behav_addic_data_link <- "https://raw.githubusercontent.com/rheirene/pub-med-scape-behav-addictions/main/Data%20extraction/combined_results_clean.csv"
+
+raw_data <- read_csv(url_behav_addic_data_link) %>%
+  as_tibble()
+
+str(raw_data)
+
+```
+
+# Filter data
+
+Despite my best efforts with manual searching, my explorations of this dataset revealed that there are a few erratums/corrigendums and one notice of retraction included in the scraped data. Let's remove these before moving forward:
+
+```{r}
+filtered_data <- raw_data %>%
+  filter(str_detect(Publication_Type, "Erratum") | 
+         str_detect(Publication_Type, "corrigendum") | 
+         str_detect(Publication_Type, "Retraction")) %>% 
+  distinct(PMID, .keep_all = TRUE)
+
+# Let's now remove these pubs and any from 2023 so we have data for all "full" years:
+data <- raw_data %>% 
+  anti_join(filtered_data) 
+# View(data)
+ 
+```
+
+# Clean values
+
+Let's take a look at some key variables that we can aggregate the data by and see if the values require any cleaning/processing to make them conssistent and able to be summarised.
+
+### Language
+
+Start by taking a look at the language(s) listed in each article:
+```{r}
+data %>%
+  count(Language) %>%
+arrange(desc(n)) %>%
+gt()
+```
+
+Okay, these aren't too messy and there aren't clear inconsistencies, but there are some duplciate variations (e.g., "emg; spa" and "spa; eng") that we could combine. Let's also fill out the names for ease:
+
+```{r}
+
+language_map <- c(
+  "eng" = "English", "ger" = "German", "fre" = "French", "rus" = "Russian", 
+  "spa" = "Spanish", "hun" = "Hungarian", "jpn" = "Japanese", "chi" = "Chinese",
+  "pol" = "Polish", "ita" = "Italian", "kor" = "Korean", "cze" = "Czech",
+  "por" = "Portuguese", "heb" = "Hebrew", "dut" = "Dutch", "gre" = "Greek",
+  "swe" = "Swedish", "fin" = "Finnish", "nor" = "Norwegian", "dan" = "Danish",
+  "srp" = "Serbian", "tur" = "Turkish", "hrv" = "Croatian", "lit" = "Lithuanian",
+  "eng; spa" = "English; Spanish", "spa; eng" = "English; Spanish",
+  "por; eng" = "English; Portuguese", "eng; por" = "English; Portuguese",
+  "eng; jpn" = "English; Japanese", "jpn; eng" = "English; Japanese",
+  "eng; pol" = "English; Polish", "pol; eng" = "English; Polish",
+  "eng; tur" = "English; Turkish", "tur; eng" = "English; Turkish",
+  "eng; chi" = "English; Chinese",
+  "eng; fre" = "English; French",
+  "eng; ger" = "English; German",
+  "por; spa; eng"	= "Portuguese; Spanish"
+)
+
+data_w_languages <- data %>%
+  mutate(Language = language_map[Language]) 
+
+data_w_languages %>%
+  count(Language) %>%
+  arrange(desc(n)) %>%
+  gt()
+
+```
+
+### Publication type
+
+There are lots of publication types, so let's just see how many there are first:
+```{r}
+data_w_languages %>%
+ distinct(Publication_Type) %>%
+  nrow()
+```
+
+Okay, 259 is too many to display in a table, but the code is here below so that I can visually inspect the different types and produce a coding system:
+```{r}
+data_w_languages %>%
+  count(Publication_Type ) %>%
+arrange(desc(n)) %>%
+gt()
+```
+
+Interestingly, retracted articles are labelled as such. How many retracted articles are there and what addiction types do they belong to:
+
+```{r}
+data_w_languages %>%
+ filter(str_detect(Publication_Type, "Retracted")) %>%
+  group_by(Label) %>%
+count() %>%
+arrange(desc(n))
+```
+
+Okay, some key themes/article types in the data are:
+
+- Comment/Letter/ Editorial
+- Clinical trial/RCT/ RCT protocol
+- Systematic reviews & meta-analyses
+- Case reports
+
+Most of the remaining articles types appeared to refer to just simple "journal article"s and variations of this that aren't worth breaking down.
+
+Also, inspecting the titless alongside the publication types reveals that not all are perfectly accurate., So, when we recode the categories, it would be a good idea to use a combination of publication type and article title to recode whenever appropriate.
+
+Let`s produce a recoded publication type variable with the above categories:
+
+```{r}
+data_w_languages_pub_types <- data_w_languages %>%
+ mutate(Publication_Category = case_when(str_detect(Publication_Type, "Case Reports") ~ "Case Report(s)",
+                                         (str_detect(Publication_Type, "Comment") |
+                                            str_detect(Publication_Type, "Editorial") |
+                                            str_detect(Publication_Type, "Letter")) ~ "Editorial, Letter, or Comment",
+                                          (str_detect(Publication_Type, "Systematic Review") |
+                                            str_detect(Publication_Type, "Meta-Analysis") | 
+                                             str_detect(Title, "Systematic Review")| 
+                                             str_detect(Title, "systematic review")| 
+                                             str_detect(Title, "meta-analysis")| 
+                                             str_detect(Title, "Meta-Analysis")) ~ "Systematic Review/ Meta-Analysis",
+                                         (str_detect(Publication_Type, "; Review") |
+                                            str_detect(Title, "Review")) ~ "Review (Other)",
+                                         (str_detect(Publication_Type, "Controlled Trial") |
+                                            str_detect(Publication_Type, "Clinical Trial")| 
+                                             str_detect(Title, "Randomised Controlled Trial")| 
+                                             str_detect(Title, "Randomised Clinical Trial")| 
+                                             str_detect(Title, "Blind Clinical Trial")
+                                          ) ~ "Controlled Trial Report or Protocol",
+                                         TRUE ~ "Journal Article")) 
+  
+
+data_w_languages_pub_types %>%
+  group_by(Label) %>%
+  count(Publication_Category) %>%
+arrange(desc(n)) %>%
+gt()
+
+
+# For checking strings:
+# data_w_languages %>%
+#  filter(str_detect(Title, "Clinical Trial")) %>%
+#   View()
+```
+
+# Data summaries
+
+Provide some basic daata summaries off interest that will be of use in the paper or as supplementaal information.
+
+### No. unqiue studies
+How many articles are there in total in the sample, how many unique articles are there, and what is the discrepancy between these numbers?
+```{r include=FALSE}
+data %>%
+  distinct(PMID) %>%
+  nrow() %>%
+  as_tibble() %>%
+  mutate(full_count = nrow(data)) %>%
+  mutate(full_unique_discrepancy = full_count-value) %>%
+  rename(unique_count = value) %>%
+gt()
+
+# data %>%
+#   distinct(PMID, .keep_all = TRUE) %>%
+#   group_by(Label) %>% 
+#   filter(Year %in% c(min(Year), max(Year)))
+
+
+```
+
+### Range of years for each addiction
+
+That was the first and last years of publication for each addiction:
+```{r}
+# Find the first and last study for each "addiction" with number of papers at these years:
+data %>%
+  distinct(PMID, .keep_all = TRUE) %>%
+  group_by(Label) %>% 
+  summarise(
+    min = min(Year), # identify first year
+    max = max(Year) # identify last  year
+  ) %>% 
+  arrange(min) %>%
+gt()
+```
+
+
