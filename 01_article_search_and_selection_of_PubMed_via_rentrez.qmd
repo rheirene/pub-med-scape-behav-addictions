@@ -340,7 +340,7 @@ results_behav_addictions3 <- results_behav_addictions2 %>%
   filter(PMID != "32094908")
 #  Okay, now we are confident that we have a clean dataset, let's explore!
 
-# Summary of the Year  variable:
+# Summary of the Year variable:
 summary(results_behav_addictions3$Year)
 
 # Number of publications per year:
@@ -378,7 +378,7 @@ write.csv(results_behav_addictions_final, "Data extraction/behav_addictions_data
 
 **Notes pre-search:** Mesh terms can be found [here](https://www.ncbi.nlm.nih.gov/mesh/?term=gaming+disorder). I tried adding "problem gambling" and it adds around 1,200 more studies, but the overall distribution over time remains very similar.
 
--   One unavoidable issue with the gambling search is 2 of the 3 gambling-specific journals (International Gambling Studies & Journal of Gambling Issues) are not indexed by PubMed. That said, most behavioural addiction and addiction-focused journals are, fortunately.
+-   pOne unavoidable issue with the gambling search is 2 of the 3 gambling-specific journals (International Gambling Studies & Journal of Gambling Issues) are not indexed by PubMed. That said, most behavioural addiction and addiction-focused journals are, fortunately.
 
 ::: {.callout-note appearance="minimal" icon="false"}
 ## Add gambling journals?
