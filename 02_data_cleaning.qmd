@@ -105,7 +105,7 @@ plot_theme<- theme_classic() +
 # Load Data
 
 ```{r results=FALSE, warning=FALSE, message=FALSE}
-# Now I'll load in the dataset and do a little cleaning. Of note, I'm going to remove all publications from 2023 so that we only have data for complete years (see comments in the code chunk below for any other exclusions).
+# Now I'll load in the dataset and do a little cleaning. See comments in the code chunk below for exclusions.
 
 #| code-fold: true
 #| code-summary: "Code: load dataset"
@@ -130,9 +130,15 @@ filtered_data <- raw_data %>%
          str_detect(Publication_Type, "Retraction")) %>% 
   distinct(PMID, .keep_all = TRUE)
 
-# Let's now remove these pubs and any from 2023 so we have data for all "full" years:
+# Take a look at these articles to check we're excluding appropriately:
+filtered_data %>%
+  filter(str_detect(Publication_Type, "Retraction")) %>%
+  # print(n=50)
+View()
+
+# Let's now remove these pubs:
 data <- raw_data %>% 
-  anti_join(filtered_data) 
+  anti_join(filtered_data, by = join_by(PMID))
 # View(data)
  
 ```
@@ -194,18 +200,19 @@ data_w_languages %>%
   nrow()
 ```
 
-Okay, that's far too many to display in a table, but the code below  displays them all so that I can visually inspect the different types and develop a categorisation system:
+Okay, that's far too many to display in a table, but the code below  displays them all so that I can visually inspect the different types and develop a categorisation system (I've restricted the table you'll see to the top 20 most common types):
 ```{r}
 data_w_languages %>%
   count(Publication_Type ) %>%
 arrange(desc(n)) %>%
+  head(20) %>% # Show just top 20 for the doc
 gt()
 ```
 
-Interestingly, retracted articles are labelled as such. How many retracted articles are there and what addiction types do they belong to:
+Interestingly, retracted articles are labelled as such. How many retracted articles are there and what addiction types do they belong to (note these are retracted articles and not notices of retractions; the only one of these was removed above):
 
 ```{r}
-data_w_languages %>%
+data_w_languages %>% #
  filter(str_detect(Publication_Type, "Retracted")) %>%
   distinct(PMID, .keep_all = TRUE) %>%
   group_by(Label) %>%
@@ -224,7 +231,7 @@ Most of the remaining articles types appeared to refer to just simple "journal a
 
 Also, inspecting the titles alongside the publication types reveals that not all are perfectly accurate., So, when we recode the categories, it would be a good idea to use a combination of publication type and article title to recode whenever appropriate.
 
-Let`s produce a recoded publication type variable with the above categories:
+Let`s produce a recoded publication type variable with the above categorie plus the general "journal article" category:
 
 ```{r}
 data_w_languages_pub_types <- data_w_languages %>%
@@ -272,8 +279,9 @@ data_w_languages_pub_types <- data_w_languages %>%
 #   select(Title,
 #          Publication_Type,
 #          Publication_Category) %>%
-#   slice(300:400) %>% # Alter to vary :)
-  # print(n=100)
+#   slice(800:900) %>% # Alter to vary :)
+#   # View()
+# print(n=100)
 
 
 
@@ -543,7 +551,7 @@ I want to to visualise this information, but it's going to be quite tricky as ea
 #            )
 # 
 # # Now, Save this to a CSV file because this took forever to extract the data we don't want to have to do this every time I render this page!!
-write.csv(Data temps/data_locations_with_full_geo_location, "data_locations_with_full_geo_location.csv")
+write.csv(data_locations_with_full_geo_location, "data_locations_with_full_geo_location.csv")
 
 ```
 
@@ -578,7 +586,7 @@ filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatche
        country.etc) %>%
   print(n=350) # Started with several thousand
  
-# Looking at the results above, it's clear we need to prioritise matched country (i.e., the one we extracted from the text) over the linked one (i.e., linked to city name from database) as mistake are less common with the matched one as it's simple text extraction, whereas the link from city to country can be fallible as there are multiple cities with the same name and it could have matched with the wrong city.
+# Looking at the results above, it's clear we need to prioritise matched country (i.e., the one we extracted from the text; "countries_of_authors" over the linked one (i.e., linked to city name from database) as mistake are less common with the matched one as it's simple text extraction, whereas the link from city to country can be fallible as there are multiple cities with the same name and it could have matched with the wrong city.
 
 # There are a few important caveats to the above that we will need to directly recode for accuracy:
 # Georgia USA. This gets extracted as the country, but it's obviously the state in the US! Also, the city in Georgia, Athens gets links to Greece incorrectly. 
@@ -588,7 +596,7 @@ filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatche
  
 # There are also a few key cities that are duplicated that I didn't remove in the filtering above that will need directly linking via code to the right city and country, including Cambridge, New York, London, Oxford, Liverpool, Bristol, Reading, Columbia, Northampton, Stirling, Aberdeen and Newport
 
- # Check allpotential problematic locations:
+ # Check all potential problematic locations:
  data_locations_with_full_geo_location %>%
    # filter(countries_of_authors  == "Georgia") %>% 
    # filter(countries_of_authors  == "Mongolia") %>% 
@@ -606,7 +614,8 @@ filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatche
  # filter(str_detect(cities_of_authors, "Aberdeen")) %>%
  # filter(str_detect(cities_of_authors, "Newport")) %>%
   # filter(str_detect(cities_of_authors, "Oxford")) %>%
-   filter(str_detect(institution, "Kfar-Saba")) %>%
+   # filter(str_detect(institution, "Kfar-Saba")) %>%
+    filter(str_detect(institution, "Karsiyaka")) %>%
     select(institution,
        author_names,
          cities_of_authors,
@@ -638,6 +647,9 @@ data_locations_with_full_geo_location_cleaned <-
    # Sort Columbia issues:
     str_detect(institution, "Vancouver") ~ "Vancouver",
     str_detect(institution, "Columbia University") ~ "New York",
+   # Saudi scholar:
+    str_detect(institution, "Sami H. Alzahrani") ~ "Jeddah",
+   
   # Sort Colombia issues:
     str_detect(institution, "Bogota") ~ "Bogota",
     str_detect(institution, "Barranquilla") ~ "Barranquilla",
@@ -665,12 +677,15 @@ data_locations_with_full_geo_location_cleaned <-
    str_detect(institution, "Morgantown") ~ "Morgantown",
    # Marid:
      str_detect(institution, "Madrid, Spain") ~ "Madrid",
+  # Tours, France:
+    str_detect(institution, "University of Tours") ~ "Tours",
    # Paris:
     str_detect(institution, "Pole paris 12") ~ "Paris",
    str_detect(institution, "Paris, France") ~ "Paris",
   str_detect(institution, "Centre Pierre Nicole") ~ "Paris",
     str_detect(institution, "centre hospitalier Sainte-Anne") ~ "Paris",
-  
+  # South Korea:
+  str_detect(institution, "Seoyoung University") ~ "Paju-si",
   
   # Providence:
       str_detect(institution, "Brown University") ~ "Providence",
@@ -695,6 +710,8 @@ data_locations_with_full_geo_location_cleaned <-
 # Auckland & Newzeland:
   str_detect(institution, "Auckland") ~ "Auckland",
  str_detect(institution, "Palmerston North, Manawatu") ~ "Palmerston North",
+# Netherlands uni confused for Austria:
+str_detect(institution, "Instituut voor Onderzoek") ~ "Netherlands", 
 # Lausanne:
   str_detect(institution, "Lausanne") ~ "Lausanne",
 # Boston issues:
@@ -706,7 +723,8 @@ data_locations_with_full_geo_location_cleaned <-
 str_detect(institution, "St Bonaventure University") ~ "New York",
 str_detect(institution, "Elmhurst Hospital Center") ~ "New York",
 str_detect(institution, "Cure Huntington's Disease Initiative") ~ "New York",
-
+# Case Western Reserve University: 
+str_detect(institution, "Case Western Reserve University") ~ "Cleveland", # Goes to Bolton UK
 
 # Amityville
 str_detect(institution, "Amityville") ~ "Amityville",
@@ -716,6 +734,7 @@ str_detect(institution, "Amityville") ~ "Amityville",
 str_detect(institution, "Martin-Luther-University") ~ "Halle",
 # Iraninan city:
   str_detect(institution, "Isfahan, Iran") ~ "Isfahan",
+  str_detect(institution, "Aja University") ~ "Tehran",
 # Israel:
 str_detect(institution, "Kfar-Saba") ~ "Tel Aviv",
 str_detect(institution, "Leslie and Susan Gonda") ~ "Tel Aviv",	
@@ -769,16 +788,14 @@ str_detect(institution, "Hospital Universitario de Canarias") ~ "Santa Cruz de T
 str_detect(institution, "Universitat Pompeu Fabra") ~ "Barcelona",
 str_detect(institution, "Universidad Loyola Andalucia") ~ "Cordoba",
 
-
-
-
 # Nottingham:
  str_detect(institution, "Newark Beacon Innovation Centre") ~ "Nottingham",
 
 # Portugal:
 str_detect(institution, "Unity in Multidisciplinary Research on Biomedicine (UMIB)") ~ "Porto",
 str_detect(institution, "IAJ (Gambling Support Institute)") ~ "Lisbon",
-
+# Turkey:
+str_detect(institution, "Inonu University") ~ "Malatya",
   # Porto Alegre issue:
   str_detect(institution, "Porto Alegre") ~ "Porto Alegre",
 # Namur:
@@ -793,8 +810,9 @@ str_detect(institution, "IAJ (Gambling Support Institute)") ~ "Lisbon",
  str_detect(institution, "Dublin, Ireland") ~ "Dublin",
  # West Chester University:
    str_detect(institution, "West Chester University") ~ "Philadelphia",
-  # Yunlin, Taiwan:
+  # Yunlin and others, Taiwan:
   str_detect(institution, "Yunlin, Taiwan") ~ "Douliu",
+str_detect(institution, "Chang Gung Memorial Hospital") ~ "Taoyuan City",
     # University of Montana:
   str_detect(institution, "University of Montana") ~ "Missoula",
       # San Juan:
@@ -826,6 +844,10 @@ str_detect(institution,  "Carson College of Business") ~ "Pullman",
 str_detect(institution,  "Universidad de San Martin de Porres") ~ "Lima",
 # The Center for Internet and Technology Addiction
 str_detect(institution,  "The Center for Internet and Technology Addiction") ~ "Hartford",
+  # Georgetown uni issue:
+  str_detect(institution, "Georgetown") ~ "Washington, D.C",
+  # Lincoln Memorial University issue:
+  str_detect(institution, "Lincoln Memorial University") ~ "Harrogate",
   # Meridian Behavioral Health Services (I can't find a full address for this, despite searching the people manually, But it doesn't appear to be in the US):
   str_detect(institution,  "Meridian Behavioral Health Services") ~ "",
   # Brazilian hospital:
@@ -840,6 +862,7 @@ str_detect(institution,  "The Center for Internet and Technology Addiction") ~ "
     str_detect(institution, "Hasselt, Belgium") ~ "Hasselt",
 # Poland:
  str_detect(institution, "Uniwersytet Jagiellonski Collegium Medicum") ~ "Krakow",
+ str_detect(institution, "Adam Mickiewicz University") ~ "Poznan",
  # Peru:
   str_detect(institution, "Lima, Peru") ~ "Lima",
 #Japan:
@@ -847,8 +870,6 @@ str_detect(institution, "Konan Women's University") ~ "Kobe",
 str_detect(institution, "Tokai Gakuen University") ~ "Tokai Gakuen University",
 str_detect(institution, "University of Hokkaido") ~ "Hokkaido",
 str_detect(institution, "Tama-ku, Kawasaki") ~ "Kawasaki",
-
-
 
 # Virginia:
  str_detect(institution, "Virginia Institute for Psychiatry and Behavioral Genetics") ~ "Richmond",
@@ -862,16 +883,23 @@ str_detect(institution, "Tama-ku, Kawasaki") ~ "Kawasaki",
 str_detect(institution, "Maya Sahu, RN, RM,") ~ "",
     TRUE ~ as.character(cities_of_authors)  # Default if none of the above matches
 
-
-
  # COUNTRY CHANGES:
  )) %>%
   mutate(countries_of_authors = case_when(
+    # France: 
+      # Tours, France:
+    str_detect(institution, "University of Tours") ~ "France",
+    # Poland: 
+     str_detect(institution, "Adam Mickiewicz University") ~ "Poland",
  # Sort Georgia country issues:
     str_detect(institution, "Georgia State University") ~ "USA",
     str_detect(institution, "University of Georgia") ~ "USA",
     str_detect(institution, "Georgia College") ~ "USA",
     str_detect(cities_of_authors, "Marietta") ~ "USA",
+  # Georgetown uni issue:
+  str_detect(institution, "Georgetown") ~ "USA",
+   # Lincoln Memorial University issue:
+  str_detect(institution, "Lincoln Memorial University") ~ "USA",
   # Mongolia country issues:
     str_detect(institution, "Inner Mongolia") ~ "China",
   # Mexico Country issues:
@@ -902,11 +930,15 @@ str_detect(institution, "Maya Sahu, RN, RM,") ~ "",
     str_detect(institution, "British Columbia") ~ "Canada",
     str_detect(institution, "Chilliwack") ~ "Canada",
   str_detect(institution, "Centro Universitario Cardenal Cisneros") ~ "Spain",
-  
+  # Saudi scholar:
+    str_detect(institution, "Sami H. Alzahrani") ~ "Saudi Arabia",
+ 
   # Australia:
   str_detect(institution, "Adelaide") ~ "Australia",
   str_detect(institution, " CQUniversity, 400 Kent St, Sydney") ~ "Australia",
   str_detect(institution, " CQUniversity") ~ "Australia",
+  # Austria:
+   str_detect(institution, "Therapiestation Lukasfeld der Stiftung Maria, Ebene") ~ "Austria",
    # Sort Colombia issues:
      str_detect(institution, "Barranquilla") ~ "Colombia",
   # Canada:
@@ -916,14 +948,15 @@ str_detect(institution, "Maya Sahu, RN, RM,") ~ "",
     str_detect(institution, "Addiction & Mental Health Services-Kingston") ~ "Canada",
   str_detect(institution, "Toronto, ON") ~ "Canada",
   str_detect(institution, "Social and Economic Impacts of Gambling in Massachusetts project,") ~ "USA", # Was originally Canada
-  
-  
+  # Case Western Reserve University: 
+str_detect(institution, "Case Western Reserve University") ~ "USA", # Goes to Bolton UK
+
   # South Korea:
 str_detect(institution, "Hanyang University") ~ "South Korea",
 str_detect(institution, "Chungmugong Leadership Center") ~ "South Korea",
 str_detect(institution, "Korea Institute on Behavioral Addictions") ~ "South Korea",
 str_detect(institution, "hallym University") ~ "South Korea",
-
+str_detect(institution, "Seoyoung University") ~ "South Korea",
 # Portugal:
 str_detect(institution, "Unity in Multidisciplinary Research on Biomedicine (UMIB)") ~ "Portugal",
   # China:
@@ -989,7 +1022,8 @@ str_detect(institution, "Alma Mater Studiorum") ~ "Italy",
 
 # Brazil:
 str_detect(institution, "Porto Alegre") ~ "Brazil", 
-
+# Netherlands uni confused for Austria:
+str_detect(institution, "Instituut voor Onderzoek") ~ "Netherlands", 
 
   # Lausanne issues:
  str_detect(institution, "Lausanne") ~ "Switzerland",
@@ -999,10 +1033,15 @@ str_detect(institution, "Porto Alegre") ~ "Brazil",
    str_detect(institution, "Rede SARAH de Hospitais de Reabilitacao") ~ "Brazil",
  # Taiwan:
     str_detect(institution, "Taichung") ~ "Taiwan",
+str_detect(institution, "Chang Gung Memorial Hospital") ~ "Taiwan",
+# Turkey:
+str_detect(institution, "Inonu University") ~ "Turkey",
   # Vietnam:
  str_detect(institution, "Nguyen Tat Thanh University") ~ "Vietnam",
  # Spain:
  str_detect(institution, "Ciencies d'Alimentacio") ~ "Spain",
+# Iran:
+ str_detect(institution, "Aja University") ~ "Iran",
 # Rush University Medical Center:
 str_detect(institution, "Rush University Medical Center") ~ "USA",
 # Belgium:

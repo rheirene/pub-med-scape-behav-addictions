@@ -110,13 +110,11 @@ plot_theme<- theme_classic() +
         ) 
 ```
 
-```{=tex}
 \begin{center}
 
 $^1$ School of Psychology, Brain \& Mind Centre, University of Sydney, Australia
 
 \end{center}
-```
 
 ------------------------------------------------------------------------
 
@@ -134,33 +132,32 @@ $^1$ School of Psychology, Brain \& Mind Centre, University of Sydney, Australia
 
 ------------------------------------------------------------------------
 
-```{=tex}
 \begin{center}
 
 \textit{"... there is no basis for linking the word 'addiction' to drug habits. Nor is there a basis for assuming that the most severe addictions necessarily involve drugs."} 
  
 B.K. Alexander \& R. F. Schweighofer (1988)
 \end{center}
-```
+
 \newpage
 
 # Introduction
 
 The phrase "behavioural addiction" first appears in ...'s seminal 1990 editorial and the series of commentaries that followed (). However, the notion that someone can be addicted to "activities" (e.g., Alexander & Schweighofer, 1988), not substances, predates these articles by at least several decades. Parallels between compulsive gambling and substance addictions can be found in articles from. (). OTHER ADDICTIONS RECOGNISED BEFORE 1990
 
-Responding to ...'s 1990 editorial, Jaffe [1990; @Jaffe1990] argued the term "addiction" was already being used too liberally---it was being applied to many non-drug-related behaviours and there was a risk of "*trivializing dependence*". These concerns appear to have done little to stem addiction's expanding definition. Since 1990, an increasingly greater number of repetitive or compulsive behaviour patterns have been proffered as addictions. These include... and even fortune telling [@Grall-Bronnec2015; @Skryabin2020].
+Responding to...'s 1990 editorial, Jaffe [1990; @Jaffe1990] argued the term "addiction" was already being used too liberally---it was being applied to many non-drug-related behaviours and there was a risk of "*trivializing dependence*". These concerns appear to have done little to stem addiction's expanding definition. Since 1990, an increasingly greater number of repetitive or compulsive behaviour patterns have been proffered as addictions. These include... and even fortune telling [@Grall-Bronnec2015; @Skryabin2020].
 
 Fears that the term addiction will lose its seriousness or weight remain heightened today [@Billieux2015]. These may be justified---individuals who experience addictions to opioid-based drugs or alcohol can suffer serious, life-threatening harm and withdrawal episodes. Assigning the same label to describe their experience and someone who has a largely inconsequential difficulty controlling their spending or screen use could indeed trivialise the condition. Yet, there is increasing evidence that people are compulsively engaging with behaviours like gambling (), gaming (), smartphone use (), and exercise () in a way that resembles substance addictions. Parallels have been observed in the symptoms (), antecedents and correlates (), and underlying neurobiology of drug and non-drug addictions (see ...).
 
 Buoyed by this evidence, clinicians and researchers have lobbied for increased recognition of behavioural addictions as official mental health diagnoses. Success in this endeavour was most notable in 2013 when the American Psychological Association included *Gambling Disorder* as a behavioural addiction in the fifth edition of the Diagnostic & Statistical Manual of Mental Disorders (DSM-5) under the rubric of [@edition2013diagnostic]. More recently in 2018, *Gaming Disorder* was added to the 11th edition of the International Classification of Diseases [@worldhealthorganization2018].
 
-While the addition of Gambling Disorder to the DSM-5 appears to have been widely accepted as a positive step forward, the addition of Gaming Disorder to the ICD-11 has been met with contention. BEAN ET AL\> and key points in this debate.
+While the addition of Gambling Disorder to the DSM-5 appears to have been widely accepted as a positive step forward, the addition of Gaming Disorder to the ICD-11 has been met with contention. BEAN ET AL\> and key points in this debate. The appropriateness of the addiction label for other behavioural patterns (e.g. compulsive shopping & pornography use) has been similarly questioned, with evidence that these may be shorter in duration [@gooding2022] and lower in severity (NOT SURE ABOUT THIS- DO SOME RESEARCH) when compared to gambling disorder and substance addictions.
 
 Re-ignited fears that non-pathological behaviour patterns may be...
 
 Such concerns are not unique to the addiction field. "Psychiatrization" and "concept creep" have been used to describe the seemingly ever-widening definitions of mental health disorders, abuse, and trauma, as well as the "medicalisation" of these in the form of over-diagnosis and treatment (Haslam, 2016; Haslam et al., 2021).
 
-Whilst concern has been expressed about a similar form of "concept creep" occurring in the behavioural addictions field \[e.g., @Billieux2015\], there has been no attempt to systematically investigate this trend and "take stock" of research in the field. The number of novel addictions formally investigated remains unclear. As does the extent to which each purported addiction has been studied relative to the more established gambling and gaming disorders. **WHY IS THIS AN ISSUE. This precludes.... and...** The aim of this bibliographic review was, therefore, to:
+Whilst concern has been expressed about a similar form of "concept creep" occurring in the behavioural addictions field [e.g., @Billieux2015], there has been no attempt to systematically investigate this trend and "take stock" of research in the field. The number of novel addictions formally investigated remains unclear. As does the extent to which each purported addiction has been studied relative to the more established gambling and gaming disorders. **WHY IS THIS AN ISSUE. This precludes.... and...** The aim of this bibliographic review was, therefore, to:
 
 \[1\] identify the total number of different behavioural addictions formally studied in peer-reviewed articles
 
@@ -489,14 +486,13 @@ upset(
 
 # Discussion
 
-```{=tex}
 \begin{center}
 
 \textit{"I found myself saying to our driver: 'Green, did you know that I am an addict'? He is of the old school so that he did not turn his head. 'No, sir, I did not know that'. 'I am addicted to at least one good experment a day---sometimes I can arrange it by telephone. When I cannot, the world goes out of focus, becomes unreal'. Possibly somewhat dissapointed, but cearly relieved: `I see, sir`."}
 
 E. H. Land in \textit{Addiction as Necessity and Opportunity} (1971).
 \end{center}
-```
+
 # References
 
 -   Alexander, B. K., & Schweighofer, A. R. F. (1988). Behavioural Addictions. *Canadian Journal of Psychology*, 29, 151-163.
