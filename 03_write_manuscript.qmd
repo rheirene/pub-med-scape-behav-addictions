@@ -166,7 +166,9 @@ Overall, fears that non-pathological behaviour patterns are being labelled as "a
 
 \[2\] determine the number of such articles focused on each proposed addiction and the characteristics of these articles (e.g., years of publications, geographic location of authors)
 
-\[3\] determine the relative strength of evidence for each behavioural addiction.
+\[3\] determine the relative strength of evidence for each behavioural addiction\*.
+
+\*Note that for ease of reading, I use the term "behavioural addiction" for all behaviours studied irrespective of my
 
 # Methods
 
