@@ -24,6 +24,7 @@ get.groundhog.folder()
 packages <- c("tidyverse", 
               'readr', # Load dataset from GitHib
               'RCurl', # Load dataset from GitHib
+              'stringdist', # Helps with string matching
               'gtExtras', # Add colours to gt tables
               'transformr', # Needed for certain animations (dumbell lines)
               'png',# Helps render gganimate plots
@@ -314,243 +315,294 @@ I want to to visualise this information, but it's going to be quite tricky as ea
 #| code-fold: true
 #| code-summary: "Code: Extract location data for each paper"
 
-# ***********************The below code is almost all commented out on purpose as the process of extracting and matching city names from the author address column is so computationally taxing that it takes a long time to process.  I've left the code here so that anyone can see how I did it, but I saved the results as a .csv file and now load the data like that***********************
+# ***********************The below code is almost all commented out on purpose as the process of extracting and matching city names from the author address column is so computationally taxing that it takes a long time to process. I've left the code here so that anyone can see how I did it, but I saved the results as a .csv file and now load the data like that***********************
 
-# # as_tibble(data$Author_Address) # Take a look at how the author addresses are structured
-# 
-# # Okay, so we're going to need to create an ID variable for each paper (this makes the string split and a nest below work bettter than relying on titles), then split the author_address strings into separate addresses, then unnest these into new rows.
-# 
-# # Whilst I'm splitting and unnesting the author address: I'm going to simultaneously do this for the authors name column.
-# 
-# 
-# # The un-nest doesn't seem to work well when we retain all of the columns in the dataset, so I do it with only id and institution (address) in the data, then join all of the rest of the data set to the unnested rows after this. For this to work, we need to create a dataset that has the ID variable in before splitting the string and and unnesting. Let's do that:
-#  data_id <-data %>%
-#   rowid_to_column(var = "id")
-# 
-#  pad_vector <- function(vec, len) {
-#   length(vec) <- len
-#   return(vec)
-#  }
-# 
-# # Now split the author and address strings and then  unnest it into multiple rows, and finally re-join with the main dataset
-# data_locations <- data_id %>%
-#     mutate(
-#      institution = str_split(Author_Address, ";"), # Split author address column into separate strings For each address
-#     author_names = str_split(Full_Author_Name, ";") # Split author name column into separate strings For each Name
-#   ) %>%
-#   # The below code matches the number of author institutions and author names where discrepancies exist, so the unnest further below works:
-#    mutate(
-#     max_length = pmax(map_int(institution, length), map_int(author_names, length)),
-#     institution = map2(institution, max_length, ~ pad_vector(., .y)),
-#     author_names = map2(author_names, max_length, ~ pad_vector(., .y))
-#   ) %>%
-#   select(id, institution, author_names) %>%
-#   unnest(c(institution, author_names)) %>%
-#   # Looking at the data at this point, there's a lot of white space around the institutions and author names. Let's remember that now:
-#   mutate(institution = str_trim(institution, side = "both"),
-#          author_names = str_trim(author_names, side = "both")) %>%
-#   full_join(data_id, by = "id") %>%
-#   # Whilst we're doing this, we'll also create a counter/number for each institution per paper
-#   group_by(id) %>%
-#   mutate(author_num = row_number()) %>%
-#   ungroup()
-#   # We can also pivot to wide format if that makes sense at any point:
-#   # pivot_wider(names_from = author_num,
-#               # values_from = institution,
-#               # names_prefix = "author_",
-#               # values_fill = NA_character_)
-# 
-# View(data_locations) # Looks good!
-# 
-# # Uncomment from below this line
-# 
-# # Fortunately, the "maps"  package contains a list of city names that we can use to match with our author institutions. Let's load the relevant data:
-# ## Loading country data from package maps
-# data(world.cities)
+# as_tibble(data$Author_Address) # Take a look at how the author addresses are structured
+
+# Okay, so we're going to need to create an ID variable for each paper (this makes the string split and a nest below work better than relying on titles), then split the author_address strings into separate addresses, then unnest these into new rows.
+
+# Whilst I'm splitting and unnesting the author address: I'm going to simultaneously do this for the authors name column.
+
+
+# The un-nest doesn't seem to work well when we retain all of the columns in the dataset, so I do it with only id and institution (address) in the data, then join all of the rest of the data set to the unnested rows after this. For this to work, we need to create a dataset that has the ID variable in before splitting the string and and unnesting. Let's do that:
+ data_id <-data %>%
+  rowid_to_column(var = "id")
+
+ pad_vector <- function(vec, len) {
+  length(vec) <- len
+  return(vec)
+ }
+
+# Now split the author and address strings and then unnest it into multiple rows, and finally re-join with the main dataset:
+data_locations <- data_id %>%
+    mutate(
+     institution = str_split(Author_Address, ";"), # Split author address column into separate strings For each address
+    author_names = str_split(Full_Author_Name, ";") # Split author name column into separate strings For each Name
+  ) %>%
+  # The below code matches the number of author institutions and author names where discrepancies exist, so the unnest further below works:
+   mutate(
+    max_length = pmax(map_int(institution, length), map_int(author_names, length)),
+    institution = map2(institution, max_length, ~ pad_vector(., .y)),
+    author_names = map2(author_names, max_length, ~ pad_vector(., .y))
+  ) %>%
+  select(id, institution, author_names) %>%
+  unnest(c(institution, author_names)) %>%
+  # Looking at the data at this point, there's a lot of white space around the institutions and author names. Let's remove that now:
+  mutate(institution = str_trim(institution, side = "both"),
+         author_names = str_trim(author_names, side = "both")) %>%
+  full_join(data_id, by = "id") %>%
+  # Whilst we're doing this, we'll also create a counter/number for each institution per paper
+  group_by(id) %>%
+  mutate(author_num = row_number()) %>%
+  ungroup()
+  # We can also pivot to wide format if that makes sense at any point:
+  # pivot_wider(names_from = author_num,
+              # values_from = institution,
+              # names_prefix = "author_",
+              # values_fill = NA_character_)
+
+View(data_locations) # Looks good!
+
+# Fortunately, the "maps"  package contains a list of city names that we can use to match with our author institutions. Let's load the relevant data:
+## Loading country data from package maps
+data(world.cities)
+# Check it out:
+
+as_tibble(world.cities) %>%
+  print(n=20)
 # 
 #  # The way the matching process works below is by picking the first match in the string, so removing all of the cities below actually leads to an increase in proper matches as the wrong matches are skipped over:
-# world_cities_filtered <-  world.cities %>%
-#   filter(!name %in% c("China", # There is a city in Mexico called China, and including this in the dataset needed to pick up any papers published in China and link them to this city!
-#                         "India", # Same sort of issue (City in Africa)
-#                         "San",  # Same sort of issue (City in Africa, again)
-#                         "Institut", # This appears to be a City somewhere around Azerbaijan, but I think it's getting picked up as a city when in fact it just is a string in the author address referring to a university!
-#                        "Santa", # This is picked up as a city In Peru, when in fact  with just part of the name of many different institutions
-#                       "God", # This is picked up as the name of a city in the Hungary, when in fact is just  part of the name of a hospital in Ireland
-#                       "Normal", # This is picked up as a city in the US  when in fact it's part of a university name in China
-#                       "Bar", # This is picked up as a city in Ukraine, when in fact it's just the name of the University in Israel
-#                       "Victoria", #  This leads to confusion between Victoria in Canada and the state in Australia. Easier just to remove rather than be inaccurate
-#                       "Cardinal",
-#                       "Villanueva", # This is actually a university in Spain, but it's picked up as a city in Honduras
-# 
-#                       "Beira", # This is picked up as a city of Mozambique, but eventually the University Hospital name in Portugal
-#                       "Cardinal",
-#                       "Young", # This is picked up as a city in Uruguay, when is just part of the name of a young adult hospital in France
-# 
-#                       "Cornwall", # Get picked up as a city in Canada and not the area of the UK
-#                        "George", #  A street name in the US,  confused for the South African city
-#                        "Imperial", #  part of a UK university name but picked up as a city in Peru
-#                       "Laval", # Part of a university name in Canada but gets picked up as the city in France
-#                       "Villa", # Part of the name of a institution in Italy, but picked up as the Estonian city.
-#                       "Aidu", # Part of the name of a Japanese hospital, but picked up as a Estonian city
-#                      "Carolina", # Part of the US state name in the data, but picked up as a city in Peurto Rico
-#                        "Carmel", # Get confused with the US city, but always Israel in the dataset
-#                               "U",#  seems like shorthand for an address in France, but has picked up as a city in Micronesia and the French city is missed
-#                               "Ramon",  # Part of the name of a hospital in Spain, but picked up as the city in the Philippines
-#                              "Fundacion", #  Part of the name of a institution in Spain, but picked up as a city in Colombia
-#                              "Trinidad", # Part of a institution name in Argentina, were picked up as a city in Bolivia
-#                              "Liege",# Picked up as a city in Belgium, but it's actually part of a name of a place in France
-#                              "East London", # Refers to the UK University, picked up as a city in South Africa
-#                              "Florida", # University name picked up as a city in Cuba
-#                              "Ita", # Part of the name of a institution in Finland picked up as the city in Paraguay
-#                      "Princeton", #  University name confused for the city in Canada
-#                      "Humboldt", # Confused for the Canadian city, but actually a University in Germany
-#                       "Alcala", # Confused for the Colombian city, but actually part of a university name in Spain)
-#                             "York", # UK Canada confusion. Easier to remove
-#                      "Union", # Typically refers to the European Union, but confuse for the US city
-#                       "La Rioja", # Part of a Spanish University but computer the city in Argentina
-#                      "Concord", # Area in Australia that ends up being linked to a US city rather
-#                       "Nanyang", # Part of a Singapore university name that gets linked to a city in China
-#                       "Patan", # Part of a Napoleon University name that gets linked to a cityin India
-#                       "Saint-Joseph", # University name in Lebanon on that gets linked to a city in Reunion
-#                      "Valencia", # University in Spain that gets linked to Venezuela
-#                       "Ingenio", # Institution in Spain that gets linked to the Canary Islands
-#                      "Lincoln", # UK university name that gets linked to the US
-#                      "Roma", # Italian street name that gets linked to Australia
-#                      "Leon", # Institution name in France forgets links to Mexico
-#                      "Pau", # Part of a hospital name in Spain that Gets linked to France
-#                      "Ilan", # Part of a university name in Israel that gets linked to Taiwan
-#                      "Street", #  an obvious issue. Linked to the UK incorrectly
-#                      "Alle",  # Incorrectly linked to Switzerland when it's an address in Denmark'Hashtag
-#                      "San Ignacio", # Location improved its link to Bolivia
-#                      "Carnot", # Street in France that gets linked to central Africa
-#                       "Mexico", #  country gets incorrectly linked to the Philippines city
-#                       "Mobile", #  Institution in Canada that gets incorrectly linked to the US
-#                       "Hebron", # Location in Spain gets mixed up with Palestine
-#                      "Liban", #  hospital in France that gets linked to Czech Republic
-# 
-#                      "Bayonne", # Addiction clinic in France linked to the US incorrectly
-#                      "Apartado", # Confusion between Spain and Colombia. Better to just remove
-#                      "Rioja", # Appears in a few different places and can be linked to Spain or Peru
-#                       "Li", #  part of a university name in China can be linked to Norway incorrectly
-#                      "Al", # Part of the name of places in Saudi Arabia and other countries that gets picked up as a city in Norway
-#                      "San Agustin", # Part of the name of a place in Peru that getting linked to Mexico
-#                      "Asia", # A city name in the Philippines that is obviously going to give problems
-#                      "Jordan", #  country name acts incorrectly linked to the Philippines city
-#                      "Kota", # Location in Malaysia that gets linked to India incorrectly
-#                      "Ribera", # Part of an institution name in Spain gets linked to Italy
-#                      "Pilar", # Name of a Institute in Croatia that gets linked to Brazil incorrectly
-#                       "Greenwich", # Causes various problems due to being linked to the US and UK
-#                       "George Town", #In Malaysia, baguettes linked to the Cayman Islands
-#                      "Worth", # Should the Fort Worth in America, baguettes link to Germany
-#                      "Santa Lucia", # Name of a institution in Italy that gets confused at the Canary Islands
-#                      "Sainte Anne", # Name of an institution in France that gets confused with the city in Canada
-#                      "Douglas", # Part of a university name inCanada gets confused with the Isle of Man
-#                      "Arizona", # State name gets confused for a city in Honduras
-#                      "Potsdam", # In New York gets confused with Germany
-#                      "Kita", # In the name of an Indonesian institution that gets confused with the city in Mali
-#                      "Concordia", # US university name gets confused with a town in Argentina
-#                      "Bay", # Monterey Bay gets confused with a town in the Philippines
-#                      "Parana", # Part of an institution name in Brazil gets linked to Argentina
-#                      "Gazi", # Incorrectly gets linked to Ken year when it should be part of a name of a university in Turkey
-#                      "Wufeng",# incorrectly linked to China when it should be in Taiwan
-#                      "Loo", # Getting correctly linked to Estonia when it's actually part of a institution name in Singapore
-#                      "Police", # Police college accidentally linked to city in Poland
-#                      "Long", # Thia city and in the name of yale uni address
-#                      "David", # City in Panama that causes obvious issues
-#                      "Naval", # City in the Philippines that causes obvious issues
-#                      "Hall", # City in the Philippines that causes obvious issues
-#                      "Trinity" # Irish uni name but gets mistaken to Jersey city
-#                      )) %>%
-#   # A combination of city names and country names can be used to keep the city where it seems like it can be saved:
-#     mutate(city_country = paste0(name,", ", country.etc)) %>%
-#   filter(!city_country %in% c("Sussex, Canada",# Only the UK one appears and this gets confused
-#                               "Milton, Canada", #  should be Milton Keynes in the UK
-#                               "Bathurst, Canada", # Location in Australia they get confused Canada
-#                               "Milton, New Zealand", #  should be Milton Keynes in the UK
-#                               "Orleans, France", #  incorrectly linked to France, not Canada
-#                               "Bergen, Norway", # teams to be linked consistently to the US,  but mistaken for Norway
-#                               "Penrith, UK", # Should be the Australian city near Sydney
-#                               "Bedford, UK", #  location in Australia gets Linked to the UK incorrectly
-#                               "Bedford, USA", #  location in Australia gets Linked to the US incorrectly
-#                               "Salt, Spain", # Should be Salt Lake City, US,  but gets picked up as the Spanish city
-#                               "Lancaster, USA", #  should be the UK
-#                               "Ho, Ghana", # Part of an address in Taiwan that's getting linked to Ghana
-#                               "Laguna, USA", # Should be the canary islands, surprisingly
-#                               "Albert, France",
-#                               "Hong, Denmark",# Leads to this being picked up and said of Hong Kong
-#                              "Durham, USA", # Should be the UK one
-#                              "Brest, Belarus", # Refers to France not Belarus
-#                              "Warwick, USA", #  Always seems to refer to the UK university, but the Use of the US city
-#                              "Belmont, Canada", #  Always seems to refer to the US,  but confused for the Canadian city
-#                              "Beaufort, Malaysia", # Should be the American city
-#                              "Mackay, Australia", #  should always be the location in Taiwan
-#                              "Alicante, Philippines", #  should always be in Spain
-#                              "Malaya, Philippines", # Should be in Malaysia
-#                            "Claremont, Jamaica", #  Australian location that gets sent to Jamaica, incorrectly
-# 
-#                            "Colombia, Cuba", # Get confused with the country
-#                            "Carlton, UK", #Street name in Canada gets confused with the UK
-#                            "Costa Rica, Mexico", # Obviously get complete. The country
-#                            "Notre Dame, Mauritius", #  actually the Australian University!
-#                             "Baja, Hungary", # University namely Mexico
-#                            "Palmerston, Australia", #  links to the northern Australian city, rather than New Zealand
-#                            "Waterloo, USA" # Always the Canadian university
-#          )) %>%
-#    group_by(name) %>%
-#   filter(pop == max(pop)) %>% # Okay, so this is imperfect, but when a city name is duplicated that I haven't accounted for above, this will filter to select only the one with the highest population. This is based on the assumption that papers are likely to come from more populated cities (i.e. those with universities). This may seem crude, but it solved many, many issues in the map.
-#   ungroup()
-# 
-# 
-# # Extract just the city names so we can try and match author locations using these:
-# city_names_from_world <- world_cities_filtered$name
-# 
-# # Create a pattern of city names for matching with word boundaries:
-# city_names_pattern <- paste("\\b(", paste(city_names_from_world, collapse = "|"), ")\\b", sep = "")
-# 
-# 
-# 
-# # Extract city names using stringr (the str_exact function extracts the first complete match from a string; the arguments are the string and then the match we're looking for)
-# cities_of_authors <- str_extract(data_locations$institution, city_names_pattern)
-# 
-# 
-# 
-# # Before we join this to our dataset, let's now do the same thing for countries, using the world dataset. We could just link countries to the existing cities we identified, but this won't give us the richest overall data, as in some cases it might find a country name but no city name and vice versa.
-# 
-# # Extract just the Country names so we can try and match author locations using these:
-# country_names <- world.cities$country.etc
-# 
-# # Create a pattern of Country names for matching with word boundaries:
-# country_names_pattern <- paste("\\b(", paste(country_names, collapse = "|"), ")\\b", sep = "")
-# 
-# # Extract country names using stringr (the str_exact function extracts the first complete match from a string; the arguments are the string and then the match we're looking for)
-# countries_of_authors <- str_extract(data_locations$institution, country_names_pattern)
-# 
-# 
-# 
-# # Add the extracted city and country names to our dataset:
-# data_locations_with_city_country<- data_locations %>%
-#   bind_cols(cities_of_authors,
-#             countries_of_authors) %>%
-#   rename(cities_of_authors = 19,
-#          countries_of_authors = 20)
-# # Check everything looks okay:
-# #  select(author_names,
-# #         cities_of_authors,
-# #         countries_of_authors) %>%
-# #  print(n=150)
-# 
-# # Make the city name column consistent with paper dataset:
-# world_cities_filtered <- as_tibble(world_cities_filtered) %>%
-#   rename(cities_of_authors = name)
-# 
-# #Join the world.cities dataset with our paper data so we have latitude and longitude for each city:
-# data_locations_with_full_geo_location<-
-#   left_join(data_locations_with_city_country,
-#            world_cities_filtered,
-#            by = join_by(cities_of_authors) # This is done purposely, as I want to check whether the country names matched in text above match with the country names linked to the city names. Any mismatches tell us a lot about whether it got the right city are not and how I filtered out most of the problematic cities above!
-#            )
-# 
-# # Now, Save this to a CSV file because this took forever to extract the data we don't want to have to do this every time I render this page!!
+world_cities_filtered <-  world.cities %>%
+  filter(!name %in% c("China", # There is a city in Mexico called China, and including this in the dataset needed to pick up any papers published in China and link them to this city!
+                        "India", # Same sort of issue (City in Africa)
+                        "San",  # Same sort of issue (City in Africa, again)
+                        "Institut", # This appears to be a City somewhere around Azerbaijan, but I think it's getting picked up as a city when in fact it just is a string in the author address referring to a university!
+                       "Santa", # This is picked up as a city In Peru, when in fact  with just part of the name of many different institutions
+                      "Of", # Obvious issues
+                      "Oral", # Obvious issues
+                      "God", # This is picked up as the name of a city in the Hungary, when in fact is just  part of the name of a hospital in Ireland
+                      "Normal", # This is picked up as a city in the US  when in fact it's part of a university name in China
+                      "Bar", # This is picked up as a city in Ukraine, when in fact it's just the name of the University in Israel
+                      "Victoria", #  This leads to confusion between Victoria in Canada and the state in Australia. Easier just to remove rather than be inaccurate
+                      "Cardinal",
+                      "Villanueva", # This is actually a university in Spain, but it's picked up as a city in Honduras
+
+                      "Beira", # This is picked up as a city of Mozambique, but eventually the University Hospital name in Portugal
+                      "Cardinal",
+                      "Young", # This is picked up as a city in Uruguay, when is just part of the name of a young adult hospital in France
+
+                      "Cornwall", # Get picked up as a city in Canada and not the area of the UK
+                       "George", #  A street name in the US,  confused for the South African city
+                       "Imperial", #  part of a UK university name but picked up as a city in Peru
+                      "Laval", # Part of a university name in Canada but gets picked up as the city in France
+                      "Villa", # Part of the name of a institution in Italy, but picked up as the Estonian city.
+                      "Aidu", # Part of the name of a Japanese hospital, but picked up as a Estonian city
+                     "Carolina", # Part of the US state name in the data, but picked up as a city in Peurto Rico
+                       "Carmel", # Get confused with the US city, but always Israel in the dataset
+                              "U",#  seems like shorthand for an address in France, but has picked up as a city in Micronesia and the French city is missed
+                              "Ramon",  # Part of the name of a hospital in Spain, but picked up as the city in the Philippines
+                             "Fundacion", #  Part of the name of a institution in Spain, but picked up as a city in Colombia
+                             "Trinidad", # Part of a institution name in Argentina, were picked up as a city in Bolivia
+                             "Liege",# Picked up as a city in Belgium, but it's actually part of a name of a place in France
+                             "East London", # Refers to the UK University, picked up as a city in South Africa
+                             "Florida", # University name picked up as a city in Cuba
+                             "Ita", # Part of the name of a institution in Finland picked up as the city in Paraguay
+                     "Princeton", #  University name confused for the city in Canada
+                     "Humboldt", # Confused for the Canadian city, but actually a University in Germany
+                      "Alcala", # Confused for the Colombian city, but actually part of a university name in Spain)
+                            "York", # UK Canada confusion. Easier to remove
+                     "Union", # Typically refers to the European Union, but confuse for the US city
+                      "La Rioja", # Part of a Spanish University but computer the city in Argentina
+                     "Concord", # Area in Australia that ends up being linked to a US city rather
+                      "Nanyang", # Part of a Singapore university name that gets linked to a city in China
+                      "Patan", # Part of a Napoleon University name that gets linked to a cityin India
+                      "Saint-Joseph", # University name in Lebanon on that gets linked to a city in Reunion
+                     "Valencia", # University in Spain that gets linked to Venezuela
+                      "Ingenio", # Institution in Spain that gets linked to the Canary Islands
+                     "Lincoln", # UK university name that gets linked to the US
+                     "Roma", # Italian street name that gets linked to Australia
+                     "Leon", # Institution name in France forgets links to Mexico
+                     "Pau", # Part of a hospital name in Spain that Gets linked to France
+                     "Ilan", # Part of a university name in Israel that gets linked to Taiwan
+                     "Street", #  an obvious issue. Linked to the UK incorrectly
+                     "Alle",  # Incorrectly linked to Switzerland when it's an address in Denmark'Hashtag
+                     "San Ignacio", # Location improved its link to Bolivia
+                     "Carnot", # Street in France that gets linked to central Africa
+                      "Mexico", #  country gets incorrectly linked to the Philippines city
+                      "Mobile", #  Institution in Canada that gets incorrectly linked to the US
+                      "Hebron", # Location in Spain gets mixed up with Palestine
+                     "Liban", #  hospital in France that gets linked to Czech Republic
+
+                     "Bayonne", # Addiction clinic in France linked to the US incorrectly
+                     "Apartado", # Confusion between Spain and Colombia. Better to just remove
+                     "Rioja", # Appears in a few different places and can be linked to Spain or Peru
+                      "Li", #  part of a university name in China can be linked to Norway incorrectly
+                     "Al", # Part of the name of places in Saudi Arabia and other countries that gets picked up as a city in Norway
+                     "San Agustin", # Part of the name of a place in Peru that getting linked to Mexico
+                     "Asia", # A city name in the Philippines that is obviously going to give problems
+                     "Jordan", #  country name acts incorrectly linked to the Philippines city
+                     "Kota", # Location in Malaysia that gets linked to India incorrectly
+                     "Ribera", # Part of an institution name in Spain gets linked to Italy
+                     "Pilar", # Name of a Institute in Croatia that gets linked to Brazil incorrectly
+                      "Greenwich", # Causes various problems due to being linked to the US and UK
+                      "George Town", #In Malaysia, baguettes linked to the Cayman Islands
+                     "Worth", # Should the Fort Worth in America, baguettes link to Germany
+                     "Santa Lucia", # Name of a institution in Italy that gets confused at the Canary Islands
+                     "Sainte Anne", # Name of an institution in France that gets confused with the city in Canada
+                     "Douglas", # Part of a university name inCanada gets confused with the Isle of Man
+                     "Arizona", # State name gets confused for a city in Honduras
+                     "Potsdam", # In New York gets confused with Germany
+                     "Kita", # In the name of an Indonesian institution that gets confused with the city in Mali
+                     "Concordia", # US university name gets confused with a town in Argentina
+                     "Bay", # Monterey Bay gets confused with a town in the Philippines
+                     "Parana", # Part of an institution name in Brazil gets linked to Argentina
+                     "Gazi", # Incorrectly gets linked to Ken year when it should be part of a name of a university in Turkey
+                     "Wufeng",# incorrectly linked to China when it should be in Taiwan
+                     "Loo", # Getting correctly linked to Estonia when it's actually part of a institution name in Singapore
+                     "Police", # Police college accidentally linked to city in Poland
+                     "Long", # Thia city and in the name of yale uni address
+                     "David", # City in Panama that causes obvious issues
+                     "Naval", # City in the Philippines that causes obvious issues
+                     "Hall", # City in the Philippines that causes obvious issues
+                     "Trinity" # Irish uni name but gets mistaken to Jersey city
+                     )) %>%
+  # A combination of city names and country names can be used to keep the city where it seems like it can be saved:
+    mutate(city_country = paste0(name,", ", country.etc)) %>%
+  filter(!city_country %in% c("Sussex, Canada",# Only the UK one appears and this gets confused
+                              "Milton, Canada", #  should be Milton Keynes in the UK
+                              "Bathurst, Canada", # Location in Australia they get confused Canada
+                              "Milton, New Zealand", #  should be Milton Keynes in the UK
+                              "Orleans, France", #  incorrectly linked to France, not Canada
+                              "Bergen, Norway", # teams to be linked consistently to the US,  but mistaken for Norway
+                              "Penrith, UK", # Should be the Australian city near Sydney
+                              "Bedford, UK", #  location in Australia gets Linked to the UK incorrectly
+                              "Bedford, USA", #  location in Australia gets Linked to the US incorrectly
+                              "Salt, Spain", # Should be Salt Lake City, US,  but gets picked up as the Spanish city
+                              "Lancaster, USA", #  should be the UK
+                              "Ho, Ghana", # Part of an address in Taiwan that's getting linked to Ghana
+                              "Laguna, USA", # Should be the canary islands, surprisingly
+                              "Albert, France",
+                              "Hong, Denmark",# Leads to this being picked up and said of Hong Kong
+                             "Durham, USA", # Should be the UK one
+                             "Brest, Belarus", # Refers to France not Belarus
+                             "Warwick, USA", #  Always seems to refer to the UK university, but the Use of the US city
+                             "Belmont, Canada", #  Always seems to refer to the US,  but confused for the Canadian city
+                             "Beaufort, Malaysia", # Should be the American city
+                             "Mackay, Australia", #  should always be the location in Taiwan
+                             "Alicante, Philippines", #  should always be in Spain
+                             "Malaya, Philippines", # Should be in Malaysia
+                           "Claremont, Jamaica", #  Australian location that gets sent to Jamaica, incorrectly
+
+                           "Colombia, Cuba", # Get confused with the country
+                           "Carlton, UK", #Street name in Canada gets confused with the UK
+                           "Costa Rica, Mexico", # Obviously get complete. The country
+                           "Notre Dame, Mauritius", #  actually the Australian University!
+                            "Baja, Hungary", # University namely Mexico
+                           "Palmerston, Australia", #  links to the northern Australian city, rather than New Zealand
+                           "Waterloo, USA" # Always the Canadian university
+         )) %>%
+   group_by(name) %>%
+  filter(pop == max(pop)) %>% # Okay, so this is imperfect, but when a city name is duplicated that I haven't accounted for above, this will filter to select only the one with the highest population. This is based on the assumption that papers are likely to come from more populated cities (i.e. those with universities). This may seem crude, but it solved many, many issues in the map.
+  ungroup()
+
+
+# Extract just the city names so we can try and match author locations using these:
+city_names_from_world <- world_cities_filtered$name
+
+# Create a pattern of city names for matching with word boundaries:
+city_names_pattern <- paste("\\b(", paste(city_names_from_world, collapse = "|"), ")\\b", sep = "")
+
+
+
+# Extract city names using stringr (the str_exact function extracts the first complete match from a string; the arguments are the string and then the match we're looking for)
+cities_of_authors <- str_extract(data_locations$institution, city_names_pattern)
+
+# This misses quite a lot of matches. Let's try to fuzzy match city names where str_extract() failed using stringdist (see: https://cran.r-project.org/web/packages/stringdist/stringdist.pdf):
+match_city <- function(address, cities) {
+  # If the input address is NA, an empty string, or the city list is empty, return NA:
+  if (is.na(address) || address == "" || length(cities) == 0) return(NA)
+  
+  # Compute string distances between the address and all cities using Jaro-Winkler (jw) method:
+  dists <- stringdist::stringdist(address, cities, method = "jw")
+  
+  # If distances can't be computed or are all NA, return NA:
+  if (length(dists) == 0 || all(is.na(dists))) return(NA)
+  
+  # Find the index of the city with the smallest string distance (i.e., closest match):
+  best <- which.min(dists)
+  
+  # If no valid index found, or the best distance is NA, return NA:
+  if (length(best) == 0 || is.na(dists[best])) return(NA)
+  
+  # If the best match has a distance less than 0.1 (very close match), return that city name:
+  if (dists[best] < 0.1) return(cities[best]) 
+  else return(NA)  # Otherwise, no acceptable match found; return NA
+}
+
+# Apply function:
+cities_of_authors_fuzzy <- ifelse(
+  is.na(cities_of_authors),
+  sapply(data_locations$institution, match_city, cities = city_names_from_world),
+  cities_of_authors
+)
+
+# Before we join this to our dataset, let's now do the same thing for countries, using the world dataset. We could just link countries to the existing cities we identified, but this won't give us the richest overall data, as in some cases it might find a country name but no city name and vice versa.
+
+# Extract just the Country names so we can try and match author locations using these:
+country_names <- world.cities$country.etc
+
+# Create a pattern of Country names for matching with word boundaries:
+country_names_pattern <- paste("\\b(", paste(country_names, collapse = "|"), ")\\b", sep = "")
+
+# Extract country names using stringr (the str_exact function extracts the first complete match from a string; the arguments are the string and then the match we're looking for)
+countries_of_authors <- str_extract(data_locations$institution, country_names_pattern)
+
+
+# Add the extracted city and country names to our dataset:
+data_locations_with_city_country<- data_locations %>%
+  bind_cols(cities_of_authors,
+            cities_of_authors_fuzzy,
+            countries_of_authors) %>% 
+  rename(cities_of_authors = 19,
+         cities_of_authors_fuzzy = 20,
+         countries_of_authors = 21)
+# Check everything looks okay:
+#  select(author_names,
+#         cities_of_authors,
+#         countries_of_authors) %>%
+#  print(n=150)
+
+# Okay, let's check the fuzzy matching for city names to see how it did:
+data_locations_with_city_country %>%
+  filter(is.na(cities_of_authors) & !is.na(cities_of_authors_fuzzy)) %>%
+   select(author_names,
+        cities_of_authors,
+        cities_of_authors_fuzzy,
+        countries_of_authors) %>%
+  print(n=40)
+
+# well, it only matched 35  additional cities, andthe matches are all very questionable (e.g.m "Statte" is Matched around eight times, could just be because this is so similar to the word "State").  I think best not to rely on these and to remove it from the dataset below.
+
+# Make the city name column consistent with paper dataset:
+world_cities_filtered <- as_tibble(world_cities_filtered) %>%
+  rename(cities_of_authors = name)
+
+# Join the world.cities dataset with our paper data so we have latitude and longitude for each city. This also allows us to keep the country that matches with city names but doesn't match with the country, which will allow us to help spot errors in both variables:
+data_locations_with_full_geo_location<-
+  left_join(data_locations_with_city_country,
+           world_cities_filtered,
+           by = join_by(cities_of_authors) # This is done purposely, as I want to check whether the country names matched in text above match with the country names linked to the city names. Any mismatches tell us a lot about whether it got the right city or not and this is how I filtered out most of the problematic cities above!
+           ) %>%
+  select(-cities_of_authors_fuzzy) %>%
+# One final thing we can do with this data is remove all of the many rows where there is no author name. It seems that this is mostly the case where authors have included multiple affiliations and so there author number and affiliation number doesn't quite line up. To be sure, We will only remove roles with no author name if at least one author is present per  article/PMID:
+  group_by(PMID) %>% 
+  filter(!(is.na(author_names) & any(!is.na(author_names)))) %>% # This removes nearly 10,000 rows of superfluous and problematic data (location matching is hard, as you'll see if you follow the script below!)
+  ungroup()
+
+
+
+
+# Now, Save this to a CSV file because this took forever to extract the data we don't want to have to do this every time I render this page!!
 write.csv(data_locations_with_full_geo_location, "data_locations_with_full_geo_location.csv")
 
 ```
@@ -653,24 +705,37 @@ data_locations_with_full_geo_location_cleaned <-
     str_detect(institution, "(?i)Rutgers") &
     !str_detect(institution, "(?i)Camden") &
     !str_detect(institution, "(?i)New York") ~ "New Brunswick", # this isn't perfect, but cities are often missing for Rutgers
-    # London city issues
+  
+      # London city issues
+     str_detect(institution, "(?i)Division of Psychology and Language Sciences, UCL") ~ "London",
+     str_detect(institution, "(?i)Reta Lila Weston") ~ "London",
      str_detect(institution, "(?i)University College London") ~ "London",
      str_detect(institution, "(?i)London, United Kingdom") ~ "London",
      str_detect(institution, "(?i)Grovelands Priory Hospital") ~ "London",
+     str_detect(institution, "(?i)Barnet, Enfield & Haringey") ~ "London",    
    # Sort Columbia issues:
     str_detect(institution, "(?i)Vancouver") ~ "Vancouver",
     str_detect(institution, "(?i)Columbia University") ~ "New York",
+   str_detect(institution, "(?i)Mailman School of Public Health, Columbia") ~ "New York",
+   str_detect(institution, "(?i)Teacher's College, Columbia") ~ "New York",
+   str_detect(institution, "(?i)College of Physicians and Surgeons, Columbia") ~ "New York",
+   
+  
    # Saudi scholar:
     str_detect(institution, "(?i)Sami H. Alzahrani") ~ "Jeddah",
    
   # Sort Colombia issues:
     str_detect(institution, "(?i)Bogota") ~ "Bogota",
+  str_detect(institution, "(?i) Universidad del Rosa") ~ "Bogota",
     str_detect(institution, "(?i)Barranquilla") ~ "Barranquilla",
     str_detect(institution, "(?i)Pasto") ~ "Pasto",
     str_detect(institution, "(?i)Campus Robledo") ~ "Medellin",
    # Cambridge city issues:
    str_detect(institution, "(?i)Cambridge University, UCL and NHS National Centre for gaming Disorders") ~ "London",
+  
    # UBC & Canada other:
+  str_detect(institution, "(?i)Edmonton") ~ "Edmonton",  
+  str_detect(institution, "(?i)University of Alberta") ~ "Edmonton",  
     str_detect(institution, "(?i)Concordia University") ~ "Montreal",  
       str_detect(institution, "(?i)Sainte-Justine University Hospital") ~ "Montreal",  
     str_detect(institution, "(?i)University of Western Ontario") ~ "London",  
@@ -678,6 +743,9 @@ data_locations_with_full_geo_location_cleaned <-
   	      str_detect(institution, "(?i)University of British Columbia, Okanagan Campus") ~ "Kelowna",
     str_detect(institution, "(?i)University of British Columbia") ~ "Vancouver",
    str_detect(institution, "(?i)Toronto, Canada") ~ "Toronto",
+str_detect(institution, "(?i)Dalhousie University") ~ "Halifax",
+    str_detect(institution, "(?i)Centre for Addiction and Mental Health, 33 Russell") ~ "Toronto",
+  str_detect(institution, "(?i)Quebec") ~ "Quebec",
       str_detect(institution, "(?i)Brandon University") ~ "Brandon",
   str_detect(institution, "(?i)Department of Education, Centre for Addiction and Mental Health") ~ "Toronto",
     str_detect(institution, "(?i)Morton and Gloria Shulman Movement Disorders Clinic") ~ "Toronto",
@@ -688,6 +756,7 @@ str_detect(institution, "(?i)Toronto, ON") ~ "Toronto",
     str_detect(institution, "(?i)Carleton University") ~ "Ottawa",
   # Indian city:
   str_detect(institution, "(?i)Veer Chandra Singh Garhwali Government") ~ "Srinagar",
+str_detect(institution, "(?i)Maya Sahu") ~ "Bengaluru",
 str_detect(institution, "(?i)Saveetha") ~ "Chennai",
  str_detect(institution, "(?i)Anna Nagar") ~ "Chennai",
 
@@ -705,23 +774,34 @@ str_detect(institution, "(?i)Saveetha") ~ "Chennai",
    str_detect(institution, "(?i)Morgantown") ~ "Morgantown",
    # Marid & spain other:
      str_detect(institution, "(?i)Madrid, Spain") ~ "Madrid",
+ str_detect(institution, "(?i)Mostoles, Madrid") ~ "Madrid",
+
+str_detect(institution, "(?i)Alava University Hospital-Santiago") ~ "Spain",
+str_detect(institution, "(?i)Hospital Universitario Fundacion Jimenez Diaz") ~ "Vitoria-Gasteiz",
  str_detect(institution, "(?i)Universidad Francisco de Vitoria") ~ "Madrid",
 str_detect(institution, "(?i)Universidad del Pais Vasco") ~ "San Sebastian",
+  str_detect(institution, "(?i)Universitat Rovira i Virgili") ~ "Tarragona",
   # France/french:
+str_detect(institution, "(?i)Universite Cote D'Azur") ~ "Nice",
+str_detect(institution, "(?i)CARMEN INSERM U1060") ~ "Lyon",
+str_detect(institution, "(?i)CH de Saint-Jean-de-Dieu") ~ "Lyon",
+
     str_detect(institution, "(?i)University of Tours") ~ "Tours",
 str_detect(institution, "(?i)Clermont Ferrand") ~ "Clermont-Ferrand",
-
-
     str_detect(institution, "(?i)CSAPA, pole ressource jeux") ~ "Lille",
+    str_detect(institution, "(?i)Ramsay Generale de Sante") ~ "Lille",
 str_detect(institution, "(?i)Universite de Versailles Saint Quentin en Yvelines") ~ "Le Chesnay",
 str_detect(institution, "(?i)Centre Hospitalier Sainte-Anne") ~ "Paris",
 str_detect(institution, "(?i)Sainte-Anne Hospital") ~ "Paris",
+str_detect(institution, "(?i)Hopital Sainte-Anne") ~ "Paris",
     str_detect(institution, "(?i)Pole paris 12") ~ "Paris",
    str_detect(institution, "(?i)Paris, France") ~ "Paris",
+str_detect(institution, "(?i)Centre Pierre-Nicole") ~ "Paris",
   str_detect(institution, "(?i)Centre Pierre Nicole") ~ "Paris",
     str_detect(institution, "(?i)centre hospitalier Sainte-Anne") ~ "Paris",
     str_detect(institution, "(?i)Center Pierre Nicole") ~ "Paris",
   # South Korea:
+ str_detect(institution, "(?i)Honam University") ~ "Gwangju",
   str_detect(institution, "(?i)Seoyoung University") ~ "Paju-si",
   str_detect(institution, "(?i)Chungbuk National University") ~ "Cheongju",
   str_detect(institution, "(?i)Pusan National University") ~ "Pusan",
@@ -746,17 +826,21 @@ str_detect(institution, "(?i)Sainte-Anne Hospital") ~ "Paris",
   # Rochester:
    str_detect(institution, "(?i)Rochester") ~ "Rochester",
   # Bedford, USA:
+ str_detect(institution, "(?i)Bedford, MA") ~ "Bedford",
   str_detect(institution, "(?i)Edith Nourse Rogers Memorial Hospital") ~ "Bedford",
   str_detect(institution, "(?i)Edith Nourse Rogers") ~ "Bedford",
 # Florida:
  str_detect(institution, "(?i)University of Florida") ~ "Gainesville",
  str_detect(institution, "(?i)Jacksonville, FL") ~ "Jacksonville",
-
+str_detect(institution, "(?i)Department of Kinesiology, School of Applied Health Sciences, Brooks") ~ "Jacksonville",
 # Yale:
   str_detect(institution, "(?i)New Haven, CT") ~ "New Haven",
+str_detect(institution, "(?i)New Haven, Connecticut") ~ "New Haven",
 str_detect(institution, "(?i)Dr. Potenza") ~ "New Haven",
   str_detect(institution, "(?i)Yale University") ~ "New Haven",
 # US unis:
+ str_detect(institution, "(?i)Taylor Manor Hospital") ~ "Ellicott City",
+ str_detect(institution, "(?i)Virginia Tech, Blacksburg, VA") ~ "Roanoke",
  str_detect(institution, "(?i)Columbia University") ~ "New York",
 str_detect(institution, "(?i)Russell J. Jandoli School") ~ "Olean",
 	 str_detect(institution, "(?i)University of Minnesota") ~ "Minneapolis",
@@ -764,17 +848,49 @@ str_detect(institution, "(?i)Russell J. Jandoli School") ~ "Olean",
 str_detect(institution, "(?i)University of Rhode Island") ~ "Providence",
 str_detect(institution, "(?i)University of Southern California") ~ "Los Angeles",
 str_detect(institution, "(?i)City of Hope Medical Center, Duarte") ~ "Los Angeles",
-str_detect(institution, "(?i)Kim Ross is the School
-") ~ "Pheonix",
+str_detect(institution, "(?i)Los Angeles") ~ "Los Angeles",
+str_detect(institution, "(?i)Kim Ross is the School") ~ "Phoenix",
+str_detect(institution, "(?i)Paradise Valley, Arizona") ~ "Phoenix",
+str_detect(institution, "(?i)The University of Texas") ~ "Houston",
+ str_detect(institution, "(?i)Memorial Sloan-Kettering Cancer") ~ "New York",
+ str_detect(institution, "(?i)Wake Forest") ~ "Winston-Salem",
+ str_detect(institution, "(?i)Wake Forest") ~ "Syracuse",
+ str_detect(institution, "(?i)SUNY Upstate Medical University") ~ "Syracuse",
+ str_detect(institution, "(?i)William Paterson University") ~ "Wayne",
+ str_detect(institution, "(?i)West Virginia University") ~ "Morgantown",
+ str_detect(institution, "(?i)Metropolitan State College") ~ "Denver",
+ str_detect(institution, "(?i)Nova Southeastern University") ~ "Fort Lauderdale",
+ str_detect(institution, "(?i)Temple University") ~ "Philadelphia",
+   str_detect(institution, "(?i)Thompson Center for Autism") ~ "Columbia",
+str_detect(institution, "(?i)Stetson University") ~ "DeLand",
+str_detect(institution, "(?i)Franklin College of Arts and Science") ~ "Athens",
+str_detect(institution, "(?i)Hackensack Meridian") ~ "Edison",
+str_detect(institution, "(?i)Emory University") ~ "Atlanta",
+str_detect(institution, "(?i)Washington University") ~ "St. Louis",
+str_detect(institution, "(?i)George Warren Brown School of Social Work") ~ "St. Louis",
+str_detect(institution, "(?i)Northern Kentucky University") ~ "Highland Heights",
+ str_detect(institution, "(?i)Louisiana State University Medical Center") ~ "Shreveport",
+  str_detect(institution, "(?i)University of North Dakota") ~ "Grand Forks",
+  str_detect(institution, "(?i)University of Houston") ~ "Houston",
+  str_detect(institution, "(?i)University of California, Davis") ~ "Davis",
+  str_detect(institution, "(?i)University of Nebraska at Omaha") ~ "Omaha",
+  str_detect(institution, "(?i)University of Iowa") ~ "Iowa City",
+  str_detect(institution, "(?i)Purdue University") ~ "West Lafayette",
+  str_detect(institution, "(?i)Towson State University") ~ "Baltimore",
+  str_detect(institution, "(?i)Indiana University") ~ "Bloomington",
+  str_detect(institution, "(?i)University of Washington") ~ "Seattle",
+  str_detect(institution, "(?i)Virginia Commonwealth University") ~ "Richmond",
+  str_detect(institution, "(?i)James Madison University") ~ "Harrisonburg",
+  str_detect(institution, "(?i)Liberty, Mo") ~ "Liberty",
+  str_detect(institution, "(?i)Duke University") ~ "Durham",
+
+# Norway:
+str_detect(institution, "(?i)University College, Bergen") ~ "Bergen",
 
 
-
-# Auckland & Newzealand:
+# Auckland & New zealand:
   str_detect(institution, "(?i)Auckland") ~ "Auckland",
  str_detect(institution, "(?i)Palmerston North, Manawatu") ~ "Palmerston North",
-# Netherlands:
-str_detect(institution, "(?i)Instituut voor Onderzoek") ~ "Netherlands", 
-str_detect(institution, "(?i)South Limburg Mental Health") ~ "Netherlands", 
 
 #
 # Lausanne:
@@ -795,8 +911,11 @@ str_detect(institution, "(?i)Case Western Reserve University") ~ "Cleveland", # 
 str_detect(institution, "(?i)Amityville") ~ "Amityville",
 # German city:
    str_detect(institution, "(?i)Villingen-Schwenningen") ~ "Villingen-Schwenningen",
+   str_detect(institution, "(?i)Sana Klinikum Offenbach") ~ "Offenbach",
   str_detect(institution, "(?i)State Police College of Baden-Wuerttemberg") ~ "Villingen-Schwenningen",
+  str_detect(institution, "(?i)Ulm University") ~ "Ulm",
   str_detect(institution, "(?i)Hurth, Germany") ~ "Hurth",
+  str_detect(institution, "(?i)Eichstatt-Ingolstadt") ~ "Germany",
 str_detect(institution, "(?i)Martin-Luther-University") ~ "Halle",
 # Iraninan city:
   str_detect(institution, "(?i)Isfahan, Iran") ~ "Isfahan",
@@ -808,9 +927,13 @@ str_detect(institution, "(?i)Bar-Ilan University") ~ "Ramat Gan",
 str_detect(institution, "(?i)Beit-Berl College") ~ "Kfar-Saba",	
 
 # South Korea:
+str_detect(institution, "(?i)Department of Nursing, Chung-Ang") ~ "Seoul",
+str_detect(institution, "(?i)Yonsei University") ~ "Seoul",
+str_detect(institution, "(?i)University of Ulsan") ~ "Seoul",
 str_detect(institution, "(?i)Hanyang University ERICA") ~ "Ansan",
 str_detect(institution, "(?i)Hanyang University, Ansan") ~ "Ansan",
 str_detect(institution, "(?i)Hanyang University") ~ "Seoul",
+str_detect(institution, "(?i)Anyang University") ~ "Anyang",
 str_detect(institution, "(?i)Yonsei Forest Mental Health Clinic") ~ "Seoul",
 str_detect(institution, "(?i)Chungmugong Leadership Center") ~ "Changwon",
 str_detect(institution, "(?i)Korea Institute on Behavioral Addictions") ~ "Seoul",
@@ -823,27 +946,40 @@ str_detect(institution, "(?i)Center for Compulsive Behavior and Addiction, Rush"
  # Jordan city:
  str_detect(institution, "(?i)Amman 19392, Jordan") ~ "Amman", 
 # Perth/Australia:
+ str_detect(institution, "(?i)The Boden Collaboration") ~ "Sydney",
+ str_detect(institution, "(?i)North Parramatta") ~ "Sydney",
  str_detect(institution, "(?i)Perth, Australia") ~ "Perth", 
  str_detect(institution, "(?i)University of Western Australia") ~ "Perth", 
  str_detect(institution, "(?i)University of Tasmania") ~ "Hobart", 
  str_detect(institution, "(?i)Alfred Health, Prahran") ~ "Melbourne", 
  str_detect(institution, "(?i)University of Wollongong") ~ "Wollongong", 
  str_detect(institution, "(?i)Adelaide") ~ "Adelaide", 
+  str_detect(institution, "(?i)Liverpool Hospital, Sydney") ~ "Sydney",
+ str_detect(institution, "(?i)Campbelltown Hospital") ~ "Sydney",
 str_detect(institution, "(?i)CQUniversity, 400 Kent St, Sydney") ~ "Sydney", 
+str_detect(institution, "(?i)Gna Ka Lun Adolescent") ~ "Sydney", 
 str_detect(institution, "(?i)CQ University") ~ "Rockhamptom", 
 
 # Oxford Uni:
  str_detect(institution, "(?i)Oxford, United Kingdom") ~ "Oxford", 
 # Salford Uni:
  str_detect(institution, "(?i)Frederick Road Campus") ~ "Salford", 
- # Italian cities:
+
+ # Italian cities/ Italy:
  str_detect(institution, "(?i)Portici, Italy") ~ "Naples", 
+ str_detect(institution, "(?i)Ospedale Evangelico Betania") ~ "Naples", 
+str_detect(institution, "(?i)Ospedale Evangelico Betania") ~ "Naples",
 str_detect(institution, "(?i)Betania Evangelical Hospital") ~ "Naples", 
+str_detect(institution, "(?i)Dipartimento di Medicina Clinica e Sperimentale") ~ "Pisa", 
+str_detect(institution, "(?i)Department of Medical and Oral Sciences and Biotechnologies, University G") ~ "Chieti", 
 str_detect(institution, "(?i)Largo Brambilla") ~ "Florence", 
 str_detect(institution, "(?i)University of Salento") ~ "Lecce", 
+str_detect(institution, "(?i)University of Napoli Federico") ~ "Naples", 
  str_detect(institution, "(?i)Genoa, Italy") ~ "Genoa", 
  str_detect(institution, "(?i)Lecco, Italy") ~ "Lecco", 
   str_detect(institution, "(?i)Milan, Italy") ~ "Milan",
+str_detect(institution, "(?i)University of Milano") ~ "Milan",
+ str_detect(institution, "(?i)University Cattolica del Sacro") ~ "Milan",
 str_detect(institution, "(?i)University of Genova") ~ "Genoa", 
 str_detect(institution, "(?i)Terni, Italy") ~ "Terni", 
 str_detect(institution, "(?i)Telese Terme") ~ "Telese",
@@ -857,7 +993,9 @@ str_detect(institution, "(?i)Vincent P. Dole Dual Diagnosis Unit") ~ "Lucca",
 str_detect(institution, "(?i)Institute for Advanced Studies-IUSS") ~ "Pavia", 
 
   # barcelona & other spanish city issues:
+ str_detect(institution, "(?i)Universidad San Jorge") ~ "Zaragoza",
   str_detect(institution, "(?i)Barcelona, Spain") ~ "Barcelona",
+str_detect(institution, "(?i)Serra Hunter fellow") ~ "Barcelona",
   str_detect(institution, "(?i)Pompeu Fabra University") ~ "Barcelona",
   str_detect(institution, "(?i)Universitat Rovira i Virgili") ~ "Tarragona",
   str_detect(institution, "(?i)Alicante, Spain") ~ "Alicante",
@@ -865,6 +1003,7 @@ str_detect(institution, "(?i)Institute for Advanced Studies-IUSS") ~ "Pavia",
 str_detect(institution, "(?i)Ciencies d'Alimentacio") ~ "Barcelona",
 str_detect(institution, "(?i)Servicio de Psiquiatria, Fundacion") ~ "Madrid",
 str_detect(institution, "(?i)Jimenez Diaz University Hospital") ~ "Madrid",
+str_detect(institution, "(?i)Puerta de Hierro-Segovia de Arana Health Research Institute") ~ "Madrid",
 str_detect(institution, "(?i)Centro Universitario Cardenal Cisneros") ~ "Madrid", 
 str_detect(institution, "(?i)Universidad Catolica San Antonio de Murcia") ~ "Murcia", 
 str_detect(institution, "(?i)Santiago de Compostela") ~ "Santiago de Compostela", 
@@ -874,27 +1013,39 @@ str_detect(institution, "(?i)Serra Hunter Programme") ~ "Barcelona",
 str_detect(institution, "(?i)Hospital Universitario de Canarias") ~ "Santa Cruz de Tenerife",
 str_detect(institution, "(?i)Universitat Pompeu Fabra") ~ "Barcelona",
 str_detect(institution, "(?i)Universidad Loyola Andalucia") ~ "Cordoba",
+# India
+  str_detect(institution, "(?i)MGM Medical College & Hospital , Navi") ~ "Navi Mumbai",
 
 # Nottingham:
  str_detect(institution, "(?i)Newark Beacon Innovation Centre") ~ "Nottingham",
+
 # china:
+str_detect(institution, "(?i)Key Laboratory Of Alzheimer's Disease Of Zhejiang Province") ~ "Hangzhou",
+   str_detect(institution, "(?i)Shenzhen Research Institute") ~ "Shenzhen",
+str_detect(institution, "(?i)Hunan First Normal University") ~ "Changsha",
+ str_detect(institution, "(?i)Gannan Medical University") ~ "Ganzhou",
+ str_detect(institution, "(?i)Jiaotong University") ~ "Shanghai",
+ str_detect(institution, "(?i)National Clinical Research Center for Oral") ~ "Chengdu",
  str_detect(institution, "(?i)Macau Pui Ching Middle School") ~ "Macau",
  str_detect(institution, "(?i)University of Macau") ~ "Macau",
  str_detect(institution, "(?i)Macao Polytechnic Institute") ~ "Macau",
  str_detect(institution, "(?i)Chaohu Hospital of Anhui") ~ "Hefei",
 str_detect(institution, "(?i)Huangmei County") ~ "Huanggang",
 # Portugal:
+str_detect(institution, "(?i)Lisbon") ~ "Lisbon",
+str_detect(institution, "(?i)Instituto Superior Miguel Torga") ~ "Coimbra",
 str_detect(institution, "(?i)Unity in Multidisciplinary Research on Biomedicine (UMIB)") ~ "Porto",
 str_detect(institution, "(?i)Abel Salazar") ~ "Porto",
 
 str_detect(institution, "(?i)IAJ (Gambling Support Institute)") ~ "Lisbon",
 str_detect(institution, "(?i)Rua Sacadura Cabral") ~ "Lisbon",
 # Turkey:
-str_detect(institution, "(?i)Inonu University") ~ "Malatya",
+str_detect(institution, "(?i)Inonu") ~ "Malatya",
 str_detect(institution, "(?i)Sultan Abdulhamid Han") ~ "Istanbul",
 str_detect(institution, "(?i)Provincial Health Directorate, Agri") ~ "Agri",
 str_detect(institution, "(?i)Marmara University") ~ "Istanbul",
 str_detect(institution, "(?i)Baltalimani Metin Sabanci") ~ "Istanbul",
+str_detect(institution, "(?i)Selcuk University") ~ "Konya",
   # Porto Alegre issue:
   str_detect(institution, "(?i)Porto Alegre") ~ "Porto Alegre",
 # Namur:
@@ -903,19 +1054,21 @@ str_detect(institution, "(?i)Baltalimani Metin Sabanci") ~ "Istanbul",
  str_detect(institution, "(?i)Sandy Bay") ~ "Sandy Bay",
 # Oviedo:
  str_detect(institution, "(?i)Oviedo, Spain") ~ "Oviedo",
- str_detect(institution, "(?i)Virginia Tech, Blacksburg, VA") ~ "Roanoke",
 # Dublin & ireland:
  str_detect(institution, "(?i)Lucena Clinic Rathgar") ~ "Dublin",
  str_detect(institution, "(?i)Dublin, Ireland") ~ "Dublin",
  # West Chester University:
    str_detect(institution, "(?i)West Chester University") ~ "Philadelphia",
   # Yunlin and others, Taiwan:
+str_detect(institution, "(?i)New Taipei") ~ "New Taipei",
 str_detect(institution, "(?i)Chia Nan University") ~ "Tainan",
 str_detect(institution, "(?i)E-Da Hospital") ~ "Kaohsiung",
-str_detect(institution, "(?i)Shu Zen Junior College of Medicine ") ~ "Kaohsiung",
+str_detect(institution, "(?i)Shu Zen Junior College of Medicine") ~ "Kaohsiung",
+str_detect(institution, "(?i)Ditmanson Medical Foundation") ~ "Chiayi",
   str_detect(institution, "(?i)Yunlin, Taiwan") ~ "Douliu",
 str_detect(institution, "(?i)Chang Gung Memorial Hospital") ~ "Taoyuan City",
 str_detect(institution, "(?i)National Chi Nan University") ~ "Puli",
+str_detect(institution, "(?i)National Formosa University") ~ "Douliu",
     # University of Montana:
   str_detect(institution, "(?i)University of Montana") ~ "Missoula",
       # San Juan:
@@ -969,20 +1122,32 @@ str_detect(institution,  "The Center for Internet and Technology Addiction") ~ "
  str_detect(institution, "(?i)Uniwersytet Jagiellonski Collegium Medicum") ~ "Krakow",
  str_detect(institution, "(?i)Adam Mickiewicz University") ~ "Poznan",
   # Brazil:
+str_detect(institution, "(?i)University Federal do Vale do") ~ "Petrolina", 
+str_detect(institution, "(?i)Universidade Federal do Parana") ~ "Curitiba",
 str_detect(institution, "(?i)Federal University of Minas") ~ "Belo Horizonte",
      str_detect(institution, "(?i)Belo Horizonte") ~ "Belo Horizonte",
      str_detect(institution, "(?i)Universidade Federal de Minas Gerais") ~ "Belo Horizonte",
+     str_detect(institution, "(?i)Universidade Federal de Minas") ~ "Petrolina",
      str_detect(institution, "(?i)University of Santa Catarina") ~ "Florianopolis",
+str_detect(institution, "(?i)Federal University of Rio Grande do") ~ "Porto Alegre",
+
+    str_detect(institution, "(?i)Escola Paulista") ~ "Sao Paulo",
 str_detect(institution, "(?i)Clementino Fraga Filho Hospital") ~ "Rio de Janeiro",
 str_detect(institution, "(?i)Universidade Estadual da Paraiba") ~ "Campina Grande",
+     str_detect(institution, "(?i)Federal University of Mato Grosso do Sul") ~ "Campo Grande",
  # Peru:
   str_detect(institution, "(?i)Lima, Peru") ~ "Lima",
 str_detect(institution, "(?i)Universidad Cesar Vallejo") ~ "Trujillo",
+
 #Japan:
+str_detect(institution, "(?i)Health Sciences University of Hokkaido") ~ "Tobetsu",
 str_detect(institution, "(?i)Konan Women's University") ~ "Kobe",
 str_detect(institution, "(?i)Tokai Gakuen University") ~ "Nagoya",
 str_detect(institution, "(?i)University of Hokkaido") ~ "Hokkaido",
 str_detect(institution, "(?i)Tama-ku, Kawasaki") ~ "Kawasaki",
+str_detect(institution, "(?i)Teikyo University") ~ "Tokyo",
+str_detect(institution, "(?i)Showa University") ~ "Tokyo",
+
 
 # Virginia:
  str_detect(institution, "(?i)Virginia Institute for Psychiatry and Behavioral Genetics") ~ "Richmond",
@@ -998,11 +1163,16 @@ str_detect(institution, "(?i)Nguyen Tat Thanh") ~ "Ho Chi Minh City",
    # Santo André:
     str_detect(institution, "(?i)Santo Andre, SP, Brazil") ~ "Santo Andre",
 # Egypt"
+# Hungary:
+str_detect(institution, "(?i)Budapest") ~ "Budapest",
 str_detect(institution, "(?i)University of South Valley") ~ "Cairo", 
+# Netherlands:
+str_detect(institution, "(?i)Coronel Institute") ~ "Amsterdam", 
 # author not institution:
 str_detect(institution, "(?i)Maya Sahu, RN, RM,") ~ "",
-str_detect(institution, "(?i)Sahar Obeid") ~ "Beirut", # This is an author I looked up
+str_detect(institution, "(?i)Sahar Obeid") ~ "Beirut", # This isan author I looked up
 # Random:
+str_detect(institution, "(?i)Saint Joseph University of Beirut") ~ "Beirut",
 str_detect(institution, "(?i)Psychiatry Outpatient Clinics, University Hospital of The Brothers of Saint John") ~ "Bratislava",
 str_detect(institution, "(?i)Nucleo de Pesquisa em Vulnerabilidade a Saude") ~ "Belo Horizonte",
 str_detect(institution, "(?i)Nottingham University") ~ "Nottingham",
@@ -1014,14 +1184,17 @@ str_detect(institution, "(?i)University of La Laguna") ~ "La Laguna",
 str_detect(institution, "(?i)Manchester VA Medical Center") ~ "Manchester", 
 str_detect(institution, "(?i)Den Haag") ~ "The Hague",
 str_detect(institution, "(?i)Monash") ~ "Melbourne",
+str_detect(institution, "(?i)MONASH Pathway at Universal College Bangladesh") ~ "Dhaka",
+
  str_detect(institution, "(?i)Centre Neuchatelois de Psychiatrie, Republique et Canton de Neuchatel") ~ "Bern",
  str_detect(institution, "(?i)Institute for Safe Medication Practices, Alexandria, Virginia") ~ "Washington, D.C",
 
 
 
-
-
     TRUE ~ as.character(cities_of_authors)  # Default if none of the above matches
+
+
+
 
  # COUNTRY CHANGES:
  )) %>%
@@ -1029,41 +1202,60 @@ str_detect(institution, "(?i)Monash") ~ "Melbourne",
     # Random: 
     str_detect(institution, "(?i)Psychiatry Outpatient Clinics, University Hospital of The Brothers of Saint John") ~ "Slovakia",
     str_detect(institution, "(?i)UON Singapore Campus") ~ "Singapore", 
-str_detect(institution, "(?i)Nottingham University") ~ "UK",
-str_detect(institution, "(?i)University of Essex") ~ "UK",
+str_detect(institution, "(?i)Beirut") ~ "Lebanon",
 
-# USA:
+# Netherlands:
+str_detect(institution, "(?i)Coronel Institute") ~ "Netherlands", 
+str_detect(institution, "(?i)Instituut voor Onderzoek") ~ "Netherlands", 
+str_detect(institution, "(?i)South Limburg Mental Health") ~ "Netherlands", 
+# USA
    str_detect(institution, "(?i)Johns Hopkins University") ~ "USA",
+  str_detect(institution, "(?i)Virginia Commonwealth University") ~ "USA",
+ str_detect(institution, "(?i)Wake Forest") ~ "USA",
+ str_detect(institution, "(?i)Los Angeles") ~ "USA",
+ str_detect(institution, "(?i)Rutgers") ~ "USA",
+ str_detect(institution, "(?i)Bedford, MA") ~ "USA",
+  str_detect(institution, "(?i)Liberty, Mo") ~ "USA",
+str_detect(institution, "(?i)Nova Southeastern University") ~ "USA",
+   str_detect(institution, "(?i)Thompson Center for Autism") ~ "USA",
+  str_detect(institution, "(?i)Duke University") ~ "USA",
+str_detect(institution, "(?i)Connecticut") ~ "USA",
     str_detect(institution, "(?i)Russell H. Morgan Department of Radiology") ~ "USA",
    str_detect(institution, "(?i)University of Massachusetts") ~ "USA",
 str_detect(institution, "(?i)University of Rhode Island") ~ "USA",
  str_detect(institution, "(?i)Institute for Safe Medication Practices, Alexandria, Virginia") ~ "USA",
 str_detect(institution, "(?i)Center for Compulsive Behavior and Addiction, Rush") ~ "USA",
 str_detect(institution, "(?i)Russell J. Jandoli School") ~ "USA",
-str_detect(institution, "(?i)Rochester, MN") ~ "USA",
- str_detect(institution, "(?i)Jacksonville, FL") ~ "USA",
+str_detect(institution, "(?i)Rochester") ~ "USA",
+ str_detect(institution, "(?i)Jacksonville") ~ "USA",
 str_detect(institution, "(?i)City of Hope Medical Center, Duarte") ~ "USA",
-str_detect(institution, "(?i)Kim Ross is the School
-") ~ "USA",
-
+str_detect(institution, "(?i)Duarte") ~ "USA",
+str_detect(institution, "(?i)Kim Ross is the School") ~ "USA",
+ str_detect(institution, "(?i)West Virginia University") ~ "USA",
+str_detect(institution, "(?i)Department of Kinesiology, School of Applied Health Sciences, Brooks") ~ "USA",
 
 
 # Lebanon: 
 str_detect(institution, "(?i)Sahar Obeid") ~ "Lebanon", # This is an author I looked up
   # Brazil:
+     str_detect(institution, "(?i)Federal University of Mato Grosso do Sul") ~ "Brazil",
+ str_detect(institution, "(?i)Federal University of Mato Grosso do Sul") ~ "Brazil",
      str_detect(institution, "(?i)Belo Horizonte") ~ "Brazil",
 str_detect(institution, "(?i)Clementino Fraga Filho Hospital") ~ "Brazil",
 str_detect(institution, "(?i)Federal University of Minas") ~ "Brazil",
     str_detect(institution, "(?i)Nucleo de Pesquisa em Vulnerabilidade a Saude") ~ "Brazil",
-    str_detect(institution, "(?i)Universidade Federal de Minas Gerais") ~ "Brazil",
+    str_detect(institution, "(?i)Universidade Federal de Minas") ~ "Brazil",
 
 str_detect(institution, "(?i)Department of Clinical Medicine, Faculty of Health and Human Ecology, Belo") ~ "Brazil",
 str_detect(institution, "(?i)Universidade Estadual da Paraiba") ~ "Brazil",
     # France: 
       # Tours, France:
+str_detect(institution, "(?i)Universite Cote D'Azur") ~ "France",
     str_detect(institution, "(?i)University of Tours") ~ "France",
 str_detect(institution, "(?i)Sainte-Anne Hospital") ~ "France",
+str_detect(institution, "(?i)Hopital Sainte-Anne") ~ "France",
     str_detect(institution, "(?i)CSAPA, pole ressource jeux") ~ "France",
+    str_detect(institution, "(?i)Ramsay Generale de Sante") ~ "France",
     # Poland: 
      str_detect(institution, "(?i)Adam Mickiewicz University") ~ "Poland",
  # Sort Georgia country issues:
@@ -1080,8 +1272,11 @@ str_detect(institution, "(?i)Sainte-Anne Hospital") ~ "France",
   # Mexico Country issues:
     str_detect(institution, "(?i)University of New Mexico") ~ "USA",
   # Germany issues:
+   str_detect(institution, "(?i)Sana Klinikum Offenbach") ~ "Germany",
   str_detect(institution, "(?i)Meiningen") ~ "Germany",
+  str_detect(institution, "(?i)Ulm University") ~ "Germany",
   str_detect(institution, "(?i)Martin-Luther-University") ~ "Germany",
+  str_detect(institution, "(?i)Eichstatt-Ingolstadt") ~ "Germany",
   str_detect(institution, "(?i)State Police College of Baden-Wuerttemberg") ~ "Germany",
 
   # Jersey country issues:
@@ -1106,13 +1301,12 @@ str_detect(institution, "(?i)Sainte-Anne Hospital") ~ "France",
     str_detect(institution, "(?i)Missouri") ~ "USA",
     str_detect(institution, "(?i)New York") ~ "USA",
     str_detect(institution, "(?i)British Columbia") ~ "Canada",
-    str_detect(institution, "(?i)Chilliwack") ~ "Canada",
-      str_detect(institution, "(?i)Sainte-Justine University Hospital") ~ "Canada",  
-    str_detect(institution, "(?i)University of Waterloo") ~ "Canada",
 
 
-  # Saudi scholar:
+  # Saudi:
     str_detect(institution, "(?i)Sami H. Alzahrani") ~ "Saudi Arabia",
+str_detect(institution, "(?i)Shaqra") ~ "Saudi Arabia",
+
  
   # Australia:
   str_detect(institution, "(?i)Monash") ~ "Australia",
@@ -1121,7 +1315,11 @@ str_detect(institution, "(?i)Sainte-Anne Hospital") ~ "France",
   str_detect(institution, "(?i)CQUniversity") ~ "Australia",
 str_detect(institution, "(?i)CQ University") ~ "Australia",
   str_detect(institution, "(?i)University of Wollongong") ~ "Australia",
- 
+ str_detect(institution, "(?i)The Boden Collaboration") ~ "Australia",
+ str_detect(institution, "(?i)Campbelltown Hospital") ~ "Australia",
+ str_detect(institution, "(?i)North Parramatta") ~ "Australia",
+str_detect(institution, "(?i)Gna Ka Lun Adolescent") ~ "Australia", 
+
 # Japan:
   str_detect(institution, "(?i)Toyo University") ~ "Japan",
 
@@ -1129,24 +1327,39 @@ str_detect(institution, "(?i)CQ University") ~ "Australia",
    str_detect(institution, "(?i)Therapiestation Lukasfeld der Stiftung Maria, Ebene") ~ "Austria",
    # Sort Colombia issues:
      str_detect(institution, "(?i)Barranquilla") ~ "Colombia",
+  str_detect(institution, "(?i) Universidad del Rosa") ~ "Colombia",
+
   # Canada:
     str_detect(institution, "(?i)Department of Education, Centre for Addiction and Mental Health") ~ "Canada",
+  str_detect(institution, "(?i)Quebec") ~ "Canada",
+    str_detect(institution, "(?i)Chilliwack") ~ "Canada",
+      str_detect(institution, "(?i)Sainte-Justine University Hospital") ~ "Canada",  
+    str_detect(institution, "(?i)University of Waterloo") ~ "Canada",
       str_detect(institution, "(?i)Morton and Gloria Shulman Movement Disorders Clinic") ~ "Canada",
       str_detect(institution, "(?i)Brandon University") ~ "Canada",
         str_detect(institution, "(?i)University of New Brunswick") ~ "Canada",
     str_detect(institution, "(?i)Addiction & Mental Health Services-Kingston") ~ "Canada",
   str_detect(institution, "(?i)Toronto, ON") ~ "Canada",
+  str_detect(institution, "(?i)Centre for Addiction and Mental Health, 33 Russell") ~ "Canada",
+
   str_detect(institution, "(?i)Social and Economic Impacts of Gambling in Massachusetts project,") ~ "USA", # Was originally Canada
   # Case Western Reserve University: 
 str_detect(institution, "(?i)Case Western Reserve University") ~ "USA", # Goes to Bolton UK
  # Greece:
 str_detect(institution, "(?i)University of Athens, Greece") ~ "Greece", # Author had two affiliations listed so taking the first
-
+# Hungary:
+str_detect(institution, "(?i)Budapest") ~ "Hungary",
+# Norway:
+str_detect(institution, "(?i)University College, Bergen") ~ "Norway",
   # South Korea:
 str_detect(institution, "(?i)Hanyang University") ~ "Korea South",
+str_detect(institution, "(?i)Yonsei University") ~ "Korea South",
+str_detect(institution, "(?i)Department of Nursing, Chung-Ang") ~ "Korea South",
+str_detect(institution, "(?i)Anyang University") ~ "Korea South",
 str_detect(institution, "(?i)Chungbuk National University") ~ "Korea South",
 str_detect(institution, "(?i)Chungmugong Leadership Center") ~ "Korea South",
   str_detect(institution, "(?i)Pusan National University") ~ "Korea South",
+ str_detect(institution, "(?i)Honam University") ~ "Korea South",
 str_detect(institution, "(?i)Korea Institute on Behavioral Addictions") ~ "Korea South",
 str_detect(institution, "(?i)hallym University") ~ "Korea South",
 str_detect(institution, "(?i)Hallym University") ~ "Korea South",
@@ -1155,13 +1368,18 @@ str_detect(institution, "(?i)Yonsei Forest Mental Health Clinic") ~ "Korea South
 
 # Portugal:
 str_detect(institution, "(?i)Unity in Multidisciplinary Research on Biomedicine (UMIB)") ~ "Portugal",
+str_detect(institution, "(?i)Instituto Superior Miguel Torga") ~ "Portugal",
 str_detect(institution, "(?i)Abel Salazar") ~ "Portugal",
 str_detect(institution, "(?i)IAJ (Gambling Support Institute)") ~ "Portugal",
 
   # China:
     str_detect(institution, "(?i)The Chinese University of Hong Kong") ~ "Hong Kong",
+   str_detect(institution, "(?i)Shenzhen Research Institute") ~ "China",
  str_detect(institution, "(?i)Tung Wah Group") ~ "Hong Kong",
 str_detect(institution, "(?i)Huangmei County") ~ "China",
+str_detect(institution, "(?i)Hunan First Normal University") ~ "China",
+str_detect(institution, "(?i)Key Laboratory Of Alzheimer's Disease Of Zhejiang Province") ~ "China",
+ str_detect(institution, "(?i)National Clinical Research Center for Oral") ~ "China",
  str_detect(institution, "(?i)Macao Polytechnic Institute") ~ "China",
  str_detect(institution, "(?i)University of Macau") ~ "China",
 
@@ -1172,8 +1390,9 @@ str_detect(institution, "(?i)Christiana Care Hospital") ~ "USA",
  str_detect(institution, "(?i)Newark Beacon Innovation Centre") ~ "UK",
 
   # Sort Liverpool issues:
-  str_detect(institution, "(?i)University of New South Wales") ~ "Sydney",
-  str_detect(institution, "(?i)Liverpool Hospital, Sydney") ~ "Sydney",
+  str_detect(institution, "(?i)University of New South Wales") ~ "Australia",
+  str_detect(institution, "(?i)Liverpool Hospital, Sydney") ~ "Australia",
+  str_detect(institution, "(?i)Campbelltown Hospital") ~ "Australia",
   str_detect(institution, "(?i)John Moores") ~ "UK",
   str_detect(institution, "(?i)University of Liverpool") ~ "UK",
   str_detect(institution, "(?i)LiMRIC") ~ "UK",
@@ -1196,8 +1415,6 @@ str_detect(institution,  "University of Michigan") ~ "USA",
 str_detect(institution,  "The Center for Internet and Technology Addiction") ~ "USA",
 #  University of Southern  California:
 str_detect(institution,  "University of Southern California") ~ "USA",
-# Salford Uni:
- str_detect(institution, "(?i)Frederick Road Campus") ~ "UK", 
   # Sterling issues:
    str_detect(institution, "(?i)Australia") ~ "Australia",
    # Palo Alto
@@ -1206,28 +1423,43 @@ str_detect(institution,  "University of Southern California") ~ "USA",
    str_detect(institution, "(?i)Hong kong") ~ "Hong Kong",
   # Newport issues:
    str_detect(institution, "(?i)Christopher Newport University") ~ "USA",
-  # Oxford issues:
+  # Oxford & UK other:
    str_detect(institution, "(?i)University of Oxford") ~ "UK", 
   str_detect(institution, "(?i)Oxford, UK") ~ "UK", 
   str_detect(institution, "(?i)Oxford Centre for") ~ "UK",
-  # Weird barcelona uni & spain issue:
+str_detect(institution, "(?i)Nottingham University") ~ "UK",
+str_detect(institution, "(?i)University of Essex") ~ "UK",
+     str_detect(institution, "(?i)Barnet, Enfield & Haringey") ~ "UK", 
+ str_detect(institution, "(?i)Frederick Road Campus") ~ "UK", 
+     str_detect(institution, "(?i)Reta Lila Weston") ~ "UK",
+      str_detect(institution, "(?i)Division of Psychology and Language Sciences, UCL") ~ "UK",
+  # Weird barcelona uni & spain:
+str_detect(institution, "(?i)Alava University Hospital-Santiago") ~ "Spain",
+  str_detect(institution, "(?i)Universitat Rovira i Virgili") ~ "Spain",
   str_detect(institution, "(?i)University of Barcelona, Barcelona") ~ "Spain",
+ str_detect(institution, "(?i)Universidad Francisco de Vitoria") ~ "Spain",
   str_detect(institution, "(?i)Centro Universitario Cardenal Cisneros") ~ "Spain",
  str_detect(institution, "(?i)Universidad Francisco de Vitoria") ~ "Spain",
   str_detect(institution, "(?i)University of Salamanca") ~ "Spain",
+ str_detect(institution, "(?i)Universidad San Jorge") ~ "Spain",
  str_detect(institution, "(?i)Pompeu Fabra University") ~ "Spain",
   str_detect(institution, "(?i)Jimenez Diaz University Hospital") ~ "Spain",
 str_detect(institution, "(?i)Santiago de Compostela") ~ "Spain", 
 str_detect(institution, "(?i)Consumer and User Psychology Unit, Faculty of Psychology, University of Santiago") ~ "Spain", 
 str_detect(institution, "(?i)Universidad Catolica San Antonio de Murcia") ~ "Spain", 
 str_detect(institution, "(?i)Serra Hunter Programme") ~ "Spain",
+str_detect(institution, "(?i)Serra Hunter fellow") ~ "Spain",
 str_detect(institution, "(?i)Hospital Universitario de Canarias") ~ "Spain",
 str_detect(institution, "(?i)Universitat Pompeu Fabra") ~ "Spain",
 str_detect(institution, "(?i)Universidad Loyola Andalucia") ~ "Spain",
 str_detect(institution, "(?i)Servicio de Psiquiatria, Fundacion") ~ "Spain",
 # Italy:
+str_detect(institution, "(?i)Department of Medical and Oral Sciences and Biotechnologies, University G") ~ "Italy", 
+str_detect(institution, "(?i)Ragusa") ~ "Italy",
 str_detect(institution, "(?i)Largo Bologna") ~ "Italy", 
-str_detect(institution, "(?i)Largo Brambilla") ~ "Italy", 
+str_detect(institution, "(?i)Largo Brambilla") ~ "Italy",
+ str_detect(institution, "(?i)Ospedale Evangelico Betania") ~ "Italy",
+ str_detect(institution, "(?i)Ospedale Evangelico Betania") ~ "Italy", 
 str_detect(institution, "(?i)University of Salento") ~ "Italy", 
 str_detect(institution, "(?i)Urbino") ~ "Italy", 
 str_detect(institution, "(?i)Awake to Wisdom Centre for Meditation and Mindfulness Research") ~ "Italy", 
@@ -1238,7 +1470,9 @@ str_detect(institution, "(?i)Alma Mater Studiorum") ~ "Italy",
 # Egypt"
 str_detect(institution, "(?i)University of South Valley") ~ "Egypt", 
 # Brazil:
+str_detect(institution, "(?i)University Federal do Vale do") ~ "Brazil", 
 str_detect(institution, "(?i)Porto Alegre") ~ "Brazil", 
+     str_detect(institution, "(?i)Federal University of Mato Grosso do Sul") ~ "Brazil",
 # Netherlands uni confused for Austria:
 str_detect(institution, "(?i)Instituut voor Onderzoek") ~ "Netherlands", 
 
@@ -1251,23 +1485,33 @@ str_detect(institution, "(?i)Instituut voor Onderzoek") ~ "Netherlands",
 #Rede SARAH de Hospitais de Reabilitacao:
    str_detect(institution, "(?i)Rede SARAH de Hospitais de Reabilitacao") ~ "Brazil",
   # India:
+  str_detect(institution, "(?i)MGM Medical College & Hospital , Navi") ~ "India",
   str_detect(institution, "(?i)Veer Chandra Singh Garhwali Government") ~ "India",
 str_detect(institution, "(?i)Anna Nagar") ~ "India",
+str_detect(institution, "(?i)Maya Sahu") ~ "India",
 str_detect(institution, "(?i)Saveetha") ~ "India",
+
+# Bangladesh:
+str_detect(institution, "(?i)MONASH Pathway at Universal College Bangladesh") ~ "Bangladesh",
+
 # Malaysia:
  str_detect(institution, "(?i)Hospital Tuanku Ampuan Najihah") ~ "Malaysia",
  # Taiwan:
+str_detect(institution, "(?i)Ditmanson Medical Foundation") ~ "Taiwan",
 str_detect(institution, "(?i)Chia Nan University") ~ "Taiwan",
     str_detect(institution, "(?i)Taichung") ~ "Taiwan",
 str_detect(institution, "(?i)E-Da Hospital") ~ "Taiwan",
+str_detect(institution, "(?i)National Formosa University") ~ "Taiwan",
 str_detect(institution, "(?i)Chang Gung Memorial Hospital") ~ "Taiwan",
-str_detect(institution, "(?i)Shu Zen Junior College of Medicine ") ~ "Taiwan",
+str_detect(institution, "(?i)New Taipei") ~ "Taiwan",
+str_detect(institution, "(?i)Shu Zen Junior College of Medicine") ~ "Taiwan",
 str_detect(institution, "(?i)National Chi Nan University") ~ "Taiwan",
 
 # Turkey:
 str_detect(institution, "(?i)Inonu University") ~ "Turkey",
 str_detect(institution, "(?i)Provincial Health Directorate, Agri") ~ "Turkey",
 str_detect(institution, "(?i)Baltalimani Metin Sabanci") ~ "Turkey",
+str_detect(institution, "(?i)Selcuk University") ~ "Turkey",
   # Vietnam:
  str_detect(institution, "(?i)Nguyen Tat Thanh") ~ "Vietnam",
 
@@ -1314,18 +1558,16 @@ filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatche
        # country.etc
        ) %>%
   print(n = 700) # Okay, happy theses are good (after 10+ rounds of filtering)
+  # 2025-06-07:  did some final checks going backwards to around 500
 
- 
- 
-# HERE IS WHERE YOU"RE REALLY AT NOW ROB:
- 
+
 
  
 # Now look at papers where we couldn't match the country but linking the world.cities dataset connects a country with a city. Error check this:
  
   # 25/09/2024: As of today, started with 850 articles and checked them from 1-200 and 700+ :) Getting there!!!!
- 
- # 2025-05-04: started with 814 and now checked up to around 500 
+ # 2025-06-04: started with 814 and now checked up to around 500 
+ # 2025-06-07: Finally, screening location data until new articles come in...
  
   data_locations_with_full_geo_location_cleaned %>% 
  filter(is.na(countries_of_authors) & !is.na(country.etc)) %>% # Identify and isolate these instances
