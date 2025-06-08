@@ -600,9 +600,7 @@ data_locations_with_full_geo_location<-
   ungroup()
 
 
-
-
-# Now, Save this to a CSV file because this took forever to extract the data we don't want to have to do this every time I render this page!!
+# Now, Save this to a CSV file because this took a while to extract the data we don't want to have to do this every time I render this page!!
 write.csv(data_locations_with_full_geo_location, "data_locations_with_full_geo_location.csv")
 
 ```
@@ -620,19 +618,14 @@ Phew, that was intense. It was computationally demanding to link \>40,000 author
 # Okay, now actually load pre-created data from Github:
 url_geo_loc_data_link <- "https://raw.githubusercontent.com/rheirene/Quarto_Website/master/posts/2023-history-of-behavioural-addictions-PubMed-part2/data_locations_with_full_geo_location.csv"
 
-data_locations_with_full_geo_location <- read_csv(url_geo_loc_data_link) %>%
+data_locations_with_full_geo_location <- read_csv("data_locations_with_full_geo_location.csv") %>% # Just reading locally for now as the online version seems to  truncate the dataset (perhaps it's too large?)
+  # read_csv(url_geo_loc_data_link) %>%
   as_tibble() 
 
 # Looking for mismatches between countries matched to cities I extracted and countries matched by text (as I do below) is how I spotted most of the problematic cities.
 
 # names(data_locations_with_full_geo_location)
 
-# Install proper spelling of names in world cities dataset:
-
-world.cities %>%
-  # filter(name == "Turin")
-  filter(country.etc == "Canary Islands")
-  
 # Let's explore this data to see any mismatches
  data_locations_with_full_geo_location %>% 
 filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatches
@@ -685,7 +678,11 @@ filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatche
  
  
  
- # No do some final, manual cleaning 
+ # No do some final, manual cleaning.
+ 
+ # Note that I started this pre-ChatGPT being good for this sort of thing, but have since used it to identify and reconcile the errors. I still wrote the code, but it helped with picking up errors for me to correct. I got it to review it at the end and loved its feedback:
+ 
+# CHATGPT: "This is truly heroic data cleaning — and while it’s long, it’s also methodical, well-documented, and extremely valuable for geo-validating bibliometric affiliation data. You're doing what most researchers either avoid or leave uncorrected, and that makes this dataset incredibly reliable for geographic and institutional mapping."
  
  # Note that "(?i)" makes it case insensitive... only learnt it after doing about 80% of the recoding so there's some case-sensitive processing present. 
 data_locations_with_full_geo_location_cleaned <- 
@@ -715,18 +712,19 @@ data_locations_with_full_geo_location_cleaned <-
      str_detect(institution, "(?i)Barnet, Enfield & Haringey") ~ "London",    
    # Sort Columbia issues:
     str_detect(institution, "(?i)Vancouver") ~ "Vancouver",
+    str_detect(institution, "(?i)British Columbia Children's Hospital") ~ "Vancouver",
     str_detect(institution, "(?i)Columbia University") ~ "New York",
    str_detect(institution, "(?i)Mailman School of Public Health, Columbia") ~ "New York",
    str_detect(institution, "(?i)Teacher's College, Columbia") ~ "New York",
    str_detect(institution, "(?i)College of Physicians and Surgeons, Columbia") ~ "New York",
    
   
-   # Saudi scholar:
+   # Saudi:
     str_detect(institution, "(?i)Sami H. Alzahrani") ~ "Jeddah",
-   
+
   # Sort Colombia issues:
     str_detect(institution, "(?i)Bogota") ~ "Bogota",
-  str_detect(institution, "(?i) Universidad del Rosa") ~ "Bogota",
+  str_detect(institution, "(?i)Universidad del Rosa") ~ "Bogota",
     str_detect(institution, "(?i)Barranquilla") ~ "Barranquilla",
     str_detect(institution, "(?i)Pasto") ~ "Pasto",
     str_detect(institution, "(?i)Campus Robledo") ~ "Medellin",
@@ -735,6 +733,7 @@ data_locations_with_full_geo_location_cleaned <-
   
    # UBC & Canada other:
   str_detect(institution, "(?i)Edmonton") ~ "Edmonton",  
+  str_detect(institution, "(?i)McMaster University") ~ "Hamilton",  
   str_detect(institution, "(?i)University of Alberta") ~ "Edmonton",  
     str_detect(institution, "(?i)Concordia University") ~ "Montreal",  
       str_detect(institution, "(?i)Sainte-Justine University Hospital") ~ "Montreal",  
@@ -742,6 +741,7 @@ data_locations_with_full_geo_location_cleaned <-
       str_detect(institution, "(?i)Guelph, ON") ~ "Guelph",  
   	      str_detect(institution, "(?i)University of British Columbia, Okanagan Campus") ~ "Kelowna",
     str_detect(institution, "(?i)University of British Columbia") ~ "Vancouver",
+  str_detect(institution, "(?i)University of the Fraser Valley") ~ "Vancouver",
    str_detect(institution, "(?i)Toronto, Canada") ~ "Toronto",
 str_detect(institution, "(?i)Dalhousie University") ~ "Halifax",
     str_detect(institution, "(?i)Centre for Addiction and Mental Health, 33 Russell") ~ "Toronto",
@@ -754,12 +754,16 @@ str_detect(institution, "(?i)Dalhousie University") ~ "Halifax",
   
 str_detect(institution, "(?i)Toronto, ON") ~ "Toronto",
     str_detect(institution, "(?i)Carleton University") ~ "Ottawa",
-  # Indian city:
+
+  # India:
   str_detect(institution, "(?i)Veer Chandra Singh Garhwali Government") ~ "Srinagar",
+  str_detect(institution, "(?i)Thrissur") ~ "Thrissur",
 str_detect(institution, "(?i)Maya Sahu") ~ "Bengaluru",
 str_detect(institution, "(?i)Saveetha") ~ "Chennai",
  str_detect(institution, "(?i)Anna Nagar") ~ "Chennai",
-
+ str_detect(institution, "(?i)Bhubaneswar") ~ "Bhubaneswar",
+ str_detect(institution, "(?i)Ims & Sum Hospital") ~ "Bhubaneswar",
+  str_detect(institution, "(?i)MGM Medical College & Hospital , Navi") ~ "Navi Mumbai",
    # Hong kong:
    str_detect(institution, "(?i)Hong Kong") ~ "Hong Kong", 
  str_detect(institution, "(?i)Tung Wah Group") ~ "Hong Kong", 
@@ -775,8 +779,8 @@ str_detect(institution, "(?i)Saveetha") ~ "Chennai",
    # Marid & spain other:
      str_detect(institution, "(?i)Madrid, Spain") ~ "Madrid",
  str_detect(institution, "(?i)Mostoles, Madrid") ~ "Madrid",
-
-str_detect(institution, "(?i)Alava University Hospital-Santiago") ~ "Spain",
+ str_detect(institution, "(?i)University of Rovira e Virgili") ~ "Tarragona",
+str_detect(institution, "(?i)Alava University Hospital-Santiago") ~ "Vitoria-Gasteiz",
 str_detect(institution, "(?i)Hospital Universitario Fundacion Jimenez Diaz") ~ "Vitoria-Gasteiz",
  str_detect(institution, "(?i)Universidad Francisco de Vitoria") ~ "Madrid",
 str_detect(institution, "(?i)Universidad del Pais Vasco") ~ "San Sebastian",
@@ -815,6 +819,7 @@ str_detect(institution, "(?i)Centre Pierre-Nicole") ~ "Paris",
   # Essesx uni campus:
   str_detect(institution, "(?i)University of Essex, Colchester") ~ "Colchester",
   # Serbia uni & Belgrade:
+      str_detect(institution, "(?i)Novi Sad") ~ "Novi Sad",
       str_detect(institution, "(?i)Novi Pazar, Serbia") ~ "Novi Pazar",
     str_detect(institution, "(?i)Belgrade, Serbia") ~ "Belgrade",
  # Johns Hopkins University:
@@ -839,15 +844,17 @@ str_detect(institution, "(?i)New Haven, Connecticut") ~ "New Haven",
 str_detect(institution, "(?i)Dr. Potenza") ~ "New Haven",
   str_detect(institution, "(?i)Yale University") ~ "New Haven",
 # US unis:
+ str_detect(institution, "(?i)Chatham University") ~ "Pittsburgh",
  str_detect(institution, "(?i)Taylor Manor Hospital") ~ "Ellicott City",
  str_detect(institution, "(?i)Virginia Tech, Blacksburg, VA") ~ "Roanoke",
  str_detect(institution, "(?i)Columbia University") ~ "New York",
-str_detect(institution, "(?i)Russell J. Jandoli School") ~ "Olean",
+str_detect(institution, "(?i)Russell J. Jandoli School") ~ "Buffalo",
 	 str_detect(institution, "(?i)University of Minnesota") ~ "Minneapolis",
 	 str_detect(institution, "(?i)Saint Mary's University of Minnesota") ~ "Winona",
 str_detect(institution, "(?i)University of Rhode Island") ~ "Providence",
 str_detect(institution, "(?i)University of Southern California") ~ "Los Angeles",
 str_detect(institution, "(?i)City of Hope Medical Center, Duarte") ~ "Los Angeles",
+str_detect(institution, "(?i)ity of Hope National Medical Center, Duarte") ~ "Los Angeles",
 str_detect(institution, "(?i)Los Angeles") ~ "Los Angeles",
 str_detect(institution, "(?i)Kim Ross is the School") ~ "Phoenix",
 str_detect(institution, "(?i)Paradise Valley, Arizona") ~ "Phoenix",
@@ -883,6 +890,8 @@ str_detect(institution, "(?i)Northern Kentucky University") ~ "Highland Heights"
   str_detect(institution, "(?i)James Madison University") ~ "Harrisonburg",
   str_detect(institution, "(?i)Liberty, Mo") ~ "Liberty",
   str_detect(institution, "(?i)Duke University") ~ "Durham",
+  str_detect(institution, "(?i)Center for On-Line Addiction, Bedford") ~ "Harrisburg",
+
 
 # Norway:
 str_detect(institution, "(?i)University College, Bergen") ~ "Bergen",
@@ -901,7 +910,7 @@ str_detect(institution, "(?i)University College, Bergen") ~ "Bergen",
   str_detect(institution, "(?i)Berenson-Allen Center for Noninvasive") ~ "Boston",
 # New york:
    str_detect(institution, "(?i)Nassau Community College") ~ "New York",
-str_detect(institution, "(?i)St Bonaventure University") ~ "New York",
+str_detect(institution, "(?i)Bonaventure University") ~ "Buffalo",
 str_detect(institution, "(?i)Elmhurst Hospital Center") ~ "New York",
 str_detect(institution, "(?i)Cure Huntington's Disease Initiative") ~ "New York",
 # Case Western Reserve University: 
@@ -910,6 +919,7 @@ str_detect(institution, "(?i)Case Western Reserve University") ~ "Cleveland", # 
 # Amityville
 str_detect(institution, "(?i)Amityville") ~ "Amityville",
 # German city:
+   str_detect(institution, "(?i)Hurth, Germany") ~ "Cologne",
    str_detect(institution, "(?i)Villingen-Schwenningen") ~ "Villingen-Schwenningen",
    str_detect(institution, "(?i)Sana Klinikum Offenbach") ~ "Offenbach",
   str_detect(institution, "(?i)State Police College of Baden-Wuerttemberg") ~ "Villingen-Schwenningen",
@@ -917,9 +927,15 @@ str_detect(institution, "(?i)Amityville") ~ "Amityville",
   str_detect(institution, "(?i)Hurth, Germany") ~ "Hurth",
   str_detect(institution, "(?i)Eichstatt-Ingolstadt") ~ "Germany",
 str_detect(institution, "(?i)Martin-Luther-University") ~ "Halle",
-# Iraninan city:
+
+# Austria
+str_detect(institution, "(?i)Anton Proksch Institute") ~ "Vienna", 
+
+# Iraninan:
   str_detect(institution, "(?i)Isfahan, Iran") ~ "Isfahan",
   str_detect(institution, "(?i)Aja University") ~ "Tehran",
+ str_detect(institution, "(?i)Arak University") ~ "Arak",
+
 # Israel:
 str_detect(institution, "(?i)Kfar-Saba") ~ "Kfar-Saba",
 str_detect(institution, "(?i)Leslie and Susan Gonda") ~ "Tel Aviv",	
@@ -949,8 +965,11 @@ str_detect(institution, "(?i)Center for Compulsive Behavior and Addiction, Rush"
  str_detect(institution, "(?i)The Boden Collaboration") ~ "Sydney",
  str_detect(institution, "(?i)North Parramatta") ~ "Sydney",
  str_detect(institution, "(?i)Perth, Australia") ~ "Perth", 
+ str_detect(institution, "(?i)Edinburgh, South Australia") ~ "Adelaide",
+ str_detect(institution, "(?i)Macquarie University") ~ "Sydney",
  str_detect(institution, "(?i)University of Western Australia") ~ "Perth", 
  str_detect(institution, "(?i)University of Tasmania") ~ "Hobart", 
+ str_detect(institution, "(?i)Federation University, Australia") ~ "Ballarat", 
  str_detect(institution, "(?i)Alfred Health, Prahran") ~ "Melbourne", 
  str_detect(institution, "(?i)University of Wollongong") ~ "Wollongong", 
  str_detect(institution, "(?i)Adelaide") ~ "Adelaide", 
@@ -958,7 +977,7 @@ str_detect(institution, "(?i)Center for Compulsive Behavior and Addiction, Rush"
  str_detect(institution, "(?i)Campbelltown Hospital") ~ "Sydney",
 str_detect(institution, "(?i)CQUniversity, 400 Kent St, Sydney") ~ "Sydney", 
 str_detect(institution, "(?i)Gna Ka Lun Adolescent") ~ "Sydney", 
-str_detect(institution, "(?i)CQ University") ~ "Rockhamptom", 
+str_detect(institution, "(?i)CQ University") ~ "Rockhampton", 
 
 # Oxford Uni:
  str_detect(institution, "(?i)Oxford, United Kingdom") ~ "Oxford", 
@@ -967,6 +986,7 @@ str_detect(institution, "(?i)CQ University") ~ "Rockhamptom",
 
  # Italian cities/ Italy:
  str_detect(institution, "(?i)Portici, Italy") ~ "Naples", 
+ str_detect(institution, "(?i)Padua") ~ "Padua", 
  str_detect(institution, "(?i)Ospedale Evangelico Betania") ~ "Naples", 
 str_detect(institution, "(?i)Ospedale Evangelico Betania") ~ "Naples",
 str_detect(institution, "(?i)Betania Evangelical Hospital") ~ "Naples", 
@@ -978,6 +998,7 @@ str_detect(institution, "(?i)University of Napoli Federico") ~ "Naples",
  str_detect(institution, "(?i)Genoa, Italy") ~ "Genoa", 
  str_detect(institution, "(?i)Lecco, Italy") ~ "Lecco", 
   str_detect(institution, "(?i)Milan, Italy") ~ "Milan",
+  str_detect(institution, "(?i)Scientific Institute IRCCS Eugenio Medea, Bosisio Parini") ~ "Milan", # Not a perfect match, but closest major city
 str_detect(institution, "(?i)University of Milano") ~ "Milan",
  str_detect(institution, "(?i)University Cattolica del Sacro") ~ "Milan",
 str_detect(institution, "(?i)University of Genova") ~ "Genoa", 
@@ -1013,15 +1034,18 @@ str_detect(institution, "(?i)Serra Hunter Programme") ~ "Barcelona",
 str_detect(institution, "(?i)Hospital Universitario de Canarias") ~ "Santa Cruz de Tenerife",
 str_detect(institution, "(?i)Universitat Pompeu Fabra") ~ "Barcelona",
 str_detect(institution, "(?i)Universidad Loyola Andalucia") ~ "Cordoba",
-# India
-  str_detect(institution, "(?i)MGM Medical College & Hospital , Navi") ~ "Navi Mumbai",
+
+# Indonesia:
+ str_detect(institution, "(?i)Soegijapranata University") ~ "Semarang",
 
 # Nottingham:
  str_detect(institution, "(?i)Newark Beacon Innovation Centre") ~ "Nottingham",
 
 # china:
 str_detect(institution, "(?i)Key Laboratory Of Alzheimer's Disease Of Zhejiang Province") ~ "Hangzhou",
-   str_detect(institution, "(?i)Shenzhen Research Institute") ~ "Shenzhen",
+   str_detect(institution, "(?i)Shenzhen") ~ "Shenzhen",
+   str_detect(institution, "(?i)The Chinese University of Hong Kong Shenzhen Research Institute") ~ "Shenzhen",
+  str_detect(institution, "(?i)Liaoning Normal University") ~ "Dalian",
 str_detect(institution, "(?i)Hunan First Normal University") ~ "Changsha",
  str_detect(institution, "(?i)Gannan Medical University") ~ "Ganzhou",
  str_detect(institution, "(?i)Jiaotong University") ~ "Shanghai",
@@ -1031,14 +1055,16 @@ str_detect(institution, "(?i)Hunan First Normal University") ~ "Changsha",
  str_detect(institution, "(?i)Macao Polytechnic Institute") ~ "Macau",
  str_detect(institution, "(?i)Chaohu Hospital of Anhui") ~ "Hefei",
 str_detect(institution, "(?i)Huangmei County") ~ "Huanggang",
+
 # Portugal:
 str_detect(institution, "(?i)Lisbon") ~ "Lisbon",
 str_detect(institution, "(?i)Instituto Superior Miguel Torga") ~ "Coimbra",
 str_detect(institution, "(?i)Unity in Multidisciplinary Research on Biomedicine (UMIB)") ~ "Porto",
 str_detect(institution, "(?i)Abel Salazar") ~ "Porto",
-
+str_detect(institution, "(?i)Hospital da Senhora da Oliveira") ~ "Guimaraes",
 str_detect(institution, "(?i)IAJ (Gambling Support Institute)") ~ "Lisbon",
 str_detect(institution, "(?i)Rua Sacadura Cabral") ~ "Lisbon",
+
 # Turkey:
 str_detect(institution, "(?i)Inonu") ~ "Malatya",
 str_detect(institution, "(?i)Sultan Abdulhamid Han") ~ "Istanbul",
@@ -1122,9 +1148,13 @@ str_detect(institution,  "The Center for Internet and Technology Addiction") ~ "
  str_detect(institution, "(?i)Uniwersytet Jagiellonski Collegium Medicum") ~ "Krakow",
  str_detect(institution, "(?i)Adam Mickiewicz University") ~ "Poznan",
   # Brazil:
+str_detect(institution, "(?i)Universidade Federal de Rondonia") ~ "Porto Velho",
+str_detect(institution, "(?i)University of the West of Santa Catarina") ~ "Chapeco",
+   str_detect(institution, "(?i)Porto Velho") ~ "Porto Velho",
 str_detect(institution, "(?i)University Federal do Vale do") ~ "Petrolina", 
 str_detect(institution, "(?i)Universidade Federal do Parana") ~ "Curitiba",
 str_detect(institution, "(?i)Federal University of Minas") ~ "Belo Horizonte",
+str_detect(institution, "(?i)Rede SARAH de Hospitais de Reabilitacao, Departamento de Neurologia, Belo") ~ "Belo Horizonte",
      str_detect(institution, "(?i)Belo Horizonte") ~ "Belo Horizonte",
      str_detect(institution, "(?i)Universidade Federal de Minas Gerais") ~ "Belo Horizonte",
      str_detect(institution, "(?i)Universidade Federal de Minas") ~ "Petrolina",
@@ -1151,9 +1181,7 @@ str_detect(institution, "(?i)Showa University") ~ "Tokyo",
 
 # Virginia:
  str_detect(institution, "(?i)Virginia Institute for Psychiatry and Behavioral Genetics") ~ "Richmond",
-# Kuala Lumpur/ Malaysia:
- str_detect(institution, "(?i)Monash University Malaysia") ~ "Kuala Lumpur",
- str_detect(institution, "(?i)University of Nottingham Malaysia Campus") ~ "Kuala Lumpur",
+
 
  str_detect(institution, "(?i)Hospital Tuanku Ampuan Najihah") ~ "Kuala Pilah",
  # Vietnam:
@@ -1171,23 +1199,28 @@ str_detect(institution, "(?i)Coronel Institute") ~ "Amsterdam",
 # author not institution:
 str_detect(institution, "(?i)Maya Sahu, RN, RM,") ~ "",
 str_detect(institution, "(?i)Sahar Obeid") ~ "Beirut", # This isan author I looked up
+
 # Random:
+str_detect(institution, "(?i)Bulle Hora University") ~ "Addis Ababa", # This is an Ethiopian University and the updated city is really far away from it, but the Internet tells me it's the closest city.
 str_detect(institution, "(?i)Saint Joseph University of Beirut") ~ "Beirut",
+str_detect(institution, "(?i)Beirut Arab University") ~ "Beirut",
 str_detect(institution, "(?i)Psychiatry Outpatient Clinics, University Hospital of The Brothers of Saint John") ~ "Bratislava",
 str_detect(institution, "(?i)Nucleo de Pesquisa em Vulnerabilidade a Saude") ~ "Belo Horizonte",
 str_detect(institution, "(?i)Nottingham University") ~ "Nottingham",
 str_detect(institution, "(?i)Department of Clinical Medicine, Faculty of Health and Human Ecology, Belo") ~ "Belo Horizonte",
-str_detect(institution, "(?i)Cambridge Health Alliance") ~ "Malden",
+str_detect(institution, "(?i)Cambridge Health Alliance") ~ "Boston",
 str_detect(institution, "(?i)Harvard University, 52 Oxford St") ~ "Cambridge",
 str_detect(institution, "(?i)South Limburg Mental Health") ~ "Maastricht", 
 str_detect(institution, "(?i)University of La Laguna") ~ "La Laguna", 
 str_detect(institution, "(?i)Manchester VA Medical Center") ~ "Manchester", 
 str_detect(institution, "(?i)Den Haag") ~ "The Hague",
-str_detect(institution, "(?i)Monash") ~ "Melbourne",
-str_detect(institution, "(?i)MONASH Pathway at Universal College Bangladesh") ~ "Dhaka",
-
+str_detect(institution, "(?i)Monash") & !str_detect(institution, "(?i)Bangladesh") & !str_detect(institution, "(?i)Malaysia") ~ "Melbourne",
+str_detect(institution, "(?i)Dhaka, Bangladesh") ~ "Dhaka", # Purposely put after the Monash recoding above as there is a Monash satellite uni in Bangladesh.
  str_detect(institution, "(?i)Centre Neuchatelois de Psychiatrie, Republique et Canton de Neuchatel") ~ "Bern",
  str_detect(institution, "(?i)Institute for Safe Medication Practices, Alexandria, Virginia") ~ "Washington, D.C",
+# Kuala Lumpur/ Malaysia:
+ str_detect(institution, "(?i)Monash University Malaysia") ~ "Kuala Lumpur",
+ str_detect(institution, "(?i)University of Nottingham Malaysia Campus") ~ "Kuala Lumpur",
 
 
 
@@ -1203,6 +1236,7 @@ str_detect(institution, "(?i)MONASH Pathway at Universal College Bangladesh") ~ 
     str_detect(institution, "(?i)Psychiatry Outpatient Clinics, University Hospital of The Brothers of Saint John") ~ "Slovakia",
     str_detect(institution, "(?i)UON Singapore Campus") ~ "Singapore", 
 str_detect(institution, "(?i)Beirut") ~ "Lebanon",
+str_detect(institution, "(?i)Autonomous University of Santo Domingo") ~ "Dominican Republic",
 
 # Netherlands:
 str_detect(institution, "(?i)Coronel Institute") ~ "Netherlands", 
@@ -1309,7 +1343,8 @@ str_detect(institution, "(?i)Shaqra") ~ "Saudi Arabia",
 
  
   # Australia:
-  str_detect(institution, "(?i)Monash") ~ "Australia",
+  str_detect(institution, "(?i)Monash") & !str_detect(institution, "(?i)Bangladesh") ~ "Australia",
+  str_detect(institution, "(?i)MONASH Pathway at Universal College Bangladesh") ~ "Bangladesh",
   str_detect(institution, "(?i)Adelaide") ~ "Australia",
   str_detect(institution, "(?i)CQUniversity, 400 Kent St, Sydney") ~ "Australia",
   str_detect(institution, "(?i)CQUniversity") ~ "Australia",
@@ -1325,9 +1360,10 @@ str_detect(institution, "(?i)Gna Ka Lun Adolescent") ~ "Australia",
 
   # Austria:
    str_detect(institution, "(?i)Therapiestation Lukasfeld der Stiftung Maria, Ebene") ~ "Austria",
+
    # Sort Colombia issues:
      str_detect(institution, "(?i)Barranquilla") ~ "Colombia",
-  str_detect(institution, "(?i) Universidad del Rosa") ~ "Colombia",
+  str_detect(institution, "(?i)Universidad del Rosa") ~ "Colombia",
 
   # Canada:
     str_detect(institution, "(?i)Department of Education, Centre for Addiction and Mental Health") ~ "Canada",
@@ -1373,7 +1409,7 @@ str_detect(institution, "(?i)Abel Salazar") ~ "Portugal",
 str_detect(institution, "(?i)IAJ (Gambling Support Institute)") ~ "Portugal",
 
   # China:
-    str_detect(institution, "(?i)The Chinese University of Hong Kong") ~ "Hong Kong",
+    str_detect(institution, "(?i)The Chinese University of Hong Kong") & !str_detect(institution, "(?i)Shenzhen")~ "Hong Kong",
    str_detect(institution, "(?i)Shenzhen Research Institute") ~ "China",
  str_detect(institution, "(?i)Tung Wah Group") ~ "Hong Kong",
 str_detect(institution, "(?i)Huangmei County") ~ "China",
@@ -1390,8 +1426,9 @@ str_detect(institution, "(?i)Christiana Care Hospital") ~ "USA",
  str_detect(institution, "(?i)Newark Beacon Innovation Centre") ~ "UK",
 
   # Sort Liverpool issues:
-  str_detect(institution, "(?i)University of New South Wales") ~ "Australia",
+  str_detect(institution, "(?i)University of New South Wales") & !str_detect(institution, "UK")~ "Australia", # note case sensitive here
   str_detect(institution, "(?i)Liverpool Hospital, Sydney") ~ "Australia",
+  str_detect(institution, "(?i)University of New South Wales at Liverpool, UK") ~ "UK",
   str_detect(institution, "(?i)Campbelltown Hospital") ~ "Australia",
   str_detect(institution, "(?i)John Moores") ~ "UK",
   str_detect(institution, "(?i)University of Liverpool") ~ "UK",
@@ -1476,6 +1513,7 @@ str_detect(institution, "(?i)Porto Alegre") ~ "Brazil",
 # Netherlands uni confused for Austria:
 str_detect(institution, "(?i)Instituut voor Onderzoek") ~ "Netherlands", 
 
+
   # Switzerland:
  str_detect(institution, "(?i)Lausanne") ~ "Switzerland",
  str_detect(institution, "(?i)Lausanne University") ~ "Switzerland",
@@ -1492,7 +1530,7 @@ str_detect(institution, "(?i)Maya Sahu") ~ "India",
 str_detect(institution, "(?i)Saveetha") ~ "India",
 
 # Bangladesh:
-str_detect(institution, "(?i)MONASH Pathway at Universal College Bangladesh") ~ "Bangladesh",
+str_detect(institution, "(?i)Bangladesh") ~ "Bangladesh",
 
 # Malaysia:
  str_detect(institution, "(?i)Hospital Tuanku Ampuan Najihah") ~ "Malaysia",
@@ -1519,6 +1557,8 @@ str_detect(institution, "(?i)Selcuk University") ~ "Turkey",
  str_detect(institution, "(?i)Ciencies d'Alimentacio") ~ "Spain",
 # Iran:
  str_detect(institution, "(?i)Aja University") ~ "Iran",
+str_detect(institution, "(?i)Arak University") ~ "Iran",
+
 # Rush University Medical Center:
 str_detect(institution, "(?i)Rush University Medical Center") ~ "USA",
 # Belgium:
@@ -1542,11 +1582,17 @@ str_detect(institution, "(?i)Maya Sahu, RN, RM,") ~ "",
   )) %>%
   mutate(countries_of_authors = case_when(cities_of_authors == "Lausanne" ~ "Switzerland",
                                           cities_of_authors == "Tel Aviv" ~ "Israel",
-cities_of_authors == "Jerusalem" ~ "Israel",                                          cities_of_authors == "Auckland" ~ "New Zealand",
-                       cities_of_authors == "Netherlands" ~ "Netherlands",                 
+cities_of_authors == "Jerusalem" ~ "Israel",   
+cities_of_authors == "Pusan" ~ "Busan",
+cities_of_authors == "Auckland" ~ "New Zealand",
+                       cities_of_authors == "Netherlands" ~ "Netherlands",  
+cities_of_authors == "Ragusa" ~ "Italy",  
                                           
                                           cities_of_authors == "Rome" ~ "Italy",
-          TRUE ~ countries_of_authors))
+          TRUE ~ countries_of_authors)) %>%
+  mutate(cities_of_authors = case_when(cities_of_authors == "Shaqra" ~ "Riyadh",
+                                       cities_of_authors == "Berwick" & countries_of_authors == "Australia" ~ "Melbourne",
+                                       TRUE ~ cities_of_authors))
  
 # Now look to see what's left and see if it matters now if we assume our created city and country names (i.e., cities_of_authors AND countries_of_authors) are correct and the link (country.etc) is an error:
  data_locations_with_full_geo_location_cleaned %>% 
@@ -1557,8 +1603,9 @@ filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatche
          countries_of_authors,
        # country.etc
        ) %>%
-  print(n = 700) # Okay, happy theses are good (after 10+ rounds of filtering)
+  print(n = 1100) # Okay, happy theses are good (after 10+ rounds of filtering)
   # 2025-06-07:  did some final checks going backwards to around 500
+  # 2025-06-09:  Finally finished all of these and am happy with them
 
 
 
