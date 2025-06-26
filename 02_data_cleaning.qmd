@@ -59,9 +59,8 @@ packages <- c("tidyverse",
               'sessioninfo', # Detailed session info for reproducibility
               "osfr",
               "readxl",
-              # "Gmisc", # Produce prisma flow diagram
-              # 'grid', # Produce prisma flow diagram
-              # "glue", # Produce prisma flow diagram
+              "httr", # supports automation of geolocation
+               "jsonlite", # supports automation of geolocation
               "apa", # print test results in apa format
               "apaTables", # print test results in apa format
               "ggh4x", # truncate graph axis lines
@@ -1659,6 +1658,109 @@ data_locations_with_full_geo_location_cleaned_final <-   data_locations_with_ful
 
 # MAKE GIT FILE SMALLER FOR STORAGE
 ```
+
+
+
+```{r}
+# NEED TO RUN IN CONSOLE FIRST! Not included here to avoid commiting this information to a public repository 
+
+
+# Sys.setenv(OPENAI_API_KEY = "")
+
+correct_city <- function(institution, cities_of_authors) {
+  prompt <- paste0(
+    "Institution: '", institution, 
+  "'. Detected city: '", cities_of_authors, 
+  "'. I want the location of this institution. Respond ONLY with the name of the nearest city (no explanation) and the country that city is based in, like this: 'City name, Country name'. If the detected city is already the correct city, repeat it exactly. Do not give the name of a town or county, only a city. If you are unsure about the city or country name, just respond NA in place of either"
+)
+  
+  res <- POST(
+    "https://api.openai.com/v1/chat/completions",
+    add_headers(Authorization = paste("Bearer", Sys.getenv("OPENAI_API_KEY"))),
+    content_type_json(),
+    body = toJSON(list(
+      model = "gpt-3.5-turbo", # MUCH cheaper than using gpt-4.5
+      messages = list(list(role = "user", content = prompt)),
+      temperature = 0
+    ), auto_unbox = TRUE)
+  )
+  
+  res_text <- content(res, as = "text", encoding = "UTF-8")
+  parsed <- fromJSON(res_text, simplifyVector = FALSE)
+  
+  return(parsed$choices[[1]]$message$content)
+}
+
+
+safe_correct_city <- possibly(correct_city, otherwise = NA_character_) # this is cool, this funtion basically tells it to just proceed if there's an error in one row rather than freaking out
+
+```
+
+Test the function on random samples of 200 affiliation rows to see how it does:
+```{r}
+
+# TEST RUN:
+automation_data<- data_locations_with_full_geo_location_cleaned_final %>% slice(1:200)
+
+institution_data <- automation_data %>%
+  rowwise() %>%
+ mutate(city_corrected = list({
+  Sys.sleep(1.1)
+  safe_correct_city(institution, cities_of_authors)
+}))
+
+institution_data %>%
+  select(institution, 
+         cities_of_authors,
+         city_corrected) %>%
+  unnest(city_corrected) %>%
+  print(n=200)
+```
+
+Wow, this is so much better than mapping against lists of city/country names!
+
+```{r}
+batch_size <- 100
+n_batches <- ceiling(nrow(data_locations_with_full_geo_location_cleaned_final) / batch_size)
+
+n_test_batches <-  2
+
+process_batch <- function(batch_data) {
+  batch_data %>%
+    rowwise() %>%
+    mutate(city_corrected = list({
+      Sys.sleep(1.1)
+      safe_correct_city(institution, cities_of_authors)
+    })) %>%
+    ungroup()
+}
+
+all_results <- list()
+
+for (i in seq_len(n_test_batches)) {
+  start_idx <- ((i - 1) * batch_size + 1)
+  end_idx <- min(i * batch_size, nrow(data_locations_with_full_geo_location_cleaned_final))
+  
+  message("Processing batch ", i, " of ", n_batches, " (rows ", start_idx, "-", end_idx, ")")
+  
+  batch <- data_locations_with_full_geo_location_cleaned_final[start_idx:end_idx, ]
+  
+  result <- process_batch(batch)
+  
+  # Save partial result (optional but recommended)
+  write.csv(result, paste0("city_check_batch_", i, ".csv"), row.names = FALSE)
+  
+  # Store in list
+  all_results[[i]] <- result
+}
+
+
+final_result <- bind_rows(all_results)
+
+write.csv(final_result, "city_corrected_all.csv", row.names = FALSE)
+
+```
+
 
 # Data summaries
 
