@@ -324,284 +324,284 @@ I want to to visualise this information, but it's going to be quite tricky as ea
 # Whilst I'm splitting and unnesting the author address: I'm going to simultaneously do this for the authors name column.
 
 
-# The un-nest doesn't seem to work well when we retain all of the columns in the dataset, so I do it with only id and institution (address) in the data, then join all of the rest of the data set to the unnested rows after this. For this to work, we need to create a dataset that has the ID variable in before splitting the string and and unnesting. Let's do that:
- data_id <-data %>%
-  rowid_to_column(var = "id")
-
- pad_vector <- function(vec, len) {
-  length(vec) <- len
-  return(vec)
- }
-
-# Now split the author and address strings and then unnest it into multiple rows, and finally re-join with the main dataset:
-data_locations <- data_id %>%
-    mutate(
-     institution = str_split(Author_Address, ";"), # Split author address column into separate strings For each address
-    author_names = str_split(Full_Author_Name, ";") # Split author name column into separate strings For each Name
-  ) %>%
-  # The below code matches the number of author institutions and author names where discrepancies exist, so the unnest further below works:
-   mutate(
-    max_length = pmax(map_int(institution, length), map_int(author_names, length)),
-    institution = map2(institution, max_length, ~ pad_vector(., .y)),
-    author_names = map2(author_names, max_length, ~ pad_vector(., .y))
-  ) %>%
-  select(id, institution, author_names) %>%
-  unnest(c(institution, author_names)) %>%
-  # Looking at the data at this point, there's a lot of white space around the institutions and author names. Let's remove that now:
-  mutate(institution = str_trim(institution, side = "both"),
-         author_names = str_trim(author_names, side = "both")) %>%
-  full_join(data_id, by = "id") %>%
-  # Whilst we're doing this, we'll also create a counter/number for each institution per paper
-  group_by(id) %>%
-  mutate(author_num = row_number()) %>%
-  ungroup()
-  # We can also pivot to wide format if that makes sense at any point:
-  # pivot_wider(names_from = author_num,
-              # values_from = institution,
-              # names_prefix = "author_",
-              # values_fill = NA_character_)
-
-View(data_locations) # Looks good!
-
-# Fortunately, the "maps"  package contains a list of city names that we can use to match with our author institutions. Let's load the relevant data:
-## Loading country data from package maps
-data(world.cities)
-# Check it out:
-
-as_tibble(world.cities) %>%
-  print(n=20)
+# # The un-nest doesn't seem to work well when we retain all of the columns in the dataset, so I do it with only id and institution (address) in the data, then join all of the rest of the data set to the unnested rows after this. For this to work, we need to create a dataset that has the ID variable in before splitting the string and and unnesting. Let's do that:
+#  data_id <-data %>%
+#   rowid_to_column(var = "id")
 # 
-#  # The way the matching process works below is by picking the first match in the string, so removing all of the cities below actually leads to an increase in proper matches as the wrong matches are skipped over:
-world_cities_filtered <-  world.cities %>%
-  filter(!name %in% c("China", # There is a city in Mexico called China, and including this in the dataset needed to pick up any papers published in China and link them to this city!
-                        "India", # Same sort of issue (City in Africa)
-                        "San",  # Same sort of issue (City in Africa, again)
-                        "Institut", # This appears to be a City somewhere around Azerbaijan, but I think it's getting picked up as a city when in fact it just is a string in the author address referring to a university!
-                       "Santa", # This is picked up as a city In Peru, when in fact  with just part of the name of many different institutions
-                      "Of", # Obvious issues
-                      "Oral", # Obvious issues
-                      "God", # This is picked up as the name of a city in the Hungary, when in fact is just  part of the name of a hospital in Ireland
-                      "Normal", # This is picked up as a city in the US  when in fact it's part of a university name in China
-                      "Bar", # This is picked up as a city in Ukraine, when in fact it's just the name of the University in Israel
-                      "Victoria", #  This leads to confusion between Victoria in Canada and the state in Australia. Easier just to remove rather than be inaccurate
-                      "Cardinal",
-                      "Villanueva", # This is actually a university in Spain, but it's picked up as a city in Honduras
-
-                      "Beira", # This is picked up as a city of Mozambique, but eventually the University Hospital name in Portugal
-                      "Cardinal",
-                      "Young", # This is picked up as a city in Uruguay, when is just part of the name of a young adult hospital in France
-
-                      "Cornwall", # Get picked up as a city in Canada and not the area of the UK
-                       "George", #  A street name in the US,  confused for the South African city
-                       "Imperial", #  part of a UK university name but picked up as a city in Peru
-                      "Laval", # Part of a university name in Canada but gets picked up as the city in France
-                      "Villa", # Part of the name of a institution in Italy, but picked up as the Estonian city.
-                      "Aidu", # Part of the name of a Japanese hospital, but picked up as a Estonian city
-                     "Carolina", # Part of the US state name in the data, but picked up as a city in Peurto Rico
-                       "Carmel", # Get confused with the US city, but always Israel in the dataset
-                              "U",#  seems like shorthand for an address in France, but has picked up as a city in Micronesia and the French city is missed
-                              "Ramon",  # Part of the name of a hospital in Spain, but picked up as the city in the Philippines
-                             "Fundacion", #  Part of the name of a institution in Spain, but picked up as a city in Colombia
-                             "Trinidad", # Part of a institution name in Argentina, were picked up as a city in Bolivia
-                             "Liege",# Picked up as a city in Belgium, but it's actually part of a name of a place in France
-                             "East London", # Refers to the UK University, picked up as a city in South Africa
-                             "Florida", # University name picked up as a city in Cuba
-                             "Ita", # Part of the name of a institution in Finland picked up as the city in Paraguay
-                     "Princeton", #  University name confused for the city in Canada
-                     "Humboldt", # Confused for the Canadian city, but actually a University in Germany
-                      "Alcala", # Confused for the Colombian city, but actually part of a university name in Spain)
-                            "York", # UK Canada confusion. Easier to remove
-                     "Union", # Typically refers to the European Union, but confuse for the US city
-                      "La Rioja", # Part of a Spanish University but computer the city in Argentina
-                     "Concord", # Area in Australia that ends up being linked to a US city rather
-                      "Nanyang", # Part of a Singapore university name that gets linked to a city in China
-                      "Patan", # Part of a Napoleon University name that gets linked to a cityin India
-                      "Saint-Joseph", # University name in Lebanon on that gets linked to a city in Reunion
-                     "Valencia", # University in Spain that gets linked to Venezuela
-                      "Ingenio", # Institution in Spain that gets linked to the Canary Islands
-                     "Lincoln", # UK university name that gets linked to the US
-                     "Roma", # Italian street name that gets linked to Australia
-                     "Leon", # Institution name in France forgets links to Mexico
-                     "Pau", # Part of a hospital name in Spain that Gets linked to France
-                     "Ilan", # Part of a university name in Israel that gets linked to Taiwan
-                     "Street", #  an obvious issue. Linked to the UK incorrectly
-                     "Alle",  # Incorrectly linked to Switzerland when it's an address in Denmark'Hashtag
-                     "San Ignacio", # Location improved its link to Bolivia
-                     "Carnot", # Street in France that gets linked to central Africa
-                      "Mexico", #  country gets incorrectly linked to the Philippines city
-                      "Mobile", #  Institution in Canada that gets incorrectly linked to the US
-                      "Hebron", # Location in Spain gets mixed up with Palestine
-                     "Liban", #  hospital in France that gets linked to Czech Republic
-
-                     "Bayonne", # Addiction clinic in France linked to the US incorrectly
-                     "Apartado", # Confusion between Spain and Colombia. Better to just remove
-                     "Rioja", # Appears in a few different places and can be linked to Spain or Peru
-                      "Li", #  part of a university name in China can be linked to Norway incorrectly
-                     "Al", # Part of the name of places in Saudi Arabia and other countries that gets picked up as a city in Norway
-                     "San Agustin", # Part of the name of a place in Peru that getting linked to Mexico
-                     "Asia", # A city name in the Philippines that is obviously going to give problems
-                     "Jordan", #  country name acts incorrectly linked to the Philippines city
-                     "Kota", # Location in Malaysia that gets linked to India incorrectly
-                     "Ribera", # Part of an institution name in Spain gets linked to Italy
-                     "Pilar", # Name of a Institute in Croatia that gets linked to Brazil incorrectly
-                      "Greenwich", # Causes various problems due to being linked to the US and UK
-                      "George Town", #In Malaysia, baguettes linked to the Cayman Islands
-                     "Worth", # Should the Fort Worth in America, baguettes link to Germany
-                     "Santa Lucia", # Name of a institution in Italy that gets confused at the Canary Islands
-                     "Sainte Anne", # Name of an institution in France that gets confused with the city in Canada
-                     "Douglas", # Part of a university name inCanada gets confused with the Isle of Man
-                     "Arizona", # State name gets confused for a city in Honduras
-                     "Potsdam", # In New York gets confused with Germany
-                     "Kita", # In the name of an Indonesian institution that gets confused with the city in Mali
-                     "Concordia", # US university name gets confused with a town in Argentina
-                     "Bay", # Monterey Bay gets confused with a town in the Philippines
-                     "Parana", # Part of an institution name in Brazil gets linked to Argentina
-                     "Gazi", # Incorrectly gets linked to Ken year when it should be part of a name of a university in Turkey
-                     "Wufeng",# incorrectly linked to China when it should be in Taiwan
-                     "Loo", # Getting correctly linked to Estonia when it's actually part of a institution name in Singapore
-                     "Police", # Police college accidentally linked to city in Poland
-                     "Long", # Thia city and in the name of yale uni address
-                     "David", # City in Panama that causes obvious issues
-                     "Naval", # City in the Philippines that causes obvious issues
-                     "Hall", # City in the Philippines that causes obvious issues
-                     "Trinity" # Irish uni name but gets mistaken to Jersey city
-                     )) %>%
-  # A combination of city names and country names can be used to keep the city where it seems like it can be saved:
-    mutate(city_country = paste0(name,", ", country.etc)) %>%
-  filter(!city_country %in% c("Sussex, Canada",# Only the UK one appears and this gets confused
-                              "Milton, Canada", #  should be Milton Keynes in the UK
-                              "Bathurst, Canada", # Location in Australia they get confused Canada
-                              "Milton, New Zealand", #  should be Milton Keynes in the UK
-                              "Orleans, France", #  incorrectly linked to France, not Canada
-                              "Bergen, Norway", # teams to be linked consistently to the US,  but mistaken for Norway
-                              "Penrith, UK", # Should be the Australian city near Sydney
-                              "Bedford, UK", #  location in Australia gets Linked to the UK incorrectly
-                              "Bedford, USA", #  location in Australia gets Linked to the US incorrectly
-                              "Salt, Spain", # Should be Salt Lake City, US,  but gets picked up as the Spanish city
-                              "Lancaster, USA", #  should be the UK
-                              "Ho, Ghana", # Part of an address in Taiwan that's getting linked to Ghana
-                              "Laguna, USA", # Should be the canary islands, surprisingly
-                              "Albert, France",
-                              "Hong, Denmark",# Leads to this being picked up and said of Hong Kong
-                             "Durham, USA", # Should be the UK one
-                             "Brest, Belarus", # Refers to France not Belarus
-                             "Warwick, USA", #  Always seems to refer to the UK university, but the Use of the US city
-                             "Belmont, Canada", #  Always seems to refer to the US,  but confused for the Canadian city
-                             "Beaufort, Malaysia", # Should be the American city
-                             "Mackay, Australia", #  should always be the location in Taiwan
-                             "Alicante, Philippines", #  should always be in Spain
-                             "Malaya, Philippines", # Should be in Malaysia
-                           "Claremont, Jamaica", #  Australian location that gets sent to Jamaica, incorrectly
-
-                           "Colombia, Cuba", # Get confused with the country
-                           "Carlton, UK", #Street name in Canada gets confused with the UK
-                           "Costa Rica, Mexico", # Obviously get complete. The country
-                           "Notre Dame, Mauritius", #  actually the Australian University!
-                            "Baja, Hungary", # University namely Mexico
-                           "Palmerston, Australia", #  links to the northern Australian city, rather than New Zealand
-                           "Waterloo, USA" # Always the Canadian university
-         )) %>%
-   group_by(name) %>%
-  filter(pop == max(pop)) %>% # Okay, so this is imperfect, but when a city name is duplicated that I haven't accounted for above, this will filter to select only the one with the highest population. This is based on the assumption that papers are likely to come from more populated cities (i.e. those with universities). This may seem crude, but it solved many, many issues in the map.
-  ungroup()
-
-
-# Extract just the city names so we can try and match author locations using these:
-city_names_from_world <- world_cities_filtered$name
-
-# Create a pattern of city names for matching with word boundaries:
-city_names_pattern <- paste("\\b(", paste(city_names_from_world, collapse = "|"), ")\\b", sep = "")
-
-
-
-# Extract city names using stringr (the str_exact function extracts the first complete match from a string; the arguments are the string and then the match we're looking for)
-cities_of_authors <- str_extract(data_locations$institution, city_names_pattern)
-
-# This misses quite a lot of matches. Let's try to fuzzy match city names where str_extract() failed using stringdist (see: https://cran.r-project.org/web/packages/stringdist/stringdist.pdf):
-match_city <- function(address, cities) {
-  # If the input address is NA, an empty string, or the city list is empty, return NA:
-  if (is.na(address) || address == "" || length(cities) == 0) return(NA)
-  
-  # Compute string distances between the address and all cities using Jaro-Winkler (jw) method:
-  dists <- stringdist::stringdist(address, cities, method = "jw")
-  
-  # If distances can't be computed or are all NA, return NA:
-  if (length(dists) == 0 || all(is.na(dists))) return(NA)
-  
-  # Find the index of the city with the smallest string distance (i.e., closest match):
-  best <- which.min(dists)
-  
-  # If no valid index found, or the best distance is NA, return NA:
-  if (length(best) == 0 || is.na(dists[best])) return(NA)
-  
-  # If the best match has a distance less than 0.1 (very close match), return that city name:
-  if (dists[best] < 0.1) return(cities[best]) 
-  else return(NA)  # Otherwise, no acceptable match found; return NA
-}
-
-# Apply function:
-cities_of_authors_fuzzy <- ifelse(
-  is.na(cities_of_authors),
-  sapply(data_locations$institution, match_city, cities = city_names_from_world),
-  cities_of_authors
-)
-
-# Before we join this to our dataset, let's now do the same thing for countries, using the world dataset. We could just link countries to the existing cities we identified, but this won't give us the richest overall data, as in some cases it might find a country name but no city name and vice versa.
-
-# Extract just the Country names so we can try and match author locations using these:
-country_names <- world.cities$country.etc
-
-# Create a pattern of Country names for matching with word boundaries:
-country_names_pattern <- paste("\\b(", paste(country_names, collapse = "|"), ")\\b", sep = "")
-
-# Extract country names using stringr (the str_exact function extracts the first complete match from a string; the arguments are the string and then the match we're looking for)
-countries_of_authors <- str_extract(data_locations$institution, country_names_pattern)
-
-
-# Add the extracted city and country names to our dataset:
-data_locations_with_city_country<- data_locations %>%
-  bind_cols(cities_of_authors,
-            cities_of_authors_fuzzy,
-            countries_of_authors) %>% 
-  rename(cities_of_authors = 19,
-         cities_of_authors_fuzzy = 20,
-         countries_of_authors = 21)
-# Check everything looks okay:
-#  select(author_names,
+#  pad_vector <- function(vec, len) {
+#   length(vec) <- len
+#   return(vec)
+#  }
+# 
+# # Now split the author and address strings and then unnest it into multiple rows, and finally re-join with the main dataset:
+# data_locations <- data_id %>%
+#     mutate(
+#      institution = str_split(Author_Address, ";"), # Split author address column into separate strings For each address
+#     author_names = str_split(Full_Author_Name, ";") # Split author name column into separate strings For each Name
+#   ) %>%
+#   # The below code matches the number of author institutions and author names where discrepancies exist, so the unnest further below works:
+#    mutate(
+#     max_length = pmax(map_int(institution, length), map_int(author_names, length)),
+#     institution = map2(institution, max_length, ~ pad_vector(., .y)),
+#     author_names = map2(author_names, max_length, ~ pad_vector(., .y))
+#   ) %>%
+#   select(id, institution, author_names) %>%
+#   unnest(c(institution, author_names)) %>%
+#   # Looking at the data at this point, there's a lot of white space around the institutions and author names. Let's remove that now:
+#   mutate(institution = str_trim(institution, side = "both"),
+#          author_names = str_trim(author_names, side = "both")) %>%
+#   full_join(data_id, by = "id") %>%
+#   # Whilst we're doing this, we'll also create a counter/number for each institution per paper
+#   group_by(id) %>%
+#   mutate(author_num = row_number()) %>%
+#   ungroup()
+#   # We can also pivot to wide format if that makes sense at any point:
+#   # pivot_wider(names_from = author_num,
+#               # values_from = institution,
+#               # names_prefix = "author_",
+#               # values_fill = NA_character_)
+# 
+# View(data_locations) # Looks good!
+# 
+# # Fortunately, the "maps"  package contains a list of city names that we can use to match with our author institutions. Let's load the relevant data:
+# ## Loading country data from package maps
+# data(world.cities)
+# # Check it out:
+# 
+# as_tibble(world.cities) %>%
+#   print(n=20)
+# # 
+# #  # The way the matching process works below is by picking the first match in the string, so removing all of the cities below actually leads to an increase in proper matches as the wrong matches are skipped over:
+# world_cities_filtered <-  world.cities %>%
+#   filter(!name %in% c("China", # There is a city in Mexico called China, and including this in the dataset needed to pick up any papers published in China and link them to this city!
+#                         "India", # Same sort of issue (City in Africa)
+#                         "San",  # Same sort of issue (City in Africa, again)
+#                         "Institut", # This appears to be a City somewhere around Azerbaijan, but I think it's getting picked up as a city when in fact it just is a string in the author address referring to a university!
+#                        "Santa", # This is picked up as a city In Peru, when in fact  with just part of the name of many different institutions
+#                       "Of", # Obvious issues
+#                       "Oral", # Obvious issues
+#                       "God", # This is picked up as the name of a city in the Hungary, when in fact is just  part of the name of a hospital in Ireland
+#                       "Normal", # This is picked up as a city in the US  when in fact it's part of a university name in China
+#                       "Bar", # This is picked up as a city in Ukraine, when in fact it's just the name of the University in Israel
+#                       "Victoria", #  This leads to confusion between Victoria in Canada and the state in Australia. Easier just to remove rather than be inaccurate
+#                       "Cardinal",
+#                       "Villanueva", # This is actually a university in Spain, but it's picked up as a city in Honduras
+# 
+#                       "Beira", # This is picked up as a city of Mozambique, but eventually the University Hospital name in Portugal
+#                       "Cardinal",
+#                       "Young", # This is picked up as a city in Uruguay, when is just part of the name of a young adult hospital in France
+# 
+#                       "Cornwall", # Get picked up as a city in Canada and not the area of the UK
+#                        "George", #  A street name in the US,  confused for the South African city
+#                        "Imperial", #  part of a UK university name but picked up as a city in Peru
+#                       "Laval", # Part of a university name in Canada but gets picked up as the city in France
+#                       "Villa", # Part of the name of a institution in Italy, but picked up as the Estonian city.
+#                       "Aidu", # Part of the name of a Japanese hospital, but picked up as a Estonian city
+#                      "Carolina", # Part of the US state name in the data, but picked up as a city in Peurto Rico
+#                        "Carmel", # Get confused with the US city, but always Israel in the dataset
+#                               "U",#  seems like shorthand for an address in France, but has picked up as a city in Micronesia and the French city is missed
+#                               "Ramon",  # Part of the name of a hospital in Spain, but picked up as the city in the Philippines
+#                              "Fundacion", #  Part of the name of a institution in Spain, but picked up as a city in Colombia
+#                              "Trinidad", # Part of a institution name in Argentina, were picked up as a city in Bolivia
+#                              "Liege",# Picked up as a city in Belgium, but it's actually part of a name of a place in France
+#                              "East London", # Refers to the UK University, picked up as a city in South Africa
+#                              "Florida", # University name picked up as a city in Cuba
+#                              "Ita", # Part of the name of a institution in Finland picked up as the city in Paraguay
+#                      "Princeton", #  University name confused for the city in Canada
+#                      "Humboldt", # Confused for the Canadian city, but actually a University in Germany
+#                       "Alcala", # Confused for the Colombian city, but actually part of a university name in Spain)
+#                             "York", # UK Canada confusion. Easier to remove
+#                      "Union", # Typically refers to the European Union, but confuse for the US city
+#                       "La Rioja", # Part of a Spanish University but computer the city in Argentina
+#                      "Concord", # Area in Australia that ends up being linked to a US city rather
+#                       "Nanyang", # Part of a Singapore university name that gets linked to a city in China
+#                       "Patan", # Part of a Napoleon University name that gets linked to a cityin India
+#                       "Saint-Joseph", # University name in Lebanon on that gets linked to a city in Reunion
+#                      "Valencia", # University in Spain that gets linked to Venezuela
+#                       "Ingenio", # Institution in Spain that gets linked to the Canary Islands
+#                      "Lincoln", # UK university name that gets linked to the US
+#                      "Roma", # Italian street name that gets linked to Australia
+#                      "Leon", # Institution name in France forgets links to Mexico
+#                      "Pau", # Part of a hospital name in Spain that Gets linked to France
+#                      "Ilan", # Part of a university name in Israel that gets linked to Taiwan
+#                      "Street", #  an obvious issue. Linked to the UK incorrectly
+#                      "Alle",  # Incorrectly linked to Switzerland when it's an address in Denmark'Hashtag
+#                      "San Ignacio", # Location improved its link to Bolivia
+#                      "Carnot", # Street in France that gets linked to central Africa
+#                       "Mexico", #  country gets incorrectly linked to the Philippines city
+#                       "Mobile", #  Institution in Canada that gets incorrectly linked to the US
+#                       "Hebron", # Location in Spain gets mixed up with Palestine
+#                      "Liban", #  hospital in France that gets linked to Czech Republic
+# 
+#                      "Bayonne", # Addiction clinic in France linked to the US incorrectly
+#                      "Apartado", # Confusion between Spain and Colombia. Better to just remove
+#                      "Rioja", # Appears in a few different places and can be linked to Spain or Peru
+#                       "Li", #  part of a university name in China can be linked to Norway incorrectly
+#                      "Al", # Part of the name of places in Saudi Arabia and other countries that gets picked up as a city in Norway
+#                      "San Agustin", # Part of the name of a place in Peru that getting linked to Mexico
+#                      "Asia", # A city name in the Philippines that is obviously going to give problems
+#                      "Jordan", #  country name acts incorrectly linked to the Philippines city
+#                      "Kota", # Location in Malaysia that gets linked to India incorrectly
+#                      "Ribera", # Part of an institution name in Spain gets linked to Italy
+#                      "Pilar", # Name of a Institute in Croatia that gets linked to Brazil incorrectly
+#                       "Greenwich", # Causes various problems due to being linked to the US and UK
+#                       "George Town", #In Malaysia, baguettes linked to the Cayman Islands
+#                      "Worth", # Should the Fort Worth in America, baguettes link to Germany
+#                      "Santa Lucia", # Name of a institution in Italy that gets confused at the Canary Islands
+#                      "Sainte Anne", # Name of an institution in France that gets confused with the city in Canada
+#                      "Douglas", # Part of a university name inCanada gets confused with the Isle of Man
+#                      "Arizona", # State name gets confused for a city in Honduras
+#                      "Potsdam", # In New York gets confused with Germany
+#                      "Kita", # In the name of an Indonesian institution that gets confused with the city in Mali
+#                      "Concordia", # US university name gets confused with a town in Argentina
+#                      "Bay", # Monterey Bay gets confused with a town in the Philippines
+#                      "Parana", # Part of an institution name in Brazil gets linked to Argentina
+#                      "Gazi", # Incorrectly gets linked to Ken year when it should be part of a name of a university in Turkey
+#                      "Wufeng",# incorrectly linked to China when it should be in Taiwan
+#                      "Loo", # Getting correctly linked to Estonia when it's actually part of a institution name in Singapore
+#                      "Police", # Police college accidentally linked to city in Poland
+#                      "Long", # Thia city and in the name of yale uni address
+#                      "David", # City in Panama that causes obvious issues
+#                      "Naval", # City in the Philippines that causes obvious issues
+#                      "Hall", # City in the Philippines that causes obvious issues
+#                      "Trinity" # Irish uni name but gets mistaken to Jersey city
+#                      )) %>%
+#   # A combination of city names and country names can be used to keep the city where it seems like it can be saved:
+#     mutate(city_country = paste0(name,", ", country.etc)) %>%
+#   filter(!city_country %in% c("Sussex, Canada",# Only the UK one appears and this gets confused
+#                               "Milton, Canada", #  should be Milton Keynes in the UK
+#                               "Bathurst, Canada", # Location in Australia they get confused Canada
+#                               "Milton, New Zealand", #  should be Milton Keynes in the UK
+#                               "Orleans, France", #  incorrectly linked to France, not Canada
+#                               "Bergen, Norway", # teams to be linked consistently to the US,  but mistaken for Norway
+#                               "Penrith, UK", # Should be the Australian city near Sydney
+#                               "Bedford, UK", #  location in Australia gets Linked to the UK incorrectly
+#                               "Bedford, USA", #  location in Australia gets Linked to the US incorrectly
+#                               "Salt, Spain", # Should be Salt Lake City, US,  but gets picked up as the Spanish city
+#                               "Lancaster, USA", #  should be the UK
+#                               "Ho, Ghana", # Part of an address in Taiwan that's getting linked to Ghana
+#                               "Laguna, USA", # Should be the canary islands, surprisingly
+#                               "Albert, France",
+#                               "Hong, Denmark",# Leads to this being picked up and said of Hong Kong
+#                              "Durham, USA", # Should be the UK one
+#                              "Brest, Belarus", # Refers to France not Belarus
+#                              "Warwick, USA", #  Always seems to refer to the UK university, but the Use of the US city
+#                              "Belmont, Canada", #  Always seems to refer to the US,  but confused for the Canadian city
+#                              "Beaufort, Malaysia", # Should be the American city
+#                              "Mackay, Australia", #  should always be the location in Taiwan
+#                              "Alicante, Philippines", #  should always be in Spain
+#                              "Malaya, Philippines", # Should be in Malaysia
+#                            "Claremont, Jamaica", #  Australian location that gets sent to Jamaica, incorrectly
+# 
+#                            "Colombia, Cuba", # Get confused with the country
+#                            "Carlton, UK", #Street name in Canada gets confused with the UK
+#                            "Costa Rica, Mexico", # Obviously get complete. The country
+#                            "Notre Dame, Mauritius", #  actually the Australian University!
+#                             "Baja, Hungary", # University namely Mexico
+#                            "Palmerston, Australia", #  links to the northern Australian city, rather than New Zealand
+#                            "Waterloo, USA" # Always the Canadian university
+#          )) %>%
+#    group_by(name) %>%
+#   filter(pop == max(pop)) %>% # Okay, so this is imperfect, but when a city name is duplicated that I haven't accounted for above, this will filter to select only the one with the highest population. This is based on the assumption that papers are likely to come from more populated cities (i.e. those with universities). This may seem crude, but it solved many, many issues in the map.
+#   ungroup()
+# 
+# 
+# # Extract just the city names so we can try and match author locations using these:
+# city_names_from_world <- world_cities_filtered$name
+# 
+# # Create a pattern of city names for matching with word boundaries:
+# city_names_pattern <- paste("\\b(", paste(city_names_from_world, collapse = "|"), ")\\b", sep = "")
+# 
+# 
+# 
+# # Extract city names using stringr (the str_exact function extracts the first complete match from a string; the arguments are the string and then the match we're looking for)
+# cities_of_authors <- str_extract(data_locations$institution, city_names_pattern)
+# 
+# # This misses quite a lot of matches. Let's try to fuzzy match city names where str_extract() failed using stringdist (see: https://cran.r-project.org/web/packages/stringdist/stringdist.pdf):
+# match_city <- function(address, cities) {
+#   # If the input address is NA, an empty string, or the city list is empty, return NA:
+#   if (is.na(address) || address == "" || length(cities) == 0) return(NA)
+#   
+#   # Compute string distances between the address and all cities using Jaro-Winkler (jw) method:
+#   dists <- stringdist::stringdist(address, cities, method = "jw")
+#   
+#   # If distances can't be computed or are all NA, return NA:
+#   if (length(dists) == 0 || all(is.na(dists))) return(NA)
+#   
+#   # Find the index of the city with the smallest string distance (i.e., closest match):
+#   best <- which.min(dists)
+#   
+#   # If no valid index found, or the best distance is NA, return NA:
+#   if (length(best) == 0 || is.na(dists[best])) return(NA)
+#   
+#   # If the best match has a distance less than 0.1 (very close match), return that city name:
+#   if (dists[best] < 0.1) return(cities[best]) 
+#   else return(NA)  # Otherwise, no acceptable match found; return NA
+# }
+# 
+# # Apply function:
+# cities_of_authors_fuzzy <- ifelse(
+#   is.na(cities_of_authors),
+#   sapply(data_locations$institution, match_city, cities = city_names_from_world),
+#   cities_of_authors
+# )
+# 
+# # Before we join this to our dataset, let's now do the same thing for countries, using the world dataset. We could just link countries to the existing cities we identified, but this won't give us the richest overall data, as in some cases it might find a country name but no city name and vice versa.
+# 
+# # Extract just the Country names so we can try and match author locations using these:
+# country_names <- world.cities$country.etc
+# 
+# # Create a pattern of Country names for matching with word boundaries:
+# country_names_pattern <- paste("\\b(", paste(country_names, collapse = "|"), ")\\b", sep = "")
+# 
+# # Extract country names using stringr (the str_exact function extracts the first complete match from a string; the arguments are the string and then the match we're looking for)
+# countries_of_authors <- str_extract(data_locations$institution, country_names_pattern)
+# 
+# 
+# # Add the extracted city and country names to our dataset:
+# data_locations_with_city_country<- data_locations %>%
+#   bind_cols(cities_of_authors,
+#             cities_of_authors_fuzzy,
+#             countries_of_authors) %>% 
+#   rename(cities_of_authors = 19,
+#          cities_of_authors_fuzzy = 20,
+#          countries_of_authors = 21)
+# # Check everything looks okay:
+# #  select(author_names,
+# #         cities_of_authors,
+# #         countries_of_authors) %>%
+# #  print(n=150)
+# 
+# # Okay, let's check the fuzzy matching for city names to see how it did:
+# data_locations_with_city_country %>%
+#   filter(is.na(cities_of_authors) & !is.na(cities_of_authors_fuzzy)) %>%
+#    select(author_names,
 #         cities_of_authors,
+#         cities_of_authors_fuzzy,
 #         countries_of_authors) %>%
-#  print(n=150)
-
-# Okay, let's check the fuzzy matching for city names to see how it did:
-data_locations_with_city_country %>%
-  filter(is.na(cities_of_authors) & !is.na(cities_of_authors_fuzzy)) %>%
-   select(author_names,
-        cities_of_authors,
-        cities_of_authors_fuzzy,
-        countries_of_authors) %>%
-  print(n=40)
-
-# well, it only matched 35  additional cities, andthe matches are all very questionable (e.g.m "Statte" is Matched around eight times, could just be because this is so similar to the word "State").  I think best not to rely on these and to remove it from the dataset below.
-
-# Make the city name column consistent with paper dataset:
-world_cities_filtered <- as_tibble(world_cities_filtered) %>%
-  rename(cities_of_authors = name)
-
-# Join the world.cities dataset with our paper data so we have latitude and longitude for each city. This also allows us to keep the country that matches with city names but doesn't match with the country, which will allow us to help spot errors in both variables:
-data_locations_with_full_geo_location<-
-  left_join(data_locations_with_city_country,
-           world_cities_filtered,
-           by = join_by(cities_of_authors) # This is done purposely, as I want to check whether the country names matched in text above match with the country names linked to the city names. Any mismatches tell us a lot about whether it got the right city or not and this is how I filtered out most of the problematic cities above!
-           ) %>%
-  select(-cities_of_authors_fuzzy) %>%
-# One final thing we can do with this data is remove all of the many rows where there is no author name. It seems that this is mostly the case where authors have included multiple affiliations and so there author number and affiliation number doesn't quite line up. To be sure, We will only remove roles with no author name if at least one author is present per  article/PMID:
-  group_by(PMID) %>% 
-  filter(!(is.na(author_names) & any(!is.na(author_names)))) %>% # This removes nearly 10,000 rows of superfluous and problematic data (location matching is hard, as you'll see if you follow the script below!)
-  ungroup()
-
-
-# Now, Save this to a CSV file because this took a while to extract the data we don't want to have to do this every time I render this page!!
-write.csv(data_locations_with_full_geo_location, "data_locations_with_full_geo_location.csv")
+#   print(n=40)
+# 
+# # well, it only matched 35  additional cities, andthe matches are all very questionable (e.g.m "Statte" is Matched around eight times, could just be because this is so similar to the word "State").  I think best not to rely on these and to remove it from the dataset below.
+# 
+# # Make the city name column consistent with paper dataset:
+# world_cities_filtered <- as_tibble(world_cities_filtered) %>%
+#   rename(cities_of_authors = name)
+# 
+# # Join the world.cities dataset with our paper data so we have latitude and longitude for each city. This also allows us to keep the country that matches with city names but doesn't match with the country, which will allow us to help spot errors in both variables:
+# data_locations_with_full_geo_location<-
+#   left_join(data_locations_with_city_country,
+#            world_cities_filtered,
+#            by = join_by(cities_of_authors) # This is done purposely, as I want to check whether the country names matched in text above match with the country names linked to the city names. Any mismatches tell us a lot about whether it got the right city or not and this is how I filtered out most of the problematic cities above!
+#            ) %>%
+#   select(-cities_of_authors_fuzzy) %>%
+# # One final thing we can do with this data is remove all of the many rows where there is no author name. It seems that this is mostly the case where authors have included multiple affiliations and so there author number and affiliation number doesn't quite line up. To be sure, We will only remove roles with no author name if at least one author is present per  article/PMID:
+#   group_by(PMID) %>% 
+#   filter(!(is.na(author_names) & any(!is.na(author_names)))) %>% # This removes nearly 10,000 rows of superfluous and problematic data (location matching is hard, as you'll see if you follow the script below!)
+#   ungroup()
+# 
+# 
+# # Now, Save this to a CSV file because this took a while to extract the data we don't want to have to do this every time I render this page!!
+# write.csv(data_locations_with_full_geo_location, "data_locations_with_full_geo_location.csv")
 
 ```
 
@@ -893,6 +893,9 @@ str_detect(institution, "(?i)Northern Kentucky University") ~ "Highland Heights"
   str_detect(institution, "(?i)Center for On-Line Addiction, Bedford") ~ "Harrisburg",
 
 
+# Paraguay:
+str_detect(institution, "(?i)Jesus University") ~ "Asuncion",
+
 # Norway:
 str_detect(institution, "(?i)University College, Bergen") ~ "Bergen",
 
@@ -915,6 +918,9 @@ str_detect(institution, "(?i)Elmhurst Hospital Center") ~ "New York",
 str_detect(institution, "(?i)Cure Huntington's Disease Initiative") ~ "New York",
 # Case Western Reserve University: 
 str_detect(institution, "(?i)Case Western Reserve University") ~ "Cleveland", # Goes to Bolton UK
+
+# UK
+str_detect(institution, "(?i)University of Warwick") ~ "Coventry",
 
 # Amityville
 str_detect(institution, "(?i)Amityville") ~ "Amityville",
@@ -1042,6 +1048,7 @@ str_detect(institution, "(?i)Universidad Loyola Andalucia") ~ "Cordoba",
  str_detect(institution, "(?i)Newark Beacon Innovation Centre") ~ "Nottingham",
 
 # china:
+ str_detect(institution, "(?i)Beijing University") ~ "Beijing",
 str_detect(institution, "(?i)Key Laboratory Of Alzheimer's Disease Of Zhejiang Province") ~ "Hangzhou",
    str_detect(institution, "(?i)Shenzhen") ~ "Shenzhen",
    str_detect(institution, "(?i)The Chinese University of Hong Kong Shenzhen Research Institute") ~ "Shenzhen",
@@ -1147,7 +1154,9 @@ str_detect(institution,  "The Center for Internet and Technology Addiction") ~ "
 # Poland:
  str_detect(institution, "(?i)Uniwersytet Jagiellonski Collegium Medicum") ~ "Krakow",
  str_detect(institution, "(?i)Adam Mickiewicz University") ~ "Poznan",
+
   # Brazil:
+str_detect(institution, "(?i)Mackenzie Presbyterian") ~ "Sao Paulo",
 str_detect(institution, "(?i)Universidade Federal de Rondonia") ~ "Porto Velho",
 str_detect(institution, "(?i)University of the West of Santa Catarina") ~ "Chapeco",
    str_detect(institution, "(?i)Porto Velho") ~ "Porto Velho",
@@ -1272,6 +1281,7 @@ str_detect(institution, "(?i)Department of Kinesiology, School of Applied Health
 # Lebanon: 
 str_detect(institution, "(?i)Sahar Obeid") ~ "Lebanon", # This is an author I looked up
   # Brazil:
+str_detect(institution, "(?i)Mackenzie Presbyterian") ~ "Brazil",
      str_detect(institution, "(?i)Federal University of Mato Grosso do Sul") ~ "Brazil",
  str_detect(institution, "(?i)Federal University of Mato Grosso do Sul") ~ "Brazil",
      str_detect(institution, "(?i)Belo Horizonte") ~ "Brazil",
@@ -1410,6 +1420,7 @@ str_detect(institution, "(?i)IAJ (Gambling Support Institute)") ~ "Portugal",
 
   # China:
     str_detect(institution, "(?i)The Chinese University of Hong Kong") & !str_detect(institution, "(?i)Shenzhen")~ "Hong Kong",
+ str_detect(institution, "(?i)Beijing University") ~ "China",
    str_detect(institution, "(?i)Shenzhen Research Institute") ~ "China",
  str_detect(institution, "(?i)Tung Wah Group") ~ "Hong Kong",
 str_detect(institution, "(?i)Huangmei County") ~ "China",
@@ -1614,7 +1625,9 @@ filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatche
  
   # 25/09/2024: As of today, started with 850 articles and checked them from 1-200 and 700+ :) Getting there!!!!
  # 2025-06-04: started with 814 and now checked up to around 500 
- # 2025-06-07: Finally, screening location data until new articles come in...
+ # 2025-06-09: Need to re-look at these now, slowly. Tell ChatGPT to ensure it's checking for mathcing cities and not towns
+ 
+ # 2025-06-25 DID THE BELOW FROM THE BOTTOM UP TO 850
  
   data_locations_with_full_geo_location_cleaned %>% 
  filter(is.na(countries_of_authors) & !is.na(country.etc)) %>% # Identify and isolate these instances
@@ -1628,21 +1641,23 @@ filter(countries_of_authors != country.etc) %>% # Identify and isolate mismatche
   print(n = 1000) 
 
   
- # data_locations_with_full_geo_location_cleaned %>% 
-#    filter(str_detect(institution, "arson College of Business")
- #          ) %>% 
-    # View()
-# Okay,  I've gone back to the above recording section to correct any country mismatches found in the above output:
+
+# Prepare finalised location data:
+data_locations_with_full_geo_location_cleaned_final <-   data_locations_with_full_geo_location_cleaned %>%
+   # select(institution,
+   #       cities_of_authors,
+   #       countries_of_authors,
+   #       country.etc) %>%
+    # Add in the missing country where it is available from the world.cities dataset, as per the last recoding check above:
+    mutate(countries_of_authors = case_when(is.na(countries_of_authors) ~ as.character(country.etc),
+    TRUE ~ countries_of_authors)) %>%
+   print(n = 50) 
+  
 
   
-# need to try and linkj long and lat to the combination of city and country where possible
+# NEXT: need to try and link long and lat to the combination of city and country where possible
 
- 
- # MAKE GIT FILE SMALLER FOR STORAGE
-
- # Other problematic  Cities we need to directly code:
- # Athens
- # Nottingham
+# MAKE GIT FILE SMALLER FOR STORAGE
 ```
 
 # Data summaries
