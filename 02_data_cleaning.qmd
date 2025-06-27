@@ -26,11 +26,14 @@ packages <- c("tidyverse",
               'RCurl', # Load dataset from GitHib
               'stringdist', # Helps with string matching
               'gtExtras', # Add colours to gt tables
+              'plotly', # Add interactive elements to figures
+              'gganimate', # Make animated plots
               'transformr', # Needed for certain animations (dumbell lines)
               'png',# Helps render gganimate plots
               'gifski', # Helps render gganimate plots
               'rmarkdown', # Helps render gganimate plots
               'av', # render gganimate plots as videos
+               'htmlwidgets', # Make plotly plots HTML format for rendering in Quarto
               'Cairo', # Anti-aliasing for the line plots (smoothing output)
               'ggtext', # make fancy labels in plots
               'sysfonts', # Special fonts for figures
@@ -91,14 +94,14 @@ showtext_auto(enable = TRUE)
 # Save new theme for figures/graphs.This will determine the layout, presentation, font type and font size used in all data visualisations presented here:
 plot_theme<- theme_classic() +
   theme(
-    text=element_text(family="Poppins"),
-    plot.title = element_text(hjust = 0.5, size = 16),
-          plot.subtitle = element_text(hjust = 0.5, size = 13),
-        axis.text = element_text(size = 10),
-        axis.title = element_text(size = 12),
-    plot.caption = element_text(size = 12),
-    legend.title=element_text(size=12), 
-    legend.text=element_text(size=10)
+    text=element_text(family="Poppins")
+    # plot.title = element_text(hjust = 0.5, size = 16),
+    #       plot.subtitle = element_text(hjust = 0.5, size = 13),
+    #     axis.text = element_text(size = 10),
+    #     axis.title = element_text(size = 12),
+    # plot.caption = element_text(size = 12),
+    # legend.title=element_text(size=12), 
+    # legend.text=element_text(size=10)
         ) 
 ```
 
@@ -1397,19 +1400,19 @@ str_detect(institution, "(?i)Budapest") ~ "Hungary",
 # Norway:
 str_detect(institution, "(?i)University College, Bergen") ~ "Norway",
   # South Korea:
-str_detect(institution, "(?i)Hanyang University") ~ "Korea South",
-str_detect(institution, "(?i)Yonsei University") ~ "Korea South",
-str_detect(institution, "(?i)Department of Nursing, Chung-Ang") ~ "Korea South",
-str_detect(institution, "(?i)Anyang University") ~ "Korea South",
-str_detect(institution, "(?i)Chungbuk National University") ~ "Korea South",
-str_detect(institution, "(?i)Chungmugong Leadership Center") ~ "Korea South",
-  str_detect(institution, "(?i)Pusan National University") ~ "Korea South",
- str_detect(institution, "(?i)Honam University") ~ "Korea South",
-str_detect(institution, "(?i)Korea Institute on Behavioral Addictions") ~ "Korea South",
-str_detect(institution, "(?i)hallym University") ~ "Korea South",
-str_detect(institution, "(?i)Hallym University") ~ "Korea South",
-str_detect(institution, "(?i)Seoyoung University") ~ "Korea South",
-str_detect(institution, "(?i)Yonsei Forest Mental Health Clinic") ~ "Korea South",
+str_detect(institution, "(?i)Hanyang University") ~ "South Korea",
+str_detect(institution, "(?i)Yonsei University") ~ "South Korea",
+str_detect(institution, "(?i)Department of Nursing, Chung-Ang") ~ "South Korea",
+str_detect(institution, "(?i)Anyang University") ~ "South Korea",
+str_detect(institution, "(?i)Chungbuk National University") ~ "South Korea",
+str_detect(institution, "(?i)Chungmugong Leadership Center") ~ "South Korea",
+  str_detect(institution, "(?i)Pusan National University") ~ "South Korea",
+ str_detect(institution, "(?i)Honam University") ~ "South Korea",
+str_detect(institution, "(?i)Korea Institute on Behavioral Addictions") ~ "South Korea",
+str_detect(institution, "(?i)hallym University") ~ "South Korea",
+str_detect(institution, "(?i)Hallym University") ~ "South Korea",
+str_detect(institution, "(?i)Seoyoung University") ~ "South Korea",
+str_detect(institution, "(?i)Yonsei Forest Mental Health Clinic") ~ "South Korea",
 
 # Portugal:
 str_detect(institution, "(?i)Unity in Multidisciplinary Research on Biomedicine (UMIB)") ~ "Portugal",
@@ -1650,7 +1653,10 @@ data_locations_with_full_geo_location_cleaned_final <-   data_locations_with_ful
     # Add in the missing country where it is available from the world.cities dataset, as per the last recoding check above:
     mutate(countries_of_authors = case_when(is.na(countries_of_authors) ~ as.character(country.etc),
     TRUE ~ countries_of_authors)) %>%
-   print(n = 50) 
+    mutate(countries_of_authors = case_when(
+    str_detect(countries_of_authors, "Korea South") ~ "South Korea",
+     str_detect(countries_of_authors, "Korea North") ~ "North Korea",
+    TRUE ~ countries_of_authors)) 
   
 
   
@@ -1762,6 +1768,55 @@ write.csv(final_result, "city_corrected_all.csv", row.names = FALSE)
 ```
 
 
+Process and finalise location data:
+```{r}
+
+# Add Hong Kong to world.cities dataset, with approximate values
+hong_kong_row <- data.frame(
+  name = "Hong Kong",
+  country.etc = "Hong Kong",  
+  pop = 7500000,
+  lat = 22.3193,
+  long = 114.1694,
+  capital = 1
+)
+
+world.cities_extended <- bind_rows(world.cities, hong_kong_row)
+
+world.cities_extended %>%
+  filter(str_detect(name, "Hong Kong"))
+
+# Normalize names to improve matching
+cities_clean <- world.cities_extended %>%
+  mutate(
+    city_lower = tolower(name),
+    country_lower = tolower(country.etc)
+  )
+
+data_locations_with_full_geo_location_cleaned_final_normalised <- data_locations_with_full_geo_location_cleaned_final %>%
+  mutate(
+    city_lower = tolower(cities_of_authors),
+    country_lower = tolower(countries_of_authors)
+  )
+
+
+location_data <- data_locations_with_full_geo_location_cleaned_final_normalised %>%
+  select(-lat,
+         -long) %>%
+  left_join(cities_clean, by = c("city_lower", "country_lower")) %>%
+  select(-city_lower, -country_lower)
+
+location_data %>% select(institution, 
+                         cities_of_authors,
+                         countries_of_authors,
+                         lat,
+                         long) %>%
+  print(n=100)
+
+```
+
+
+
 # Data summaries
 
 Provide some basic data summaries of interest that will be of use in the paper or as supplemental information.
@@ -1802,4 +1857,421 @@ data %>%
 gt()
 ```
 
+# Map locations
+```{r}
+#| code-fold: true
+#| code-summary: "Code: Create interactive map of papers"
+#| fig-align: center
+
+world.cities %>%
+  filter(str_detect(name, "Kong"))
+
+# Load world map data but filter out Antarctica as we don't have any values/papers for this region and it just takes up space on the map:
+world_map <- map_data("world") %>% 
+  filter(region != "Antarctica")
+
+# Join the world map data with our paper data:
+data_locations_with_full_geo_location_WORLD<- left_join(location_data, world_map) %>%
+  # Tidy the behavioural addiction labels:
+    mutate(Label = str_replace_all(Label, "_", " ") %>%
+                 str_to_title())
+
+# Wrangle data for plot:
+data_locations_with_full_geo_location_WORLD_city_aggregate<- data_locations_with_full_geo_location_WORLD %>%
+  # Calculate the unique number of papers that can be linked to each city:
+   group_by(cities_of_authors) %>%
+  summarise(
+    num_papers = n_distinct(PMID),
+    lat = first(lat),   # Retain the first value of latitude for the city
+    long = first(long),  # Retain the first value of longitude for the city
+    group = first(group)
+  ) %>%
+  filter(!is.na(cities_of_authors)) %>% # Remove rows where we don't have a city
+    arrange(desc(num_papers)) %>%    # Just for easier viewing
+  ungroup() 
+
+
+# Create plot:
+all_publications_map <- ggplot(world_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill="#FAFFFF", colour = "grey",
+               ) +
+   geom_point(data = data_locations_with_full_geo_location_WORLD_city_aggregate,
+              aes(x = long, y = lat,
+            #  size = sqrt(num_papers),
+              size = num_papers,
+              text = paste("City:", cities_of_authors, "\nNo. of publications:", num_papers)),
+              colour = "black",
+              fill = "#289998",
+              alpha = 0.4,
+              shape = 21) +  # shape 21 for filled circles
+  # scale_size_continuous(guide="none") +
+  scale_x_continuous(expand = c(.001, .001)) +
+  # scale_y_continuous(expand = c(.001, .001)) +
+  plot_theme +
+  theme(
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_blank()
+    ) +
+  labs(
+    # title = "Institution locations of authors publishing\n behavioural addictions research",
+    # subtitle = "Each circle represents a city and its size corresponds\n to the number of papers linked to it",
+    caption = "",
+    size     = "No. publications"
+  )
+
+# Save this now as a basic plot:
+ggsave("Figures/all_publications_map.pdf",
+       plot = all_publications_map,
+       width = 10,
+       height = 5.5,
+       dpi = 600)
+
+
+# We're going to turn this into an interactive plot now using ggplotly, but this removes some of our existing theme settings, especially the fonts. The standard way of changing the font in ggplotly doesn't seem to work for me, and it seems like other people having the same issue. I found this workaround online (https://github.com/plotly/plotly.R/issues/2117) which I now use below to load and use the correct font once this becomes a ggplotly:
+
+# Get the URL for the "Reem Kufi" font from Google Fonts:
+reem_kufi_file <- showtextdb::google_fonts("Reem Kufi")$regular_url
+
+# Create custom CSS:
+reem_kufi_css <- paste0(
+  "<style type = 'text/css'>",
+    "@font-face { ",
+      "font-family: 'Reem Kufi'; ",
+      "src: url('", reem_kufi_file, "'); ",
+    "}",
+  "</style>"
+)
+
+# Convert static plot to ggplotly format and adjust theme settings where required:
+ all_publications_map_ggplotly <-ggplotly(all_publications_map,
+                                              tooltip = 'text') %>%
+  hide_legend() %>%
+  plotly::layout(annotations =
+ list(x = 1, y = -0.1, text = "Rob Heirene",
+      showarrow = F, xref='paper', yref='paper',
+      xanchor='right', yanchor='auto', xshift=0, yshift=25,
+      font=list(size=12, color="#50B5C8")),
+       margin = list(t = 70), # Increase top margin
+                 font = list(family = "Reem Kufi"),
+                 title = list(x = 0, y = 0.945),
+    hoverlabel = list(font = list(family = "Reem Kufi")
+))
+
+# Add the CSS as a dependency for the plotly plot:
+all_publications_map_ggplotly$dependencies <- c(
+  all_publications_map_ggplotly$dependencies,
+  list(
+    htmltools::htmlDependency(
+      name = "reem-kufi-font",
+      version = "0",
+      src = "",
+      head = reem_kufi_css)))
+
+# Display plot:
+saveWidget(all_publications_map_ggplotly, 'all_pubs_map.html')
+```
+
+```{=html}
+<iframe src="all_pubs_map.html" class="fade-inhtml" width="100%" height="600" style="border:none;"></iframe>
+```
+Well, that looks nice. I used the `ggplotly` package to make the map interactive so you can zoom into any area and hover over the circles to see which city is represented and how many papers can be linked to it.
+
+```{r}
+# ALSO CHECK HONG KONG!
+
+# 1. Summarise publications by country:
+country_pubs <- data_locations_with_full_geo_location_WORLD %>%
+  filter(!is.na(countries_of_authors)) %>%
+  group_by(countries_of_authors) %>%
+  summarise(num_papers = n_distinct(PMID), .groups = "drop")
+
+# 2. Prepare a world map frame
+world_map <- map_data("world") %>% 
+  filter(region != "Antarctica")
+
+# 3. Join the publication counts to the map data:
+choropleth_map <- world_map %>%
+  left_join(country_pubs, by = c("region" = "countries_of_authors"))
+
+#Love this:
+# Find a lighter color to contrast our darkest shade:
+# library(colorspace)
+# 
+# colorspace::lighten("#289998", 0.99) # Make this **closer to 1** for lighter shades, ROB!
+
+# 4. Plot:
+all_publications_choropleth <- ggplot(choropleth_map, aes(x = long, 
+                                                             y = lat, 
+                                                             group = group,
+                                                             fill = num_papers)) +
+  geom_polygon(colour = "black", size = 0.2) +
+  coord_fixed(1.3) +
+  scale_x_continuous(expand = c(.001, .001)) +
+  scale_fill_gradient(
+    name    = "Count",
+    low     = "#FAFFFF",
+    high    = "#289998",
+    na.value= "grey"
+  ) +
+ plot_theme +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_blank(),
+    # plot.margin = margin(-20,0,-1,-30)
+    ) +
+  labs(
+    # title    = "Publications per country",
+    # subtitle = "",
+    caption  = ""
+  ) 
+
+all_publications_choropleth
+
+# 5. Save:
+ggsave("Figures/all_publications_choropleth.pdf",
+       plot = all_publications_choropleth,
+       width = 10, height = 5.5, dpi = 600)
+```
+
+Just gambling?
+
+```{r}
+# ALSO CHECK HONG KONG!
+
+# 1. Summarise publications by country:
+country_pubs <- data_locations_with_full_geo_location_WORLD %>%
+  filter(Label == "Gambling") %>%
+  filter(!is.na(countries_of_authors)) %>%
+  group_by(countries_of_authors) %>%
+  summarise(num_papers = n_distinct(PMID), .groups = "drop")
+
+# 2. Prepare a world map frame
+world_map <- map_data("world") %>% 
+  filter(region != "Antarctica")
+
+# 3. Join the publication counts to the map data:
+choropleth_map <- world_map %>%
+  left_join(country_pubs, by = c("region" = "countries_of_authors"))
+
+  
+# 4. Plot:
+gambling_publications_choropleth <- ggplot(choropleth_map, aes(x = long, y = lat, group = group, fill = num_papers)) +
+  geom_polygon(colour = "black", size = 0.2) +
+  coord_fixed(1.3) +
+  scale_fill_gradient(
+    name    = "Count",
+    low     = "#FAFFFF",
+    high    = "#289998",
+    na.value= "grey"
+  ) +
+   scale_x_continuous(expand = c(.001, .001)) +
+ plot_theme +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_blank()
+    # plot.margin = margin(-20,0,-1,-30)
+    ) +
+  labs(
+    title    = "Gambling",
+    # subtitle = "Shaded by total number of behavioural addictions papers",
+    caption  = ""
+  ) 
+
+gambling_publications_choropleth
+
+# 5. Save:
+ggsave("Figures/gambling_publications_choropleth.pdf",
+       plot = gambling_publications_choropleth,
+       width = 10, height = 5.5, dpi = 600)
+```
+
+Just gaming?
+
+```{r}
+# ALSO CHECK HONG KONG!
+
+# 1. Summarise publications by country:
+country_pubs <- data_locations_with_full_geo_location_WORLD %>%
+  filter(Label == "Gaming") %>%
+  filter(!is.na(countries_of_authors)) %>%
+  group_by(countries_of_authors) %>%
+  summarise(num_papers = n_distinct(PMID), .groups = "drop")
+
+# 2. Prepare a world map frame
+world_map <- map_data("world") %>% 
+  filter(region != "Antarctica")
+
+# 3. Join the publication counts to the map data:
+choropleth_map <- world_map %>%
+  left_join(country_pubs, by = c("region" = "countries_of_authors"))
+
+  
+# 4. Plot:
+gaming_publications_choropleth <- ggplot(choropleth_map, aes(x = long, y = lat, group = group, fill = num_papers)) +
+  geom_polygon(colour = "black", size = 0.2) +
+  coord_fixed(1.3) +
+  scale_fill_gradient(
+    name    = "Count",
+    low     = "#FAFFFF",
+    high    = "#289998",
+    na.value= "grey"
+  ) +
+   scale_x_continuous(expand = c(.001, .001)) +
+ plot_theme +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_blank()
+    # plot.margin = margin(-20,0,-1,-30)
+    ) +
+  labs(
+    title    = "Gaming",
+    # subtitle = "Shaded by total number of behavioural addictions papers",
+    caption  = ""
+  ) 
+
+gaming_publications_choropleth
+
+# 5. Save:
+ggsave("Figures/gaming_publications_choropleth.pdf",
+       plot = gaming_publications_choropleth,
+       width = 10, height = 5.5, dpi = 600)
+```
+
+Just internet?
+
+```{r}
+# ALSO CHECK HONG KONG!
+
+# 1. Summarise publications by country:
+country_pubs <- data_locations_with_full_geo_location_WORLD %>%
+  filter(Label == "Internet") %>%
+  filter(!is.na(countries_of_authors)) %>%
+  group_by(countries_of_authors) %>%
+  summarise(num_papers = n_distinct(PMID), .groups = "drop")
+
+# 2. Prepare a world map frame
+world_map <- map_data("world") %>% 
+  filter(region != "Antarctica")
+
+# 3. Join the publication counts to the map data:
+choropleth_map <- world_map %>%
+  left_join(country_pubs, by = c("region" = "countries_of_authors"))
+
+  
+# 4. Plot:
+internet_publications_choropleth <- ggplot(choropleth_map, aes(x = long, y = lat, group = group, fill = num_papers)) +
+  geom_polygon(colour = "black", size = 0.2) +
+  coord_fixed(1.3) +
+  scale_fill_gradient(
+    name    = "Count",
+    low     = "#FAFFFF",
+    high    = "#289998",
+    na.value= "grey"
+  ) +
+   scale_x_continuous(expand = c(.001, .001)) +
+ plot_theme +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_blank()
+    # plot.margin = margin(-20,0,-1,-30)
+    ) +
+  labs(
+    title    = "Internet",
+    # subtitle = "Shaded by total number of behavioural addictions papers",
+    caption  = ""
+  ) 
+
+internet_publications_choropleth
+
+# 5. Save:
+ggsave("Figures/internet_publications_choropleth.pdf",
+       plot = internet_publications_choropleth,
+       width = 10, height = 5.5, dpi = 600)
+```
+
+Just smart_phone?
+
+```{r}
+# ALSO CHECK HONG KONG!
+
+# 1. Summarise publications by country:
+country_pubs <- data_locations_with_full_geo_location_WORLD %>%
+  filter(Label == "Smart Phone") %>%
+  filter(!is.na(countries_of_authors)) %>%
+  group_by(countries_of_authors) %>%
+  summarise(num_papers = n_distinct(PMID), .groups = "drop")
+
+# 2. Prepare a world map frame
+world_map <- map_data("world") %>% 
+  filter(region != "Antarctica")
+
+# 3. Join the publication counts to the map data:
+choropleth_map <- world_map %>%
+  left_join(country_pubs, by = c("region" = "countries_of_authors"))
+
+  
+# 4. Plot:
+smart_phone_publications_choropleth <- ggplot(choropleth_map, aes(x = long, y = lat, group = group, fill = num_papers)) +
+  geom_polygon(colour = "black", size = 0.2) +
+  coord_fixed(1.3) +
+  scale_fill_gradient(
+    name    = "Count",
+    low     = "#FAFFFF",
+    high    = "#289998",
+    na.value= "grey"
+  ) +
+   scale_x_continuous(expand = c(.001, .001)) +
+  # scale_y_continuous(expand = c(.001, .001)) +
+ plot_theme +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_blank()
+    # plot.margin = margin(-20,0,-1,-30)
+    ) +
+  labs(
+    title    = "Smart Phone",
+    # subtitle = "Shaded by total number of behavioural addictions papers",
+    caption  = ""
+  ) 
+
+
+smart_phone_publications_choropleth
+
+# 5. Save:
+ggsave("Figures/smart_phone_publications_choropleth.pdf",
+       plot = smart_phone_publications_choropleth,
+       width = 10, height = 5.5, dpi = 600)
+```
+
+Join together:
+
+```{r}
+combined_unique_types_publications_choropleth<- (gambling_publications_choropleth + gaming_publications_choropleth)/
+  (internet_publications_choropleth + smart_phone_publications_choropleth) 
+
+combined_unique_types_publications_choropleth
+
+# 5. Save:
+ggsave("Figures/combined_unique_types_publications_choropleth.pdf",
+       plot = combined_unique_types_publications_choropleth,
+       width = 10, height = 5.5, dpi = 600)
+```
 
